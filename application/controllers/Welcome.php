@@ -22,4 +22,15 @@ class Welcome extends CI_Controller {
 	{
 		$this->load->view('welcome_message');
 	}
+
+	public function select()
+	{
+		$fast = $this->load->database('fast', true);
+		// $o = $fast->query('SELECT "id_sekolah" WHERE "kode_sekolah" = \'smpn1songgon\'')->result();
+		$fast->select('id_sekolah');
+		$fast->where('kode_sekolah', 'smpn1songgon');
+		$o = $fast->get('sekolah')->row();
+		echo $fast->last_query();
+		print_r($o);
+	}
 }
