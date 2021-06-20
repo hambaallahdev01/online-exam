@@ -1,0 +1,19 @@
+RewriteEngine on
+RewriteCond $1 !^(index\.php|resources|assets|robots\.txt)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+
+# Protect Environment
+<Files .env.*> 
+	Order Allow,Deny
+	Deny from all
+</Files>
+# Protect Environment untuk openlitespeed
+RewriteCond %{REQUEST_URI} .env.localhost|.env.development|.env.testing|.env.production [NC]
+RewriteRule .* - [F,L]
+
+#cors
+#Header set Access-Control-Allow-Origin "*"
+#Header set Access-Control-Allow-Methods "GET,PUT,POST,DELETE"
+#Header set Access-Control-Allow-Headers "Content-Type, Authorization, token, X-Requested-With"
