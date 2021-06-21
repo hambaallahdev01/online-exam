@@ -18,11 +18,10 @@ class Admin_Controller extends FITH_Controller {
 
 	function __construct(){
 		parent::__construct();
-		if (!$this->session->logged_in) {
-			show_404();
+		if (!$this->session->sesi_login) {
+			redirect('welcome');
 		}
 		$this->data = array();
-		$this->data['active_link'] = beuty_url(base_url($this->router->class));
 		$this->method = $_SERVER['REQUEST_METHOD'];
 	}
 }
