@@ -10,19 +10,23 @@ class Masuk extends CI_Controller {
 
 	public function index()
 	{
+		$this->load->config('recaptcha', TRUE);
 		if ($_SERVER['REQUEST_METHOD'] === 'POST' && $this->input->post('recaptcha_response')) {
 			$recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
-			$recaptcha_secret = $this->config->item('recaptcha_secret');
+			$recaptcha_secret = $this->config->item('recaptcha_secretkey', 'recaptcha');
 			$recaptcha_response = $this->input->post('recaptcha_response');
 
 			$recaptcha = file_get_contents_curl($recaptcha_url . '?secret=' . $recaptcha_secret . '&response=' . $recaptcha_response);
 			$recaptcha = json_decode($recaptcha);
 			if (!isset($recaptcha->score)) {
-				//captcha salah
+				goto captcha_false;
 			}elseif ($recaptcha->score >= 0.5) {
-				//captcha betul -> check user pwd
+				$this->load->model('masuk_model');
+				$this->masuk_model->masuk_dasbor($this->input->post());
 			} else {
-				//captcha salah
+				captcha_false:
+				$this->session->set_flashdata('error', 'Sistem mendeteksi tindakan mencurigakan, silahkan coba lagi.');
+				redirect('masuk');
 			}
 		}elseif (isset($this->session->userdata['sess_logged_in']) && $this->session->userdata['sess_logged_in'] == 1) {
 			//jika ada sesi login, redirect
