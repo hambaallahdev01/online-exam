@@ -202,24 +202,6 @@ function insert_csrf()
 	return '<input type="hidden" name="'.$name.'" value="'.$hash.'" />';
 }
 
-function resize_image($image_data, $width=800, $height=800)
-{
-	$ci =& get_instance();
-	$ci->load->library('image_lib');
-	if ($image_data['image_width']>$width || $image_data['image_height']>$height) {
-		$config =  array(
-			'image_library'   => 'gd2',
-			'source_image'    =>  $image_data['full_path'],
-			'maintain_ratio'  =>  TRUE,
-			'width'           =>  $width,
-			'height'          =>  $height,
-		);
-		$ci->image_lib->clear();
-		$ci->image_lib->initialize($config);
-		$ci->image_lib->resize();
-	}
-}
-
 function encode_url($string) {
 	$ret = strtr($string, array('+' => '.', '=' => '-', '/' => '~'));
 	return $ret;

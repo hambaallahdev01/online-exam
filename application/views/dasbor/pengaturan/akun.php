@@ -1,5 +1,6 @@
 <?php
 $this->data['page'] = 'Pengaturan Akun';
+$this->data['icon'] = 'settings icon';
 $this->load->view('dasbor/_header.php', $this->data);
 ?>
 <div class="sixteen wide computer sixteen wide phone centered column">

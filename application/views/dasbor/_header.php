@@ -148,6 +148,6 @@
 			<div class="ui container grid">
 				<div class="row">
 					<div class="fifteen wide computer sixteen wide phone centered column">
-						<h2><i class="home icon"></i> <?=$page?></h2>
+						<h2><i class="<?=$icon?>"></i> <?=$page?></h2>
 						<div class="ui divider"></div>
 						<div class="ui grid">

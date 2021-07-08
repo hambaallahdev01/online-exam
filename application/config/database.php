@@ -96,6 +96,29 @@ $db['default'] = array(
 	'save_queries' => TRUE
 );
 
+$db['select'] = array(
+    'dsn'   => '',
+    'hostname' => getenv('DB_HOST_SELECT'),
+    'username' => getenv('DB_USER_SELECT'),
+    'port'     => getenv('DB_PORT_SELECT'),
+    'password' => getenv('DB_PASS_SELECT'),
+    'database' => getenv('DB_NAME_SELECT'),
+    'dbdriver' => 'mysqli',
+    'dbprefix' => '',
+    'pconnect' => FALSE,
+    'db_debug' => (ENVIRONMENT !== 'production'),
+    'cache_on' => FALSE,
+    'cachedir' => '',
+    'char_set' => 'utf8mb4',
+    'dbcollat' => 'utf8mb4_unicode_ci',
+    'swap_pre' => '',
+    'encrypt' => TRUE,
+    'compress' => TRUE,
+    'stricton' => FALSE,
+    'failover' => array(),
+    'save_queries' => TRUE
+);
+
 $db['fast'] = array(
     'dsn'	=> '',
     'hostname' => '',
