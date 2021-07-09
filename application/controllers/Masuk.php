@@ -28,8 +28,8 @@ class Masuk extends CI_Controller {
 				$this->session->set_flashdata('error', 'Sistem mendeteksi tindakan mencurigakan, silahkan coba lagi.');
 				redirect('masuk');
 			}
-		}elseif (isset($this->session->userdata['sess_logged_in']) && $this->session->userdata['sess_logged_in'] == 1) {
-			//jika ada sesi login, redirect
+		}elseif (isset($this->session->userdata['sesi_login']) && isset($this->session->userdata['sesi_login']->id_sekolah)) {
+			redirect('dasbor/utama');
 		}
 		$this->load->view('masuk');
 	}
