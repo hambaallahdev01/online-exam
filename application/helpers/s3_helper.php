@@ -14,7 +14,7 @@ function s3_putObject($file_name, $temp_file_location)
 
 		$result = $s3->putObject([
 			'Bucket' => getenv('S3_BUCKET'),
-			'Key'    => getenv('S3_FOLDER').$file_name,
+			'Key'    => $file_name,
 			'SourceFile' => $temp_file_location			
 		]);
 		unlink($temp_file_location);
@@ -41,7 +41,7 @@ function s3_getObject($slug)
 	try {
 		$result = $s3->getObject([
 			'Bucket' => getenv('S3_BUCKET'),
-			'Key'    => getenv('S3_FOLDER').$keyname
+			'Key'    => $keyname
 		]);
 		header("Content-Type: {$result['ContentType']}");
 		echo $result['Body'];

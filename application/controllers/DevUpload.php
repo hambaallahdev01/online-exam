@@ -11,7 +11,7 @@ class DevUpload extends CI_Controller
 	function index()
 	{
 		$this->load->helper('s3_helper');
-		$ret = upload_image('path');
+		$ret = upload_image('path1/path2');
 		print_r($ret);
 	}
 }
