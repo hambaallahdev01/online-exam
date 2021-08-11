@@ -10,8 +10,16 @@ class Akun_model extends CI_Model{
 
 	public function get_detail_sekolah($id_sekolah)
 	{
+		$this->dbselect = $this->load->database('select', true);
+		$this->dbselect->where('id_sekolah', $id_sekolah);
+		return $this->dbselect->get('sekolah')->row();
+	}
+
+	public function update_detail_sekolah($id_sekolah, $data)
+	{
 		$this->load->database();
 		$this->db->where('id_sekolah', $id_sekolah);
-		return $this->db->get('sekolah')->row();
+		$this->db->update('sekolah', $data);
+		return $this->db->affected_rows();
 	}
 }

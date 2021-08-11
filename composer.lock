@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c1cac1f541b3ca648350604ed2163ad5",
+    "content-hash": "bc4a587130cf1112b1bc835354e10d4f",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -95,6 +95,43 @@
                 "source": "https://github.com/aws/aws-sdk-php/tree/3.188.1"
             },
             "time": "2021-08-09T18:29:02+00:00"
+        },
+        {
+            "name": "chriskacerguis/codeigniter-restserver",
+            "version": "3.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/chriskacerguis/codeigniter-restserver.git",
+                "reference": "6ced70d12c7e8d207eaded3f208a201330950b57"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/chriskacerguis/codeigniter-restserver/zipball/6ced70d12c7e8d207eaded3f208a201330950b57",
+                "reference": "6ced70d12c7e8d207eaded3f208a201330950b57",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "chriskacerguis\\RestServer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Chris Kacerguis",
+                    "email": "chriskacerguis@gmail.com"
+                }
+            ],
+            "description": "CI Rest Server",
+            "support": {
+                "issues": "https://github.com/chriskacerguis/codeigniter-restserver/issues",
+                "source": "https://github.com/chriskacerguis/codeigniter-restserver/tree/master"
+            },
+            "time": "2019-11-12T15:39:34+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",

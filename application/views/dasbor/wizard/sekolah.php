@@ -1,9 +1,7 @@
 <?php
-$this->data['page'] = 'Data Sekolah';
-$this->data['icon'] = 'settings icon';
+$this->data['page'] = 'Alamat Sekolah';
+$this->data['icon'] = 'map marked alternate icon';
 $this->load->view('dasbor/_header.php', $this->data);
-//// id_sekolah
-// kode_sekolah email nama_sekolah id_kecamatan alamat
 ?>
 <div class="sixteen wide computer sixteen wide phone centered column">
 	<div class="ui raised segment">
@@ -62,9 +60,39 @@ $this->load->view('dasbor/_header.php', $this->data);
 </div>
 <script type="text/javascript">
 	$('#id_provinsi').on('change', function (arg) {
+		$("#id_kabupaten").empty()
+		$("[name=id_kecamatan]").empty().prop('disabled', true)
 		id_provinsi = $(this).val()
-		var option = $('<option></option>').attr("value", "option value").text("Text");
-		$("#id_kabupaten").empty().append(option);
+		$.ajax({
+			url : "<?=site_url()?>api/alamat/kabupaten?id_provinsi="+id_provinsi,
+			type:'GET',
+			dataType: 'json',
+			success: function(response) {
+				$("#id_kabupaten").attr('disabled', false)
+				$.each(response,function(key, value)
+				{
+					$("#id_kabupaten").append('<option value=' + value.id_kabupaten + '>' + value.nama + '</option>')
+				})
+			}
+		})
+	})
+
+	$('#id_kabupaten').on('change', function (arg) {
+		$("[name=id_kecamatan]").empty()
+		id_kabupaten = $(this).val()
+		$.ajax({
+			url : "<?=site_url()?>api/alamat/kecamatan?id_kabupaten="+id_kabupaten,
+			type:'GET',
+			dataType: 'json',
+			success: function(response) {
+				$("[name=id_kecamatan]").attr('disabled', false)
+				$.each(response,function(key, value)
+				{
+					// console.info(value)
+					$("[name=id_kecamatan]").append('<option value=' + value.id_kecamatan + '>' + value.nama + '</option>')
+				})
+			}
+		})
 	})
 </script>
 <?php

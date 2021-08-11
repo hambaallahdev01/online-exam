@@ -13,6 +13,6 @@
 <!-- chartjs:js -->
 <script src="<?=site_url()?>admin-template/vendors/chart.js/Chart.min.js"></script>
 <script src="<?=site_url()?>admin-template/vendors/chart.js/Chart.utils.js"></script>
-<script src="<?=site_url()?>admin-template/vendors/chart.js/Chart.example.js"></script>
+<!-- <script src="<?=site_url()?>admin-template/vendors/chart.js/Chart.example.js"></script> -->
 <!-- endinject -->
 </html>
