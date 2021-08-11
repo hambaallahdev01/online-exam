@@ -16,6 +16,10 @@ class Wizard extends Wizard_Controller {
 			$this->wizard_tahun_ajaran();
 		}elseif ($this->session->wizard == 'kelas') {
 			$this->wizard_kelas();
+		}elseif ($this->session->wizard == 'mata-pelajaran') {
+			$this->wizard_mata_pelajaran();
+		}else{
+			show_404();
 		}
 	}
 
@@ -68,9 +72,24 @@ class Wizard extends Wizard_Controller {
 	private function wizard_kelas()
 	{
 		if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-
+			if ($jenjang = $this->input->post('jenjang') && $nama_kelas = $this->input->post('nama_kelas')) {
+				$this->load->model('dasbor/pengaturan/kelas_model');
+				$this->kelas_model->insert_kelas([
+					'id_sekolah'	=> $this->session->sesi_login->id_sekolah,
+					'jenjang' 		=> $jenjang,
+					'nama_kelas' 	=> $nama_kelas
+				]);
+				$this->session->set_userdata('wizard', 'mata-pelajaran');
+				redirect('dasbor/wizard');
+			}
 		}
-		// $this->load->view('dasbor/wizard/kelas');
-		echo "kelas";
+		$this->load->view('dasbor/wizard/kelas');
+	}
+
+	private function wizard_mata_pelajaran()
+	{
+		if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+		}
+		$this->load->view('dasbor/wizard/mata_pelajaran');
 	}
 }

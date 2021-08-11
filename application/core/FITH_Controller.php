@@ -23,6 +23,7 @@ class Admin_Controller extends FITH_Controller {
 		}
 		$this->wizard_data_sekolah();
 		$this->wizard_tahun_ajaran();
+		$this->wizard_kelas();
 		$this->data = array();
 		$this->method = $_SERVER['REQUEST_METHOD'];
 	}
@@ -47,6 +48,18 @@ class Admin_Controller extends FITH_Controller {
 		$row = $this->dbselect->get('tahun_ajaran')->row();
 		if (is_null($row->id_sekolah)) {
 			$this->session->set_userdata('wizard', 'tahun-ajaran');
+			redirect('dasbor/wizard');
+		}
+	}
+
+	private function wizard_kelas()
+	{
+		$this->dbselect = $this->load->database('select', TRUE);
+		$this->dbselect->select('id_sekolah');
+		$this->dbselect->where('id_sekolah', $this->session->sesi_login->id_sekolah);
+		$row = $this->dbselect->get('kelas')->row();
+		if (is_null($row->id_sekolah)) {
+			$this->session->set_userdata('wizard', 'kelas');
 			redirect('dasbor/wizard');
 		}
 	}
