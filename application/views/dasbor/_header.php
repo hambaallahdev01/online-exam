@@ -14,15 +14,19 @@
 	<link rel="mask-icon" href="<?=site_url()?>safari-pinned-tab.svg" color="#5bbad5">
 	<meta name="msapplication-TileColor" content="#da532c">
 	<meta name="theme-color" content="#ffffff">
+	
+	<script src="<?=site_url()?>admin-template/vendors/jquery/jquery.min.js"></script>
+	<!-- You MUST include jQuery before Fomantic -->
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.8/dist/semantic.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.8/dist/semantic.min.js"></script>
 
 	<!-- inject:css -->
-	<link rel="stylesheet" href="<?=site_url()?>admin-template/vendors/fomantic-ui/semantic.min.css">
+	<!-- <link rel="stylesheet" href="<?=site_url()?>admin-template/vendors/fomantic-ui/semantic.min.css"> -->
 	<link rel="stylesheet" href="<?=site_url()?>admin-template/css/main.css">
 	<!-- endinject -->
 	<!-- chartjs:css -->
-	<link rel="stylesheet" href="<?=site_url()?>admin-template/vendors/chart.js/Chart.min.css">
+	<!-- <link rel="stylesheet" href="<?=site_url()?>admin-template/vendors/chart.js/Chart.min.css"> -->
 	<!-- endinject -->
-	<script src="<?=site_url()?>admin-template/vendors/jquery/jquery.min.js"></script>
 </head>
 <body>
 	<div class="ui grid">

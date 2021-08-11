@@ -12,8 +12,10 @@ class Wizard extends Wizard_Controller {
 	{
 		if($this->session->wizard == 'data-sekolah'){
 			$this->wizard_alamat();
-		}elseif ($this->session->wizard == 'tahun-pelajaran') {
-			$this->wizard_tahun_pelajaran();
+		}elseif ($this->session->wizard == 'tahun-ajaran') {
+			$this->wizard_tahun_ajaran();
+		}elseif ($this->session->wizard == 'kelas') {
+			$this->wizard_kelas();
 		}
 	}
 
@@ -26,7 +28,7 @@ class Wizard extends Wizard_Controller {
 					'id_kecamatan' => $id_kecamatan,
 					'alamat' => $alamat
 				]);
-				$this->session->set_userdata('wizard', 'tahun-pelajaran');
+				$this->session->set_userdata('wizard', 'tahun-ajaran');
 				redirect('dasbor/wizard');
 			}
 		}
@@ -39,8 +41,36 @@ class Wizard extends Wizard_Controller {
 		$this->load->view('dasbor/wizard/sekolah', $data);
 	}
 
-	private function wizard_tahun_pelajaran()
+	private function wizard_tahun_ajaran()
 	{
-		echo 'ok';
+		if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+			$tanggal_awal_ganjil = $this->input->post('tanggal_awal_ganjil');
+			$tanggal_akhir_ganjil = $this->input->post('tanggal_akhir_ganjil');
+			$tanggal_awal_genap = $this->input->post('tanggal_awal_genap');
+			$tanggal_akhir_genap = $this->input->post('tanggal_akhir_genap');
+			if ($tanggal_awal_ganjil < $tanggal_akhir_ganjil && $tanggal_akhir_ganjil < $tanggal_awal_genap && $tanggal_awal_genap < $tanggal_akhir_genap) {
+				$this->load->model('dasbor/pengaturan/tahun_ajaran_model');
+				$this->tahun_ajaran_model->insert_tahun_ajaran([
+					'id_sekolah'			=> $this->session->sesi_login->id_sekolah,
+					'tanggal_awal_ganjil' 	=> $tanggal_awal_ganjil,
+					'tanggal_akhir_ganjil' 	=> $tanggal_akhir_ganjil,
+					'tanggal_awal_genap' 	=> $tanggal_awal_genap,
+					'tanggal_akhir_genap' 	=> $tanggal_akhir_genap,
+					'is_active' 			=> 1
+				]);
+				$this->session->set_userdata('wizard', 'kelas');
+				redirect('dasbor/wizard');
+			}
+		}
+		$this->load->view('dasbor/wizard/tahun_ajaran');
+	}
+
+	private function wizard_kelas()
+	{
+		if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+
+		}
+		// $this->load->view('dasbor/wizard/kelas');
+		echo "kelas";
 	}
 }
