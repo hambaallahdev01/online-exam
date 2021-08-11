@@ -19,6 +19,7 @@
 	<link rel="stylesheet" href="<?=site_url()?>admin-template/vendors/fomantic-ui/semantic.min.css">
 	<link rel="stylesheet" href="<?=site_url()?>admin-template/css/main.css">
 	<!-- endinject -->
+	<script src="<?=site_url()?>admin-template/vendors/jquery/jquery.min.js"></script>
 	<!-- chartjs:css -->
 	<link rel="stylesheet" href="<?=site_url()?>admin-template/vendors/chart.js/Chart.min.css">
 	<!-- endinject -->
