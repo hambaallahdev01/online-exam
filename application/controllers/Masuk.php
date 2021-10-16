@@ -21,8 +21,8 @@ class Masuk extends CI_Controller {
 			if (!isset($recaptcha->score)) {
 				goto captcha_false;
 			}elseif ($recaptcha->score >= 0.5) {
-				$this->load->model('masuk_model');
-				$this->masuk_model->masuk_dasbor($this->input->post());
+				$this->load->model('sekolah_model');
+				$this->sekolah_model->masuk_dasbor($this->input->post());
 			} else {
 				captcha_false:
 				$this->session->set_flashdata('error', 'Sistem mendeteksi tindakan mencurigakan, silahkan coba lagi.');

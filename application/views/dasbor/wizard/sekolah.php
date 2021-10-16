@@ -12,7 +12,7 @@ $this->load->view('dasbor/_header.php', $this->data);
 						<form class="ui form" method="post" enctype="multipart/form-data">
 							<div class="field">
 								<label>Pilih Provinsi</label>
-								<select id="id_provinsi">
+								<select id="id_provinsi" autofocus>
 									<?php
 									foreach ($list_provinsi as $prov) {
 									?>

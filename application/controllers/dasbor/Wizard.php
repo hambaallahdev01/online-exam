@@ -18,6 +18,12 @@ class Wizard extends Wizard_Controller {
 			$this->wizard_kelas();
 		}elseif ($this->session->wizard == 'mata-pelajaran') {
 			$this->wizard_mata_pelajaran();
+		}elseif ($this->session->wizard == 'guru') {
+			$this->wizard_guru();
+		}elseif ($this->session->wizard == 'siswa') {
+			$this->wizard_siswa();
+		}elseif ($this->session->wizard == 'done') {
+			redirect('dasbor');
 		}else{
 			show_404();
 		}
@@ -26,11 +32,11 @@ class Wizard extends Wizard_Controller {
 	private function wizard_alamat()
 	{
 		if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-			if ($id_kecamatan = $this->input->post('id_kecamatan') && $alamat = $this->input->post('alamat')) {
+			if ($this->input->post('id_kecamatan') && $this->input->post('alamat')) {
 				$this->load->model('dasbor/pengaturan/akun_model');
 				$this->akun_model->update_detail_sekolah($this->session->sesi_login->id_sekolah, [
-					'id_kecamatan' => $id_kecamatan,
-					'alamat' => $alamat
+					'id_kecamatan' => $this->input->post('id_kecamatan'),
+					'alamat' => $this->input->post('alamat')
 				]);
 				$this->session->set_userdata('wizard', 'tahun-ajaran');
 				redirect('dasbor/wizard');
@@ -72,12 +78,12 @@ class Wizard extends Wizard_Controller {
 	private function wizard_kelas()
 	{
 		if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-			if ($jenjang = $this->input->post('jenjang') && $nama_kelas = $this->input->post('nama_kelas')) {
+			if ($this->input->post('jenjang') && $this->input->post('nama_kelas')) {
 				$this->load->model('dasbor/pengaturan/kelas_model');
 				$this->kelas_model->insert_kelas([
 					'id_sekolah'	=> $this->session->sesi_login->id_sekolah,
-					'jenjang' 		=> $jenjang,
-					'nama_kelas' 	=> $nama_kelas
+					'jenjang' 		=> $this->input->post('jenjang'),
+					'nama_kelas' 	=> $this->input->post('nama_kelas')
 				]);
 				$this->session->set_userdata('wizard', 'mata-pelajaran');
 				redirect('dasbor/wizard');
@@ -89,7 +95,54 @@ class Wizard extends Wizard_Controller {
 	private function wizard_mata_pelajaran()
 	{
 		if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+			if ($this->input->post('mapel') && $this->input->post('kode')) {
+				$this->load->model('dasbor/pengaturan/mata_pelajaran_model');
+				$this->mata_pelajaran_model->insert_mapel([
+					'id_sekolah'	=> $this->session->sesi_login->id_sekolah,
+					'nama_mapel' 	=> $this->input->post('mapel'),
+					'kode_mapel' 	=> $this->input->post('kode')
+				]);
+				$this->session->set_userdata('wizard', 'guru');
+				redirect('dasbor/wizard');
+			}
 		}
 		$this->load->view('dasbor/wizard/mata_pelajaran');
+	}
+
+	private function wizard_guru()
+	{
+		if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+			if ($this->input->post('nama_guru') && $this->input->post('email') && $this->input->post('password')) {
+				$this->load->model('dasbor/pengaturan/guru_model');
+				$this->guru_model->insert_guru([
+					'id_sekolah'	=> $this->session->sesi_login->id_sekolah,
+					'nama_guru' 	=> $this->input->post('nama_guru'),
+					'email' 		=> $this->input->post('email'),
+					'password' 		=> $this->input->post('password')
+				]);
+				$this->session->set_userdata('wizard', 'siswa');
+				redirect('dasbor/wizard');
+			}
+		}
+		$this->load->view('dasbor/wizard/guru');
+	}
+
+	private function wizard_siswa()
+	{
+		if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+			if ($this->input->post('nama_siswa') && $this->input->post('nis') && $this->input->post('email') && $this->input->post('password')) {
+				$this->load->model('dasbor/pengaturan/siswa_model');
+				$this->siswa_model->insert_siswa([
+					'id_sekolah'	=> $this->session->sesi_login->id_sekolah,
+					'nama_siswa' 	=> $this->input->post('nama_siswa'),
+					'nis' 	=> $this->input->post('nis'),
+					'email' 	=> $this->input->post('email'),
+					'password' 	=> $this->input->post('password')
+				]);
+				$this->session->set_userdata('wizard', 'done');
+				redirect('dasbor');
+			}
+		}
+		$this->load->view('dasbor/wizard/siswa');
 	}
 }

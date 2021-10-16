@@ -10,6 +10,6 @@ class Utama extends Admin_Controller {
 
 	function index()
 	{
-		
+		echo 'dasbor';
 	}
 }

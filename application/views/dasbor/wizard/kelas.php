@@ -12,7 +12,7 @@ $this->load->view('dasbor/_header.php', $this->data);
 						<form class="ui form" method="post" enctype="multipart/form-data">
 							<div class="field">
 								<label>Jenjang</label>
-								<select name="jenjang">
+								<select name="jenjang" autofocus>
 									<?php
 									for ($i=1; $i < 13; $i++) { 
 									?>
