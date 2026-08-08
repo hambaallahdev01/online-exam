@@ -32,6 +32,26 @@ class ExamPlatformTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'francis@stjude.org', 'role' => 'admin']);
     }
 
+    public function test_user_can_login_via_post_to_root_and_login_url()
+    {
+        $school = School::create(['name' => 'Demo', 'email' => 'demo@school.org']);
+        $user = User::create([
+            'school_id' => $school->id,
+            'name' => 'Admin User',
+            'email' => 'admin@test.org',
+            'role' => 'admin',
+            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+        ]);
+
+        $response = $this->post('/', [
+            'email' => 'admin@test.org',
+            'password' => 'password123',
+        ]);
+
+        $response->assertRedirect(route('admin.dashboard'));
+        $this->assertAuthenticatedAs($user);
+    }
+
     public function test_student_can_enter_exam_token_and_fetch_payload()
     {
         $school = School::create(['name' => 'Test School', 'email' => 'test@school.org']);

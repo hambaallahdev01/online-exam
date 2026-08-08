@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Route;
 
 // Guest Routes
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::get('/register-school', [AuthController::class, 'showRegisterSchool'])->name('register.school');
 Route::post('/register-school', [AuthController::class, 'registerSchool']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

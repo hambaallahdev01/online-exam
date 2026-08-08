@@ -134,13 +134,14 @@
             transition: all 0.2s ease;
         }
 
-        .btn-primary {
+        .btn-primary, .nav-links a.btn-primary {
             background-color: var(--primary);
-            color: #ffffff;
+            color: #ffffff !important;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover, .nav-links a.btn-primary:hover {
             background-color: var(--primary-hover);
+            color: #ffffff !important;
         }
 
         .btn-accent {
@@ -357,7 +358,7 @@
     </div>
 
     <footer>
-        <p>&copy; {{ date('Y') }} Open Source Online Exam Platform. Built with Laravel 13 & Vanilla JS.</p>
+        <p>&copy; {{ date('Y') }} Open Source Online Exam Platform. Made with <i class="fa-solid fa-heart" style="color: #ef4444;"></i> by <a href="https://github.com/animfahmy" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Achmad An'im</a>.</p>
     </footer>
 
     <script>
