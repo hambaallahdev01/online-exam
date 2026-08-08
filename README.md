@@ -231,4 +231,4 @@ To minimize storage space and save bandwidth on both local server and Linode S3:
 
 This open-source platform is released under the [MIT License](LICENSE).
 
-Made with ❤️ by [Achmad An'im](https://github.com/animfahmy). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!
+Made with ❤️ by [Achmad An'im](https://github.com/animfahmy) &bull; Inspired by [Pak Wong](https://wongcjdw.com) (Big thanks!). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!

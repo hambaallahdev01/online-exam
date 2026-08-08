@@ -358,7 +358,7 @@
     </div>
 
     <footer>
-        <p>&copy; {{ date('Y') }} Open Source Online Exam Platform. Made with <i class="fa-solid fa-heart" style="color: #ef4444;"></i> by <a href="https://github.com/animfahmy" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Achmad An'im</a>.</p>
+        <p>&copy; {{ date('Y') }} Open Source Online Exam Platform. Made with <i class="fa-solid fa-heart" style="color: #ef4444;"></i> by <a href="https://github.com/animfahmy" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Achmad An'im</a> &bull; Inspired by <a href="https://wongcjdw.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Pak Wong</a> (Big thanks!).</p>
     </footer>
 
     <script>
