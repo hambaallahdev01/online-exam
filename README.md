@@ -184,6 +184,42 @@ Easily deploy on standard cPanel/DirectAdmin shared web hosting without root acc
 
 ---
 
+## Object Storage Setup (Optional Cloud Storage)
+
+By default, the platform uses local storage (`FILESYSTEM_DISK=public` / `local`) which stores files in `storage/app/public` out-of-the-box without requiring external services.
+
+For high-concurrency cloud deployments or shared storage across multiple web servers, you can optionally configure Linode Object Storage (or AWS S3):
+
+1. **Bucket Settings in Linode Cloud Manager**:
+   - Region: `sg-sin-1` (Singapore 2)
+   - Bucket Name: `nawaitu`
+   - Access Control: Set Bucket Access to **Public Read**.
+
+2. **Configure `.env`**:
+   ```env
+   FILESYSTEM_DISK=s3
+
+   AWS_ACCESS_KEY_ID=your_linode_access_key
+   AWS_SECRET_ACCESS_KEY=your_linode_secret_key
+   AWS_DEFAULT_REGION=sg-sin-1
+   AWS_BUCKET=nawaitu
+   AWS_ENDPOINT=https://sg-sin-1.linodeobjects.com
+   AWS_URL=https://nawaitu.sg-sin-1.linodeobjects.com
+   AWS_USE_PATH_STYLE_ENDPOINT=false
+   ```
+
+---
+
+## Automated Image Resizing & Media Optimization
+
+To minimize storage space and save bandwidth on both local server and Linode S3:
+
+- **Proportional Image Resizing**: All uploaded images (JPEG, PNG, WebP) are processed by [`MediaUploadService`](file:///c:/workspace/pribadi/ujian-online/app/Services/MediaUploadService.php) using native PHP GD library to automatically resize to **maximum 1024x1024 pixels** while preserving original aspect ratio and applying **95% high quality optimization**.
+- **Strict PDF Limit**: PDF document uploads are strictly limited to a **maximum size of 5MB** (5,120 KB) to conserve storage.
+- **YouTube Video Policy**: Direct video file uploads (MP4, AVI, MOV) are prohibited to save storage and bandwidth. Videos must be embedded via standard YouTube links.
+
+---
+
 ## Security & Supply Chain Integrity
 
 - **Zero External CDN Dependencies**: All CSS, JavaScript, icons (FontAwesome 6 Free), and layout utilities are served locally from `public/vendor/`. This prevents potential third-party script injection or CDN outage disruptions during exam sessions.
