@@ -25,7 +25,7 @@
     <!-- Main Question View -->
     <div class="card" id="questionCard" style="min-height: 420px; display: flex; flex-direction: column; justify-content: space-between;">
         <div id="loadingBox" style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
-            ⏳ Loading exam questions and restoring session state...
+            <i class="fa-solid fa-spinner fa-spin"></i> Loading exam questions and restoring session state...
         </div>
 
         <div id="questionContainer" style="display: none;">
@@ -35,7 +35,7 @@
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: var(--warning); cursor: pointer; font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 0.3rem 0.6rem; border-radius: 0.4rem;">
                         <input type="checkbox" id="flagQuestionCheckbox" onchange="toggleFlagCurrentQuestion(this.checked)">
-                        <span>🚩 Ragu-ragu</span>
+                        <span><i class="fa-solid fa-flag"></i> Ragu-ragu</span>
                     </label>
 
                     <span id="questionTypeBadge" style="background: rgba(99, 102, 241, 0.15); color: var(--primary); padding: 0.25rem 0.6rem; border-radius: 0.35rem; font-size: 0.8rem; font-weight: 600;">Single Choice</span>
@@ -131,7 +131,7 @@ async function fetchExamPayload() {
         }
     } catch (err) {
         console.error('Payload fetch error:', err);
-        document.getElementById('loadingBox').innerHTML = '❌ Connection error loading questions. Please refresh the page.';
+        document.getElementById('loadingBox').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Connection error loading questions. Please refresh the page.';
     }
 }
 

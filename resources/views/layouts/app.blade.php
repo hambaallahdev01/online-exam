@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
     <title>@yield('title', 'Exam System') - Open Source Online Exam Platform</title>
     <style>
         :root {
@@ -306,7 +307,7 @@
     <header>
         <div class="navbar">
             <a href="{{ url('/') }}" class="brand">
-                ⚡ <span>ExamPlatform</span>
+                <i class="fa-solid fa-graduation-cap"></i> <span>ExamPlatform</span>
             </a>
             <ul class="nav-links">
                 @auth
@@ -364,7 +365,7 @@
             document.documentElement.setAttribute('data-theme', theme);
             const btn = document.getElementById('themeToggle');
             if (btn) {
-                btn.innerHTML = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+                btn.innerHTML = theme === 'dark' ? '<i class="fa-solid fa-sun"></i> Light' : '<i class="fa-solid fa-moon"></i> Dark';
             }
             localStorage.setItem('exam_theme', theme);
         }
