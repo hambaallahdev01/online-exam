@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,18 +7,48 @@
     <title>@yield('title', 'Exam System') - Open Source Online Exam Platform</title>
     <style>
         :root {
-            --bg-body: #0f172a;
-            --bg-card: #1e293b;
-            --bg-card-hover: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --accent: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --border-color: #334155;
+            /* Warm Light Mode Palette (Default) */
+            --bg-body: #FAF7F5;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F1F5F9;
+            --text-main: #1A1A1A;
+            --text-muted: #475569;
+            --primary: #312E81;
+            --primary-hover: #1E1B4B;
+            --accent: #6366F1;
+            --danger: #DC2626;
+            --warning: #F59E0B;
+            --border-color: #CBD5E1;
+            
+            /* Specific Exam Status Palette */
+            --status-answered: #16A34A;
+            --status-unanswered: #E2E8F0;
+            --status-flagged: #F59E0B;
+            --status-active: #2563EB;
+            --status-timer: #DC2626;
+
             --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        [data-theme="dark"] {
+            /* Charcoal Dark Mode Palette */
+            --bg-body: #1E293B;
+            --bg-card: #0F172A;
+            --bg-card-hover: #334155;
+            --text-main: #E2E8F0;
+            --text-muted: #94A3B8;
+            --primary: #6366F1;
+            --primary-hover: #4F46E5;
+            --accent: #818CF8;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --border-color: #334155;
+            
+            --status-answered: #16A34A;
+            --status-unanswered: #334155;
+            --status-flagged: #F59E0B;
+            --status-active: #3B82F6;
+            --status-timer: #EF4444;
         }
 
         * {
@@ -35,15 +65,16 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         header {
-            background-color: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(12px);
+            background-color: var(--bg-card);
             border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .navbar {
@@ -58,7 +89,7 @@
         .brand {
             font-size: 1.25rem;
             font-weight: 700;
-            color: #ffffff;
+            color: var(--primary);
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -66,9 +97,7 @@
         }
 
         .brand span {
-            background: linear-gradient(135deg, #6366f1, #10b981);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text-main);
         }
 
         .nav-links {
@@ -82,11 +111,12 @@
             color: var(--text-muted);
             text-decoration: none;
             font-size: 0.95rem;
+            font-weight: 500;
             transition: color 0.2s ease;
         }
 
         .nav-links a:hover, .nav-links a.active {
-            color: #ffffff;
+            color: var(--primary);
         }
 
         .btn {
@@ -128,6 +158,19 @@
             border: 1px solid var(--border-color);
         }
 
+        .theme-toggle-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.4rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
         .container {
             max-width: 1200px;
             width: 100%;
@@ -142,7 +185,7 @@
             border-radius: 0.75rem;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
         }
 
         .card-header {
@@ -154,6 +197,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--text-main);
         }
 
         .grid-stats {
@@ -188,6 +232,7 @@
             margin-bottom: 0.4rem;
             font-size: 0.9rem;
             color: var(--text-muted);
+            font-weight: 500;
         }
 
         .form-control {
@@ -204,6 +249,7 @@
 
         .form-control:focus {
             border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(49, 46, 129, 0.1);
         }
 
         table {
@@ -219,7 +265,7 @@
         }
 
         th {
-            background-color: rgba(15, 23, 42, 0.5);
+            background-color: var(--bg-body);
             color: var(--text-muted);
             font-size: 0.85rem;
             text-transform: uppercase;
@@ -233,15 +279,15 @@
         }
 
         .alert-success {
-            background-color: rgba(16, 185, 129, 0.15);
-            border: 1px solid var(--accent);
-            color: #34d399;
+            background-color: rgba(22, 163, 74, 0.1);
+            border: 1px solid var(--status-answered);
+            color: #15803d;
         }
 
         .alert-danger {
-            background-color: rgba(239, 68, 68, 0.15);
+            background-color: rgba(220, 38, 38, 0.1);
             border: 1px solid var(--danger);
-            color: #f87171;
+            color: #b91c1c;
         }
 
         footer {
@@ -251,6 +297,7 @@
             font-size: 0.85rem;
             color: var(--text-muted);
             margin-top: auto;
+            background-color: var(--bg-card);
         }
     </style>
     @yield('styles')
@@ -282,6 +329,12 @@
                     <li><a href="{{ route('login') }}">Login</a></li>
                     <li><a href="{{ route('register.school') }}" class="btn btn-primary">Register School</a></li>
                 @endauth
+
+                <li>
+                    <button id="themeToggle" class="theme-toggle-btn" onclick="toggleTheme()">
+                        🌙 Dark
+                    </button>
+                </li>
             </ul>
         </div>
     </header>
@@ -305,6 +358,28 @@
     <footer>
         <p>&copy; {{ date('Y') }} Open Source Online Exam Platform. Built with Laravel 13 & Vanilla JS.</p>
     </footer>
+
+    <script>
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const btn = document.getElementById('themeToggle');
+            if (btn) {
+                btn.innerHTML = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+            }
+            localStorage.setItem('exam_theme', theme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('exam_theme') || 'light';
+            applyTheme(saved);
+        });
+    </script>
 
     @yield('scripts')
 </body>

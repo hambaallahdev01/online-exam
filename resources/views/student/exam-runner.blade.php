@@ -10,36 +10,45 @@
         <span style="color: var(--text-muted); font-size: 0.85rem;" id="saveStatus">Status: Connected (Autosave active)</span>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 1rem;">
+    <div style="display: flex; align-items: center; gap: 1.25rem;">
         <div style="text-align: right;">
-            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Time Remaining</div>
-            <div id="timerDisplay" style="font-size: 1.5rem; font-weight: 700; color: var(--warning); font-family: monospace;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Time Remaining</div>
+            <div id="timerDisplay" style="font-size: 1.5rem; font-weight: 700; color: var(--status-timer); font-family: monospace;">
                 00:00:00
             </div>
         </div>
-        <button type="button" class="btn btn-accent" id="submitExamBtn" onclick="confirmSubmitExam()">Finish & Submit</button>
+        <button type="button" class="btn btn-primary" style="background-color: var(--primary);" id="submitExamBtn" onclick="confirmSubmitExam()">Finish & Submit</button>
     </div>
 </div>
 
 <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 1.5rem;">
     <!-- Main Question View -->
-    <div class="card" id="questionCard" style="min-height: 400px; display: flex; flex-direction: column; justify-content: space-between;">
+    <div class="card" id="questionCard" style="min-height: 420px; display: flex; flex-direction: column; justify-content: space-between;">
         <div id="loadingBox" style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
             ⏳ Loading exam questions and restoring session state...
         </div>
 
         <div id="questionContainer" style="display: none;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--primary); font-weight: 600;">
-                <span id="questionHeader">Question 1 of 10</span>
-                <span id="questionTypeBadge" style="background: rgba(99, 102, 241, 0.2); padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem;">Single Choice</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                <span id="questionHeader" style="font-size: 1.1rem; font-weight: 700; color: var(--primary);">Question 1 of 10</span>
+                
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: var(--warning); cursor: pointer; font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 0.3rem 0.6rem; border-radius: 0.4rem;">
+                        <input type="checkbox" id="flagQuestionCheckbox" onchange="toggleFlagCurrentQuestion(this.checked)">
+                        <span>🚩 Ragu-ragu</span>
+                    </label>
+
+                    <span id="questionTypeBadge" style="background: rgba(99, 102, 241, 0.15); color: var(--primary); padding: 0.25rem 0.6rem; border-radius: 0.35rem; font-size: 0.8rem; font-weight: 600;">Single Choice</span>
+                </div>
             </div>
 
-            <div id="questionText" style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.7;"></div>
+            <!-- Question Content with Focus-Friendly Formatting -->
+            <div id="questionText" style="font-size: 1.15rem; margin-bottom: 1.75rem; line-height: 1.8; color: var(--text-main); font-weight: 500;"></div>
 
-            <div id="optionsBox" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem;"></div>
+            <div id="optionsBox" style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 2rem;"></div>
 
             <div id="essayBox" style="display: none; margin-bottom: 2rem;">
-                <textarea id="essayAnswerInput" class="form-control" rows="5" placeholder="Type your answer here..." oninput="handleAnswerChange()"></textarea>
+                <textarea id="essayAnswerInput" class="form-control" rows="6" placeholder="Type your answer here..." oninput="handleAnswerChange()" style="line-height: 1.7; font-size: 1rem;"></textarea>
             </div>
         </div>
 
@@ -52,7 +61,28 @@
     <!-- Question Palette Drawer -->
     <div class="card">
         <div class="card-header" style="font-size: 1rem;">Question Palette</div>
-        <div id="paletteGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 1rem;"></div>
+        
+        <!-- Status Color Legend -->
+        <div style="font-size: 0.75rem; display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1rem; color: var(--text-muted);">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--status-answered); display: inline-block;"></span>
+                <span>Sudah Dijawab</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--status-unanswered); border: 1px solid var(--border-color); display: inline-block;"></span>
+                <span>Belum Dijawab</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="width: 12px; height: 12px; border-radius: 3px; background: var(--status-flagged); display: inline-block;"></span>
+                <span>Ragu-ragu</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="width: 12px; height: 12px; border-radius: 3px; border: 2px solid var(--status-active); display: inline-block;"></span>
+                <span>Sedang Dibuka</span>
+            </div>
+        </div>
+
+        <div id="paletteGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;"></div>
     </div>
 </div>
 @endsection
@@ -65,6 +95,7 @@ const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribut
 let questions = [];
 let currentIndex = 0;
 let userAnswers = {};
+let flaggedQuestions = {};
 let timeRemaining = 0;
 let timerInterval = null;
 let autosaveInterval = null;
@@ -135,6 +166,7 @@ function renderQuestion(index) {
     document.getElementById('questionHeader').textContent = `Question ${currentIndex + 1} of ${questions.length}`;
     document.getElementById('questionTypeBadge').textContent = q.type.replace('_', ' ').toUpperCase();
     document.getElementById('questionText').textContent = q.content;
+    document.getElementById('flagQuestionCheckbox').checked = !!flaggedQuestions[q.id];
 
     const optionsBox = document.getElementById('optionsBox');
     const essayBox = document.getElementById('essayBox');
@@ -151,10 +183,11 @@ function renderQuestion(index) {
             const isChecked = currentAns === opt.id;
             const label = document.createElement('label');
             label.style.cssText = `
-                display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.2rem;
-                background: ${isChecked ? 'rgba(99, 102, 241, 0.2)' : 'var(--bg-body)'};
-                border: 1px solid ${isChecked ? 'var(--primary)' : 'var(--border-color)'};
+                display: flex; align-items: center; gap: 0.85rem; padding: 0.95rem 1.25rem;
+                background: ${isChecked ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-card)'};
+                border: 2px solid ${isChecked ? 'var(--status-active)' : 'var(--border-color)'};
                 border-radius: 0.5rem; cursor: pointer; transition: all 0.2s ease;
+                color: var(--text-main); font-size: 1rem;
             `;
 
             label.innerHTML = `
@@ -172,10 +205,11 @@ function renderQuestion(index) {
             const isChecked = currentAnsList.includes(opt.id);
             const label = document.createElement('label');
             label.style.cssText = `
-                display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.2rem;
-                background: ${isChecked ? 'rgba(99, 102, 241, 0.2)' : 'var(--bg-body)'};
-                border: 1px solid ${isChecked ? 'var(--primary)' : 'var(--border-color)'};
-                border-radius: 0.5rem; cursor: pointer;
+                display: flex; align-items: center; gap: 0.85rem; padding: 0.95rem 1.25rem;
+                background: ${isChecked ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-card)'};
+                border: 2px solid ${isChecked ? 'var(--status-active)' : 'var(--border-color)'};
+                border-radius: 0.5rem; cursor: pointer; transition: all 0.2s ease;
+                color: var(--text-main); font-size: 1rem;
             `;
 
             label.innerHTML = `
@@ -193,6 +227,16 @@ function renderQuestion(index) {
     document.getElementById('prevBtn').disabled = (currentIndex === 0);
     document.getElementById('nextBtn').disabled = (currentIndex === questions.length - 1);
 
+    renderPalette();
+}
+
+function toggleFlagCurrentQuestion(isFlagged) {
+    const q = questions[currentIndex];
+    if (isFlagged) {
+        flaggedQuestions[q.id] = true;
+    } else {
+        delete flaggedQuestions[q.id];
+    }
     renderPalette();
 }
 
@@ -236,12 +280,28 @@ function renderPalette() {
             (Array.isArray(userAnswers[q.id]) && userAnswers[q.id].length > 0)
         );
 
+        const isFlagged = !!flaggedQuestions[q.id];
+        const isActive = (idx === currentIndex);
+
+        let bgColor = 'var(--status-unanswered)';
+        let textColor = 'var(--text-main)';
+
+        if (isFlagged) {
+            bgColor = 'var(--status-flagged)';
+            textColor = '#FFFFFF';
+        } else if (hasAnswer) {
+            bgColor = 'var(--status-answered)';
+            textColor = '#FFFFFF';
+        }
+
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.style.cssText = `
-            padding: 0.6rem 0.4rem; font-weight: 600; border-radius: 0.35rem; border: 1px solid var(--border-color); cursor: pointer;
-            background: ${idx === currentIndex ? 'var(--primary)' : (hasAnswer ? 'var(--accent)' : 'var(--bg-body)')};
-            color: #ffffff; font-size: 0.85rem;
+            padding: 0.65rem 0.4rem; font-weight: 700; border-radius: 0.4rem; cursor: pointer;
+            background: ${bgColor}; color: ${textColor}; font-size: 0.9rem;
+            border: ${isActive ? '3px solid var(--status-active)' : '1px solid var(--border-color)'};
+            box-shadow: ${isActive ? '0 0 0 2px rgba(37, 99, 235, 0.3)' : 'none'};
+            transition: all 0.15s ease;
         `;
         btn.textContent = idx + 1;
         btn.onclick = () => renderQuestion(idx);
@@ -272,7 +332,7 @@ async function autosaveAnswers() {
         const res = await response.json();
         if (res.status === 'success') {
             document.getElementById('saveStatus').textContent = 'Status: Autosaved successfully';
-            document.getElementById('saveStatus').style.color = 'var(--accent)';
+            document.getElementById('saveStatus').style.color = 'var(--status-answered)';
         }
     } catch (e) {
         document.getElementById('saveStatus').textContent = 'Status: Offline mode (saving locally)';
