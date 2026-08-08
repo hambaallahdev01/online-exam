@@ -42,14 +42,22 @@
                 </div>
             </div>
 
-            <!-- Question Content with Focus-Friendly Formatting -->
+            <!-- Question Content -->
             <div id="questionText" style="font-size: 1.15rem; margin-bottom: 1.75rem; line-height: 1.8; color: var(--text-main); font-weight: 500;"></div>
 
+            <!-- UI Controls for Options -->
             <div id="optionsBox" style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 2rem;"></div>
 
+            <!-- UI Controls for Essay -->
             <div id="essayBox" style="display: none; margin-bottom: 2rem;">
                 <textarea id="essayAnswerInput" class="form-control" rows="6" placeholder="Type your answer here..." oninput="handleAnswerChange()" style="line-height: 1.7; font-size: 1rem;"></textarea>
             </div>
+
+            <!-- UI Controls for Matching -->
+            <div id="matchingBox" style="display: none; margin-bottom: 2rem;"></div>
+
+            <!-- UI Controls for Sorting -->
+            <div id="sortingBox" style="display: none; margin-bottom: 2rem;"></div>
         </div>
 
         <div id="navigationBox" style="display: none; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
@@ -170,16 +178,25 @@ function renderQuestion(index) {
 
     const optionsBox = document.getElementById('optionsBox');
     const essayBox = document.getElementById('essayBox');
+    const matchingBox = document.getElementById('matchingBox');
+    const sortingBox = document.getElementById('sortingBox');
 
     optionsBox.innerHTML = '';
     optionsBox.style.display = 'none';
     essayBox.style.display = 'none';
+    matchingBox.style.display = 'none';
+    sortingBox.style.display = 'none';
 
-    if (q.type === 'single_choice' || q.type === 'true_false') {
+    if (q.type === 'single_choice' || q.type === 'true_false' || q.type === 'fact_opinion') {
         optionsBox.style.display = 'flex';
         const currentAns = userAnswers[q.id];
 
-        (q.options || []).forEach(opt => {
+        let opts = q.options || [];
+        if (q.type === 'fact_opinion') {
+            opts = [{id: 'fact', text: 'Fakta'}, {id: 'opinion', text: 'Opini'}];
+        }
+
+        opts.forEach(opt => {
             const isChecked = currentAns === opt.id;
             const label = document.createElement('label');
             label.style.cssText = `
@@ -222,6 +239,56 @@ function renderQuestion(index) {
     } else if (q.type === 'essay') {
         essayBox.style.display = 'block';
         document.getElementById('essayAnswerInput').value = userAnswers[q.id] || '';
+
+    } else if (q.type === 'matching') {
+        matchingBox.style.display = 'flex';
+        matchingBox.style.flexDirection = 'column';
+        matchingBox.style.gap = '1rem';
+
+        const leftItems = (q.options && q.options.left) ? q.options.left : [];
+        const rightItems = (q.options && q.options.right) ? q.options.right : [];
+        const currentPairAns = (typeof userAnswers[q.id] === 'object' && userAnswers[q.id] !== null) ? userAnswers[q.id] : {};
+
+        leftItems.forEach(item => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: var(--bg-body); padding: 0.85rem 1.25rem; border-radius: 0.5rem; border: 1px solid var(--border-color);';
+            
+            let optionsHtml = `<option value="">-- Match item --</option>`;
+            rightItems.forEach(r => {
+                const selected = currentPairAns[item.id] === r.id ? 'selected' : '';
+                optionsHtml += `<option value="${r.id}" ${selected}>${r.text}</option>`;
+            });
+
+            row.innerHTML = `
+                <span style="font-weight: 600;">${item.text}</span>
+                <select class="form-control" style="width: 220px;" onchange="handleMatchingSelect('${q.id}', '${item.id}', this.value)">
+                    ${optionsHtml}
+                </select>
+            `;
+            matchingBox.appendChild(row);
+        });
+
+    } else if (q.type === 'sorting') {
+        sortingBox.style.display = 'flex';
+        sortingBox.style.flexDirection = 'column';
+        sortingBox.style.gap = '0.75rem';
+
+        let items = Array.isArray(userAnswers[q.id]) ? userAnswers[q.id] : (Array.isArray(q.options) ? [...q.options] : []);
+        userAnswers[q.id] = items;
+
+        items.forEach((itemText, idx) => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: var(--bg-body); padding: 0.85rem 1.25rem; border-radius: 0.5rem; border: 1px solid var(--border-color);';
+
+            row.innerHTML = `
+                <span><strong>${idx + 1}.</strong> ${itemText}</span>
+                <div style="display: flex; gap: 0.4rem;">
+                    <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem;" onclick="moveSortItem('${q.id}', ${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲ Up</button>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem;" onclick="moveSortItem('${q.id}', ${idx}, 1)" ${idx === items.length - 1 ? 'disabled' : ''}>▼ Down</button>
+                </div>
+            `;
+            sortingBox.appendChild(row);
+        });
     }
 
     document.getElementById('prevBtn').disabled = (currentIndex === 0);
@@ -258,6 +325,31 @@ function handleMultipleSelect(questionId, val, isChecked) {
     triggerAutosaveNotification();
 }
 
+function handleMatchingSelect(questionId, leftId, rightVal) {
+    let pairs = (typeof userAnswers[questionId] === 'object' && userAnswers[questionId] !== null) ? {...userAnswers[questionId]} : {};
+    if (rightVal) {
+        pairs[leftId] = rightVal;
+    } else {
+        delete pairs[leftId];
+    }
+    userAnswers[questionId] = pairs;
+    renderPalette();
+    triggerAutosaveNotification();
+}
+
+function moveSortItem(questionId, idx, dir) {
+    let items = [...(userAnswers[questionId] || [])];
+    const targetIdx = idx + dir;
+    if (targetIdx >= 0 && targetIdx < items.length) {
+        const temp = items[idx];
+        items[idx] = items[targetIdx];
+        items[targetIdx] = temp;
+        userAnswers[questionId] = items;
+        renderQuestion(currentIndex);
+        triggerAutosaveNotification();
+    }
+}
+
 function handleAnswerChange() {
     const q = questions[currentIndex];
     const val = document.getElementById('essayAnswerInput').value;
@@ -275,10 +367,14 @@ function renderPalette() {
     grid.innerHTML = '';
 
     questions.forEach((q, idx) => {
-        const hasAnswer = userAnswers[q.id] && (
-            (typeof userAnswers[q.id] === 'string' && userAnswers[q.id].trim() !== '') ||
-            (Array.isArray(userAnswers[q.id]) && userAnswers[q.id].length > 0)
-        );
+        const ans = userAnswers[q.id];
+        let hasAnswer = false;
+
+        if (ans !== undefined && ans !== null) {
+            if (typeof ans === 'string' && ans.trim() !== '') hasAnswer = true;
+            else if (Array.isArray(ans) && ans.length > 0) hasAnswer = true;
+            else if (typeof ans === 'object' && Object.keys(ans).length > 0) hasAnswer = true;
+        }
 
         const isFlagged = !!flaggedQuestions[q.id];
         const isActive = (idx === currentIndex);

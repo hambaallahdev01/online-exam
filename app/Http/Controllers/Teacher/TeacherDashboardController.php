@@ -63,7 +63,7 @@ class TeacherDashboardController extends Controller
     public function storeQuestion(Request $request, QuestionGroup $group)
     {
         $validated = $request->validate([
-            'question_type' => 'required|in:single_choice,multiple_choice,true_false,essay',
+            'question_type' => 'required|in:single_choice,multiple_choice,true_false,essay,fact_opinion,matching,sorting',
             'content' => 'required|string',
             'option_a' => 'nullable|string',
             'option_b' => 'nullable|string',
@@ -75,6 +75,8 @@ class TeacherDashboardController extends Controller
         ]);
 
         $options = null;
+        $correctAnswers = [$validated['correct_answer']];
+
         if ($validated['question_type'] === 'single_choice' || $validated['question_type'] === 'multiple_choice') {
             $options = [
                 ['id' => 'A', 'text' => $request->option_a],
@@ -82,11 +84,37 @@ class TeacherDashboardController extends Controller
                 ['id' => 'C', 'text' => $request->option_c],
                 ['id' => 'D', 'text' => $request->option_d],
             ];
+            if ($validated['question_type'] === 'multiple_choice') {
+                $correctAnswers = array_map('trim', explode(',', $validated['correct_answer']));
+            }
         } elseif ($validated['question_type'] === 'true_false') {
             $options = [
-                ['id' => 'true', 'text' => 'True'],
-                ['id' => 'false', 'text' => 'False'],
+                ['id' => 'true', 'text' => 'True / Benar'],
+                ['id' => 'false', 'text' => 'False / Salah'],
             ];
+        } elseif ($validated['question_type'] === 'fact_opinion') {
+            $options = [
+                ['id' => 'fact', 'text' => 'Fakta'],
+                ['id' => 'opinion', 'text' => 'Opini'],
+            ];
+        } elseif ($validated['question_type'] === 'matching') {
+            // Options format: left_item => right_item
+            $pairs = json_decode($validated['correct_answer'], true);
+            if (is_array($pairs)) {
+                $left = [];
+                $right = [];
+                foreach ($pairs as $k => $v) {
+                    $left[] = ['id' => (string)$k, 'text' => (string)$k];
+                    $right[] = ['id' => (string)$v, 'text' => (string)$v];
+                }
+                $options = ['left' => $left, 'right' => $right];
+                $correctAnswers = $pairs;
+            }
+        } elseif ($validated['question_type'] === 'sorting') {
+            // Options format: ordered array
+            $items = array_map('trim', explode(',', $validated['correct_answer']));
+            $options = $items;
+            $correctAnswers = $items;
         }
 
         Question::create([
@@ -95,7 +123,7 @@ class TeacherDashboardController extends Controller
             'question_type' => $validated['question_type'],
             'content' => $validated['content'],
             'options_json' => $options,
-            'correct_answers_json' => [$validated['correct_answer']],
+            'correct_answers_json' => $correctAnswers,
             'explanation' => $validated['explanation'],
             'weight' => $validated['weight'],
         ]);
