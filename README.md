@@ -4,7 +4,7 @@
 
 ### بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
 ### اَللَّهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ
-### اللَّهُمَّ انْصُرْ وَاحْفَظْ وَأَيِّدْ جَاكَا د صَلَوَات فِي الْعَالَمِينَ بِحَقِّ سَيِّدِنَا مُحَمَّدٍ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ
+### اللهم انصر واحفظ و ايد جاكا د صلوات في العلمين بحق سيدنا محمد ص.م
 
 </div>
 
@@ -14,30 +14,32 @@ A high-performance, secure, and accessible open-source online examination platfo
 
 Designed for multi-school and multi-role operations (Administrators, Teachers, Students), with native support for high-concurrency exam scenarios as well as budget-friendly shared hosting environments.
 
-### Fitur Pertanyaan:
-1. Pilihan Ganda
-2. Pilihan Banyak
-3. Uraian
-4. Benar - Salah
-5. Fakta - Opini
-6. Mencocokkan
-7. Mengurutkan
+---
+
+## Supported Question Types
+
+The platform natively supports 7 comprehensive question formats:
+
+1. **Single Choice** (*Pilihan Ganda*): Standard single correct answer selection.
+2. **Multiple Choice** (*Pilihan Banyak / Kompleks*): Multiple correct selections (complex choice).
+3. **Essay** (*Uraian / Short Answer*): Free-form text responses.
+4. **True / False** (*Benar - Salah*): Binary true or false evaluations.
+5. **Fact / Opinion** (*Fakta - Opini*): Fact or opinion classifications for statements.
+6. **Matching** (*Mencocokkan / Menjodohkan*): Interactive pair matching between left and right item sets.
+7. **Sequence Sorting** (*Mengurutkan*): Reordering items into the correct sequential order.
 
 ---
 
 ## Key Features
 
 - **Multi-Role & Multi-Tenant Onboarding**: School registration wizard, academic year setup, classrooms, subjects, teacher-subject mapping, and student enrollment.
-- **Rich Question Bank**: Supports multiple question types:
-  - Single Choice (Pilihan Ganda)
-  - Multiple Choice / Complex Select (Pilihan Ganda Kompleks)
-  - True / False (Benar / Salah)
-  - Essay & Short Answer (Esai & Pembahasan)
+- **Rich Question Bank & Auto-Grading Engine**: Complete management and automated scoring across all 7 supported question formats.
 - **High-Resilience Exam Engine**:
-  - Pure Vanilla JS frontend execution (0 external CDN dependencies for supply-chain security).
-  - Background autosave REST API every 15 seconds & on selection change.
-  - Live countdown timer with automatic graceful submit upon timeout.
-  - Offline resilience & instant restoration upon page refresh.
+  - Pure Vanilla JS frontend execution with **zero external CDN dependencies** for supply-chain security.
+  - Background REST API autosave every 15 seconds and on option selection.
+  - Real-time countdown timer with automatic graceful submission upon timeout.
+  - Question palette navigation with visual status indicators (*Answered*, *Unanswered*, *Flagged/Ragu-ragu*, and *Active*).
+  - Built-in Dark Mode toggle with persistent local storage preferences.
 - **Flexible Deployment Architecture**:
   - High Performance Mode: Laravel Octane + Redis.
   - Web Server Container Mode: OpenLiteSpeed (OLS).
@@ -47,16 +49,17 @@ Designed for multi-school and multi-role operations (Administrators, Teachers, S
 
 ## Quickstart (Local Development)
 
-### Requirements
+### System Requirements
 - **PHP**: PHP 8.2+ (tested on PHP 8.5.7)
 - **Composer**: 2.x+
-- **Database**: MySQL 8+ or SQLite (local testing)
+- **Database**: MySQL 8+ or SQLite
 
 ### Installation Steps
 
 1. **Clone Repository & Install Dependencies**:
    ```bash
    composer install
+   npm install
    ```
 
 2. **Environment Configuration**:
@@ -67,7 +70,7 @@ Designed for multi-school and multi-role operations (Administrators, Teachers, S
 
 3. **Database Migration & Seeding**:
    ```bash
-   php artisan migrate --seed
+   php artisan migrate:fresh --seed
    ```
 
 4. **Run Development Server**:
@@ -76,10 +79,13 @@ Designed for multi-school and multi-role operations (Administrators, Teachers, S
    ```
    Open `http://127.0.0.1:8000` in your web browser.
 
-### Akun Demo untuk Login (Password: `password`):
+---
+
+## Demo Accounts for Testing (Password: `password`)
+
 - **Super / School Admin**: `admin@demo.org`
 - **Guru / Teacher**: `teacher@demo.org`
-- **Siswa / Student**: `student@demo.org` (Token Ujian Demo: `EXAM26`)
+- **Siswa / Student**: `student@demo.org` (Demo Exam Token: `EXAM26`)
 
 ---
 
@@ -180,11 +186,13 @@ Easily deploy on standard cPanel/DirectAdmin shared web hosting without root acc
 
 ## Security & Supply Chain Integrity
 
-- **Zero External CDN Dependencies**: All CSS, JavaScript, icons, and layout utilities are compiled locally. This prevents potential third-party script injection or CDN outage disruptions during exam sessions.
-- **CSRF & Session Protection**: All REST endpoints enforce Laravel CSRF token verification and multi-role session guards.
+- **Zero External CDN Dependencies**: All CSS, JavaScript, icons (FontAwesome 6 Free), and layout utilities are served locally from `public/vendor/`. This prevents potential third-party script injection or CDN outage disruptions during exam sessions.
+- **CSRF & Session Protection**: All REST API endpoints enforce Laravel CSRF token verification and multi-role session guards.
 
 ---
 
-## License
+## License & Attribution
 
-This open-source platform is released under the [MIT License](LICENSE). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!eleased under the [MIT License](LICENSE). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!
+This open-source platform is released under the [MIT License](LICENSE).
+
+Made with ❤️ by [Achmad An'im](https://github.com/animfahmy). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!

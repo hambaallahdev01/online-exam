@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Student\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamResult;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,7 +26,7 @@ class ExamSessionApiController extends Controller
 
         $formattedQuestions = $questions->map(function ($q) use ($exam) {
             $options = $q->options_json;
-            if ($options && $exam->randomize_options) {
+            if (is_array($options) && $exam->randomize_options && in_array($q->question_type, ['single_choice', 'multiple_choice'])) {
                 shuffle($options);
             }
             return [
@@ -99,17 +98,42 @@ class ExamSessionApiController extends Controller
             $studentAns = $answers[$q->id] ?? null;
 
             if ($studentAns !== null && $q->correct_answers_json) {
-                if (is_array($studentAns)) {
-                    sort($studentAns);
-                    $correct = $q->correct_answers_json;
-                    sort($correct);
-                    if ($studentAns == $correct) {
+                $type = $q->question_type;
+
+                if ($type === 'single_choice' || $type === 'true_false' || $type === 'fact_opinion') {
+                    $studentAnsLower = strtolower(trim((string)$studentAns));
+                    $correctArr = array_map(fn($v) => strtolower(trim((string)$v)), (array)$q->correct_answers_json);
+                    if (in_array($studentAnsLower, $correctArr)) {
                         $totalScore += $q->weight;
                     }
-                } else {
-                    $studentAnsLower = strtolower(trim((string)$studentAns));
-                    $correctArr = array_map(fn($v) => strtolower(trim((string)$v)), $q->correct_answers_json);
-                    if (in_array($studentAnsLower, $correctArr)) {
+                } elseif ($type === 'multiple_choice') {
+                    if (is_array($studentAns)) {
+                        $studentSorted = array_map('strval', $studentAns);
+                        sort($studentSorted);
+                        $correctSorted = array_map('strval', (array)$q->correct_answers_json);
+                        sort($correctSorted);
+                        if ($studentSorted === $correctSorted) {
+                            $totalScore += $q->weight;
+                        }
+                    }
+                } elseif ($type === 'sorting') {
+                    if (is_array($studentAns)) {
+                        if ($studentAns === (array)$q->correct_answers_json) {
+                            $totalScore += $q->weight;
+                        }
+                    }
+                } elseif ($type === 'matching') {
+                    if (is_array($studentAns)) {
+                        ksort($studentAns);
+                        $correct = (array)$q->correct_answers_json;
+                        ksort($correct);
+                        if ($studentAns === $correct) {
+                            $totalScore += $q->weight;
+                        }
+                    }
+                } elseif ($type === 'essay') {
+                    // Give full weight if non-empty answer provided, or awaiting teacher review
+                    if (trim((string)$studentAns) !== '') {
                         $totalScore += $q->weight;
                     }
                 }
