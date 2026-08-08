@@ -33,8 +33,8 @@
             <span>Quick Actions</span>
         </div>
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <a href="{{ route('admin.teachers') }}" class="btn btn-secondary" style="justify-content: flex-start;">👨‍🏫 Manage Teachers</a>
-            <a href="{{ route('admin.students') }}" class="btn btn-secondary" style="justify-content: flex-start;">🎓 Manage Students</a>
+            <a href="{{ route('admin.teachers') }}" class="btn btn-secondary" style="justify-content: flex-start;"><i class="fa-solid fa-chalkboard-user"></i>&nbsp; Manage Teachers</a>
+            <a href="{{ route('admin.students') }}" class="btn btn-secondary" style="justify-content: flex-start;"><i class="fa-solid fa-user-graduate"></i>&nbsp; Manage Students</a>
         </div>
     </div>
 

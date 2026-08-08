@@ -1,4 +1,4 @@
-# Modern Open Source Online Exam Platform ⚡
+# Modern Open Source Online Exam Platform
 
 <div dir="rtl" align="center">
 
@@ -25,7 +25,7 @@ Designed for multi-school and multi-role operations (Administrators, Teachers, S
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 - **Multi-Role & Multi-Tenant Onboarding**: School registration wizard, academic year setup, classrooms, subjects, teacher-subject mapping, and student enrollment.
 - **Rich Question Bank**: Supports multiple question types:
@@ -45,7 +45,7 @@ Designed for multi-school and multi-role operations (Administrators, Teachers, S
 
 ---
 
-## 🚀 Quickstart (Local Development)
+## Quickstart (Local Development)
 
 ### Requirements
 - **PHP**: PHP 8.2+ (tested on PHP 8.5.7)
@@ -76,15 +76,14 @@ Designed for multi-school and multi-role operations (Administrators, Teachers, S
    ```
    Open `http://127.0.0.1:8000` in your web browser.
 
-### Default Seeder Accounts (Password: `password`)
-- **Admin**: `admin@demo.org`
-- **Teacher**: `teacher@demo.org`
-- **Student**: `student@demo.org`
-- **Demo Exam Token**: `EXAM26`
+### Akun Demo untuk Login (Password: `password`):
+- **Super / School Admin**: `admin@demo.org`
+- **Guru / Teacher**: `teacher@demo.org`
+- **Siswa / Student**: `student@demo.org` (Token Ujian Demo: `EXAM26`)
 
 ---
 
-## 🛠️ Deployment Configurations
+## Deployment Configurations
 
 ### Option 1: High-Performance Production (Laravel Octane + Redis)
 
@@ -179,13 +178,13 @@ Easily deploy on standard cPanel/DirectAdmin shared web hosting without root acc
 
 ---
 
-## 🔒 Security & Supply Chain Integrity
+## Security & Supply Chain Integrity
 
 - **Zero External CDN Dependencies**: All CSS, JavaScript, icons, and layout utilities are compiled locally. This prevents potential third-party script injection or CDN outage disruptions during exam sessions.
 - **CSRF & Session Protection**: All REST endpoints enforce Laravel CSRF token verification and multi-role session guards.
 
 ---
 
-## 📄 License
+## License
 
-This open-source platform is released under the [MIT License](LICENSE). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!
+This open-source platform is released under the [MIT License](LICENSE). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!eleased under the [MIT License](LICENSE). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!

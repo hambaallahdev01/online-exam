@@ -4,7 +4,7 @@
 
 @section('content')
 <div style="margin-bottom: 2rem;">
-    <h1 style="font-size: 1.8rem;">Welcome, {{ Auth::user()->name }} 👋</h1>
+    <h1 style="font-size: 1.8rem;">Welcome, {{ Auth::user()->name }}</h1>
     <p style="color: var(--text-muted);">Enter token to join an ongoing exam or view your exam history.</p>
 </div>
 
@@ -12,7 +12,7 @@
     <!-- Enter Exam Token Card -->
     <div class="card" style="border: 1px solid var(--primary);">
         <div class="card-header" style="color: var(--primary);">
-            🔑 Enter Exam Token
+            <i class="fa-solid fa-key"></i> Enter Exam Token
         </div>
         <form action="{{ route('student.enter-token') }}" method="POST">
             @csrf
@@ -27,7 +27,7 @@
     <!-- Exam History & Results Card -->
     <div class="card">
         <div class="card-header">
-            📊 My Exam Results
+            <i class="fa-solid fa-chart-column"></i> My Exam Results
         </div>
         <table>
             <thead>
