@@ -29,9 +29,10 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+            'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $request->boolean('remember'))) {
             $request->session()->regenerate();
             return $this->redirectUser(Auth::user());
         }
@@ -55,6 +56,7 @@ class AuthController extends Controller
             'admin_name' => ['required', 'string', 'max:255'],
             'admin_email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
         ]);
 
         $school = School::create([
@@ -83,7 +85,10 @@ class AuthController extends Controller
 
     public function sendResetLink(Request $request)
     {
-        $request->validate(['email' => 'required|email|exists:users,email']);
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
+        ]);
 
         $user = User::where('email', $request->email)->first();
         $token = Str::random(60);

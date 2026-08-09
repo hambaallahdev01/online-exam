@@ -19,6 +19,13 @@
                 <input type="email" id="email" name="email" class="form-control" placeholder="user@school.org" value="{{ old('email') }}" required autofocus>
             </div>
 
+            @if(config('services.turnstile.site_key'))
+                <div class="form-group" style="display: flex; justify-content: center; margin-bottom: 1.25rem;">
+                    <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
+                </div>
+                <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+            @endif
+
             <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">Send Password Reset Link</button>
         </form>
     </div>
