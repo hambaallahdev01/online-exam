@@ -309,7 +309,8 @@ function handleMediaUpload(file) {
     fetch('{{ route("teacher.media.upload") }}', {
         method: 'POST',
         headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
         },
         body: formData
     })
