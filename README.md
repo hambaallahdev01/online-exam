@@ -263,9 +263,11 @@ To minimize storage space and save bandwidth on both local server and Linode S3:
 - **HTTP Security Headers**: Global middleware [`SecurityHeaders`](file:///c:/workspace/pribadi/ujian-online/app/Http/Middleware/SecurityHeaders.php) automatically injects `X-Frame-Options: SAMEORIGIN` (anti-clickjacking/exam runner framing), `X-Content-Type-Options: nosniff`, and `X-XSS-Protection`.
 - **Zero External CDN Dependencies**: All CSS, JavaScript, icons (FontAwesome 6 Free), and layout utilities are served locally from `public/vendor/`. This prevents potential third-party script injection or CDN outage disruptions during exam sessions.
 - **Password Reset & Email Verification**: Integrated password recovery workflow (`/forgot-password` & `/reset-password`) and email verification via secure SMTP delivery.
+- **Cloudflare Turnstile CAPTCHA Integration**: Native server-side validation ([`TurnstileRule`](file:///c:/workspace/pribadi/ujian-online/app/Rules/TurnstileRule.php)) to block automated bot submissions on Login, School Registration, and Password Reset forms.
 
-### SMTP Mail Setup (`.env`)
+### SMTP Mail & Cloudflare Turnstile Setup (`.env`)
 ```env
+# SMTP Mail Setup
 MAIL_MAILER=smtp
 MAIL_HOST=mail.domain.com
 MAIL_PORT=465
@@ -274,6 +276,10 @@ MAIL_PASSWORD=your_password
 MAIL_SCHEME=smtps
 MAIL_FROM_ADDRESS=your_email@domain.com
 MAIL_FROM_NAME="${APP_NAME}"
+
+# Cloudflare Turnstile CAPTCHA (Optional)
+TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
+TURNSTILE_SECRET_KEY=your_cloudflare_turnstile_secret_key
 ```
 
 ---

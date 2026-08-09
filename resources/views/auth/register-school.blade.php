@@ -42,6 +42,13 @@
                 <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="Repeat password" required>
             </div>
 
+            @if(config('services.turnstile.site_key'))
+                <div class="form-group" style="display: flex; justify-content: center; margin-bottom: 1.25rem;">
+                    <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
+                </div>
+                <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+            @endif
+
             <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem;">Complete School Registration</button>
         </form>
     </div>

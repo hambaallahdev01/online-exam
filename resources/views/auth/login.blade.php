@@ -25,6 +25,12 @@
                 </div>
                 <a href="{{ route('password.request') }}" style="font-size: 0.85rem; color: var(--accent); text-decoration: underline;">Forgot Password?</a>
             </div>
+            @if(config('services.turnstile.site_key'))
+                <div class="form-group" style="display: flex; justify-content: center; margin-bottom: 1.25rem;">
+                    <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
+                </div>
+                <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+            @endif
             <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">Sign In</button>
         </form>
     </div>
