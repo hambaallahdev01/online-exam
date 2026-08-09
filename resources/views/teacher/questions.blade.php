@@ -137,10 +137,26 @@
         <a href="{{ route('teacher.dashboard') }}" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard</a>
     </div>
 
-    <div class="card">
-        <div class="card-header">Tambah Soal Baru</div>
+    <!-- Upload Progress Loading Overlay Modal -->
+    <div id="uploadLoadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; flex-direction: column;">
+        <div style="background: var(--bg-card); padding: 2rem 2.5rem; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.25); border: 1px solid var(--border-color); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.85rem; max-width: 90%;">
+            <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.8rem; color: var(--accent);"></i>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin: 0;">Mengunggah Berkas Media...</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;" id="uploadLoadingText">Sedang mengompresi & menyimpan ke S3 Storage. Mohon tunggu sejenak.</p>
+        </div>
+    </div>
+
+    <div class="card" id="formCard">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="formCardHeader">Tambah Soal Baru</span>
+            <button type="button" class="btn btn-secondary" id="cancelEditBtn" onclick="cancelEdit()" style="display: none; padding: 0.25rem 0.65rem; font-size: 0.8rem;">
+                <i class="fa-solid fa-xmark"></i> Batal Edit
+            </button>
+        </div>
         <form action="{{ route('teacher.questions.store', $group->id) }}" method="POST" id="createQuestionForm">
             @csrf
+            <div id="formMethodContainer"></div>
+
             <div class="form-group">
                 <label for="question_type">Tipe Soal</label>
                 <select name="question_type" id="question_type" class="form-control" onchange="toggleOptionFields(this.value)">
@@ -221,7 +237,7 @@
                 <label for="correct_answer" id="correctAnswerLabel">Kunci Jawaban</label>
                 <input type="text" name="correct_answer" id="correct_answer" class="form-control" placeholder="Contoh: B (atau fact / opinion / A,C atau json pairs / ordered items)">
                 <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;" id="correctAnswerHint">
-                    Pilihan Ganda: A/B/C/D. Pilihan Banyak: A,B,C. Fakta/Opini: fact atau opinion. Mengurutkan: Item1,Item2,Item3.
+                    Pilihan Ganda: A/B/C/D/E. Pilihan Banyak: A,B,C. Fakta/Opini: fact atau opinion. Mengurutkan: Item1,Item2,Item3.
                 </small>
             </div>
 
@@ -235,7 +251,7 @@
                 <input type="number" name="weight" class="form-control" value="10" min="1" required>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Simpan Soal ke Bank Soal</button>
+            <button type="submit" class="btn btn-primary" id="formSubmitBtn" style="width: 100%;">Simpan Soal ke Bank Soal</button>
         </form>
     </div>
 
@@ -246,13 +262,16 @@
                 <div style="background: var(--bg-body); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
                         <span style="font-weight: 700; color: var(--primary);">#{{ $index + 1 }} ({{ strtoupper(str_replace('_', ' ', $q->question_type)) }})</span>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <span style="color: var(--accent); font-weight: 600; font-size: 0.9rem;">Bobot: {{ $q->weight }}</span>
+                        <div style="display: flex; align-items: center; gap: 0.6rem;">
+                            <span style="color: var(--accent); font-weight: 600; font-size: 0.9rem; margin-right: 0.5rem;">Bobot: {{ $q->weight }}</span>
+                            <button type="button" class="btn btn-secondary" onclick="editQuestion({{ json_encode($q) }})" style="padding: 0.25rem 0.6rem; font-size: 0.8rem; color: var(--primary); border-color: var(--primary);" title="Edit Soal">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
                             <form action="{{ route('teacher.questions.destroy', $q->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus soal ini beserta seluruh gambar/file S3 di dalamnya?');" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.8rem; color: var(--danger); border-color: var(--danger);" title="Hapus Soal & Berkas S3">
-                                    <i class="fa-solid fa-trash-can"></i> Hapus Soal
+                                    <i class="fa-solid fa-trash-can"></i> Hapus
                                 </button>
                             </form>
                         </div>
@@ -283,7 +302,7 @@
 
                     @if($q->correct_answers_json)
                         <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--status-answered); font-weight: 600;">
-                            Kunci Jawaban: {{ is_array($q->correct_answers_json) ? implode(', ', $q->correct_answers_json) : $q->correct_answers_json }}
+                            Kunci Jawaban: {{ is_array($q->correct_answers_json) ? implode(', ', $q->correct_answers_json) : (is_array($q->correct_answers_json) ? json_encode($q->correct_answers_json) : $q->correct_answers_json) }}
                         </div>
                     @else
                         <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--warning); font-weight: 600;">
@@ -324,6 +343,20 @@ function execOptionCmd(editorId, command, value = null) {
         el.focus();
         document.execCommand(command, false, value);
     }
+}
+
+function showUploadLoading(fileName) {
+    const overlay = document.getElementById('uploadLoadingOverlay');
+    const textEl = document.getElementById('uploadLoadingText');
+    if (textEl && fileName) {
+        textEl.textContent = `Mengunggah & mengompresi "${fileName}" ke S3 Storage. Mohon tunggu...`;
+    }
+    if (overlay) overlay.style.display = 'flex';
+}
+
+function hideUploadLoading() {
+    const overlay = document.getElementById('uploadLoadingOverlay');
+    if (overlay) overlay.style.display = 'none';
 }
 
 function createOptionHTML(index) {
@@ -403,6 +436,91 @@ function updateOptionLabelsAndButtons() {
             btnRemove.style.display = rows.length <= 2 ? 'none' : 'inline-flex';
         }
     });
+}
+
+function editQuestion(q) {
+    const cardHeader = document.getElementById('formCardHeader');
+    const form = document.getElementById('createQuestionForm');
+    const submitBtn = document.getElementById('formSubmitBtn');
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    const methodContainer = document.getElementById('formMethodContainer');
+
+    if (cardHeader) cardHeader.textContent = `Edit Soal #${q.id}`;
+    if (submitBtn) submitBtn.textContent = 'Perbarui Soal';
+    if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+    if (form) form.action = `/teacher/questions/${q.id}`;
+    if (methodContainer) methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+
+    // Set question type
+    const typeSelect = document.getElementById('question_type');
+    if (typeSelect) {
+        typeSelect.value = q.question_type;
+        toggleOptionFields(q.question_type);
+    }
+
+    // Set content
+    const editor = document.getElementById('editorContent');
+    if (editor) editor.innerHTML = q.content || '';
+
+    // Set options
+    const list = document.getElementById('dynamicOptionsList');
+    list.innerHTML = '';
+    optionCount = 0;
+
+    if (q.options_json && Array.isArray(q.options_json) && q.options_json.length > 0) {
+        q.options_json.forEach(opt => {
+            const index = optionCount;
+            const div = document.createElement('div');
+            div.innerHTML = createOptionHTML(index);
+            list.appendChild(div.firstElementChild);
+
+            const optionEditor = document.getElementById(`editorOption_${index}`);
+            if (optionEditor) {
+                optionEditor.innerHTML = (typeof opt === 'object' && opt !== null) ? (opt.text || '') : opt;
+            }
+            optionCount++;
+        });
+        updateOptionLabelsAndButtons();
+    } else {
+        renderInitialOptions();
+    }
+
+    // Set correct answer & explanation & weight
+    const correctAnswerInput = document.getElementById('correct_answer');
+    if (correctAnswerInput) {
+        if (q.correct_answers_json) {
+            correctAnswerInput.value = Array.isArray(q.correct_answers_json) ? q.correct_answers_json.join(', ') : (typeof q.correct_answers_json === 'object' ? JSON.stringify(q.correct_answers_json) : q.correct_answers_json);
+        } else {
+            correctAnswerInput.value = '';
+        }
+    }
+
+    const explanationInput = document.querySelector('textarea[name="explanation"]');
+    if (explanationInput) explanationInput.value = q.explanation || '';
+
+    const weightInput = document.querySelector('input[name="weight"]');
+    if (weightInput) weightInput.value = q.weight || 10;
+
+    // Scroll smoothly to form
+    document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelEdit() {
+    const cardHeader = document.getElementById('formCardHeader');
+    const form = document.getElementById('createQuestionForm');
+    const submitBtn = document.getElementById('formSubmitBtn');
+    const cancelBtn = document.getElementById('cancelEditBtn');
+    const methodContainer = document.getElementById('formMethodContainer');
+
+    if (cardHeader) cardHeader.textContent = 'Tambah Soal Baru';
+    if (submitBtn) submitBtn.textContent = 'Simpan Soal ke Bank Soal';
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    if (form) form.action = "{{ route('teacher.questions.store', $group->id) }}";
+    if (methodContainer) methodContainer.innerHTML = '';
+
+    form.reset();
+    document.getElementById('editorContent').innerHTML = '';
+    renderInitialOptions();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -521,6 +639,8 @@ function triggerMediaUpload(type, targetId = 'editorContent') {
 function handleMediaUpload(file) {
     if (!file) return;
 
+    showUploadLoading(file.name);
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('_token', '{{ csrf_token() }}');
@@ -538,6 +658,7 @@ function handleMediaUpload(file) {
     })
     .then(response => response.json())
     .then(data => {
+        hideUploadLoading();
         if (data.status === 'success') {
             if (data.is_pdf) {
                 const pdfHtml = `<p><a href="${data.url}" target="_blank" class="pdf-attachment-badge"><i class="fa-solid fa-file-pdf"></i> Unduh Lampiran PDF (${data.original_name})</a></p><p><br></p>`;
@@ -551,10 +672,12 @@ function handleMediaUpload(file) {
         }
     })
     .catch(err => {
+        hideUploadLoading();
         alert('Upload gagal: ' + err.message);
+    })
+    .finally(() => {
+        document.getElementById('mediaFileInput').value = '';
     });
-
-    document.getElementById('mediaFileInput').value = '';
 }
 
 function insertYoutubeVideo(targetId = 'editorContent') {

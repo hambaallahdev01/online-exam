@@ -1,32 +1,36 @@
 @extends('layouts.app')
 
-@section('title', 'Teacher Dashboard')
+@section('title', 'Teacher Dashboard - Open Source Exam Platform')
 
 @section('content')
-<div style="margin-bottom: 2rem;">
-    <h1 style="font-size: 1.8rem;">Teacher Workspace</h1>
-    <p style="color: var(--text-muted);">Manage Question Banks & Schedule Online Exams</p>
-</div>
-
-<div class="grid-stats">
-    <div class="stat-box">
-        <div style="color: var(--text-muted); font-size: 0.9rem;">Question Groups</div>
-        <div class="stat-number">{{ $groupsCount }}</div>
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="font-size: 1.8rem; color: var(--primary);">Teacher Dashboard</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Manage question banks, edit exam settings, and publish active tests.</p>
+        </div>
+        <button class="btn btn-primary" onclick="document.getElementById('modalGroup').style.display='flex'">
+            <i class="fa-solid fa-plus"></i> New Question Group
+        </button>
     </div>
-    <div class="stat-box">
-        <div style="color: var(--text-muted); font-size: 0.9rem;">Published Exams</div>
-        <div class="stat-number" style="color: var(--accent);">{{ $examsCount }}</div>
-    </div>
-</div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-    <!-- Question Groups Panel -->
+    <!-- Quick Stats Grid -->
+    <div class="grid-stats">
+        <div class="stat-box">
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Question Groups</span>
+            <span class="stat-number">{{ $groupsCount }}</span>
+        </div>
+        <div class="stat-box">
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Published Exams</span>
+            <span class="stat-number">{{ $examsCount }}</span>
+        </div>
+    </div>
+
+    <!-- Question Groups Bank List -->
     <div class="card">
         <div class="card-header">
-            <span>Question Groups</span>
-            <button class="btn btn-primary" onclick="document.getElementById('modalGroup').style.display='block'" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">+ New Group</button>
+            <span>Your Question Banks</span>
         </div>
-
         <table>
             <thead>
                 <tr>
@@ -41,7 +45,9 @@
                         <td><strong>{{ $g->name }}</strong></td>
                         <td>{{ $g->questions_count }} questions</td>
                         <td>
-                            <a href="{{ route('teacher.question-groups.show', $g->id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Manage Questions</a>
+                            <a href="{{ route('teacher.question-groups.show', $g->id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                                <i class="fa-solid fa-list-check"></i> Manage Questions
+                            </a>
                         </td>
                     </tr>
                 @empty
@@ -53,7 +59,64 @@
         </table>
     </div>
 
-    <!-- Active Exams Panel -->
+    <!-- Published Exams List & Management Table -->
+    <div class="card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Daftar Ujian Dipublikasikan (Published Exams)</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: normal;">Total: {{ $exams->count() }} Ujian</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Judul Ujian</th>
+                    <th>Bank Soal</th>
+                    <th>Token</th>
+                    <th>Durasi</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($exams as $index => $ex)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td><strong>{{ $ex->title }}</strong></td>
+                        <td>{{ $ex->questionGroup->name ?? 'N/A' }}</td>
+                        <td><code style="background: rgba(99, 102, 241, 0.1); color: var(--accent); padding: 0.2rem 0.5rem; border-radius: 0.3rem; font-weight: 700;">{{ $ex->token }}</code></td>
+                        <td>{{ $ex->duration_minutes }} Menit</td>
+                        <td>
+                            @if($ex->is_active)
+                                <span style="background: rgba(22, 163, 74, 0.1); color: var(--status-answered); padding: 0.2rem 0.6rem; border-radius: 0.4rem; font-weight: 600; font-size: 0.8rem;">Aktif</span>
+                            @else
+                                <span style="background: rgba(220, 38, 38, 0.1); color: var(--danger); padding: 0.2rem 0.6rem; border-radius: 0.4rem; font-weight: 600; font-size: 0.8rem;">Nonaktif</span>
+                            @endif
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 0.4rem;">
+                                <button class="btn btn-secondary" onclick="openEditExamModal({{ json_encode($ex) }})" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: var(--primary);" title="Edit Ujian">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <form action="{{ route('teacher.exams.destroy', $ex->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus publikasi ujian ini?');" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: var(--danger);" title="Hapus Ujian">
+                                        <i class="fa-solid fa-trash-can"></i> Hapus
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted);">Belum ada ujian yang dipublikasikan.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Publish New Exam Panel -->
     <div class="card">
         <div class="card-header">
             <span>Publish New Exam</span>
@@ -116,4 +179,59 @@
         </form>
     </div>
 </div>
+
+<!-- Modal for Edit Exam -->
+<div id="modalEditExam" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="card" style="width: 450px; margin: 10% auto;">
+        <div class="card-header">
+            <span id="editExamModalTitle">Edit Published Exam</span>
+            <button class="btn btn-secondary" onclick="document.getElementById('modalEditExam').style.display='none'" style="padding: 0.2rem 0.5rem;">✕</button>
+        </div>
+        <form id="editExamForm" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="form-group">
+                <label for="edit_title">Judul Ujian</label>
+                <input type="text" name="title" id="edit_title" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="edit_token">Token Ujian</label>
+                <input type="text" name="token" id="edit_token" class="form-control" style="text-transform: uppercase;" required>
+            </div>
+            <div class="form-group">
+                <label for="edit_duration_minutes">Durasi (Menit)</label>
+                <input type="number" name="duration_minutes" id="edit_duration_minutes" class="form-control" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="edit_is_active">Status Ujian</label>
+                <select name="is_active" id="edit_is_active" class="form-control">
+                    <option value="1">Aktif (Peserta Bisa Akses)</option>
+                    <option value="0">Nonaktif (Dipause / Ditutup)</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Simpan Perubahan Ujian</button>
+        </form>
+    </div>
+</div>
+@endsection
+
+@section('scripts')
+<script>
+function openEditExamModal(exam) {
+    const modal = document.getElementById('modalEditExam');
+    const form = document.getElementById('editExamForm');
+    const titleInput = document.getElementById('edit_title');
+    const tokenInput = document.getElementById('edit_token');
+    const durationInput = document.getElementById('edit_duration_minutes');
+    const activeSelect = document.getElementById('edit_is_active');
+
+    form.action = `/teacher/exams/${exam.id}`;
+    titleInput.value = exam.title || '';
+    tokenInput.value = exam.token || '';
+    durationInput.value = exam.duration_minutes || 60;
+    activeSelect.value = exam.is_active ? '1' : '0';
+
+    modal.style.display = 'flex';
+}
+</script>
 @endsection
