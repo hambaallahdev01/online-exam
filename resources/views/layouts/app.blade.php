@@ -305,17 +305,37 @@
             margin-top: auto;
             background-color: var(--bg-card);
         }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-wrap: wrap;
+                padding: 0.75rem 1rem;
+                gap: 0.75rem;
+            }
+            .brand-wrapper {
+                flex-wrap: wrap;
+                gap: 0.4rem !important;
+            }
+            .nav-links {
+                gap: 0.6rem;
+                flex-wrap: wrap;
+            }
+            .v1-legacy-btn {
+                font-size: 0.7rem !important;
+                padding: 0.15rem 0.4rem !important;
+            }
+        }
     </style>
     @yield('styles')
 </head>
 <body>
     <header>
         <div class="navbar">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div class="brand-wrapper" style="display: flex; align-items: center; gap: 0.6rem;">
                 <a href="{{ url('/') }}" class="brand">
                     <i class="fa-solid fa-graduation-cap"></i> <span>Ajenono V2</span>
                 </a>
-                <a href="http://ajenono.wongcjdw.com" target="_blank" rel="noopener noreferrer" style="font-size: 0.75rem; color: var(--text-muted); text-decoration: underline; background: rgba(99, 102, 241, 0.1); padding: 0.2rem 0.5rem; border-radius: 0.3rem;" title="Open Ajenono V1 Legacy">
+                <a href="http://ajenono.wongcjdw.com" target="_blank" rel="noopener noreferrer" class="v1-legacy-btn" style="font-size: 0.75rem; color: var(--text-muted); text-decoration: underline; background: rgba(99, 102, 241, 0.1); padding: 0.2rem 0.5rem; border-radius: 0.3rem;" title="Open Ajenono V1 Legacy">
                     <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.65rem;"></i> V1 Legacy
                 </a>
             </div>
