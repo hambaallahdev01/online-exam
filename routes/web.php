@@ -20,8 +20,10 @@ Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name(
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
-// Email Verification Route
+// Email Verification Routes
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+Route::get('/email/resend', [AuthController::class, 'showResendVerification'])->name('verification.resend.show');
+Route::post('/email/resend', [AuthController::class, 'resendVerification'])->name('verification.resend')->middleware('throttle:6,1');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 

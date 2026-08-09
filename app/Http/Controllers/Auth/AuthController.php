@@ -179,6 +179,41 @@ class AuthController extends Controller
         return redirect()->route('login')->with('success', 'Email address verified successfully!');
     }
 
+    public function showResendVerification()
+    {
+        return view('auth.resend-verification');
+    }
+
+    public function resendVerification(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->route('login')->with('info', 'Your email address is already verified. Please sign in.');
+        }
+
+        $verifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1($user->getEmailForVerification())]
+        );
+
+        try {
+            Mail::raw("Halo {$user->name},\n\nBerikut adalah tautan verifikasi email baru untuk akun Ajenono Exam Platform Anda:\n{$verifyUrl}\n\nTautan ini berlaku selama 60 menit. Silakan klik untuk menyelesaikan verifikasi email.\n\nSalam,\nTim Ajenono Exam Platform", function ($message) use ($user) {
+                $message->to($user->email)->subject('Resend Email Verification - Ajenono Exam Platform');
+            });
+        } catch (\Throwable $e) {
+            return back()->withErrors(['email' => 'Failed to send verification email: ' . $e->getMessage()]);
+        }
+
+        return back()->with('success', 'A new verification link has been sent to your email address (' . $user->email . ').');
+    }
+
     public function logout(Request $request)
     {
         Auth::logout();
