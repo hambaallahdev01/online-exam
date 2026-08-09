@@ -94,7 +94,7 @@ class AuthController extends Controller
         );
 
         try {
-            Mail::raw("Halo {$user->name},\n\nTerima kasih telah mendaftarkan sekolah {$school->name} di Ajenono Exam Platform.\n\nSilakan verifikasi email Anda dengan mengklik tautan berikut:\n{$verifyUrl}\n\nSetelah email terverifikasi, Anda dapat login ke platform.\n\nSalam,\nTim Ajenono Exam Platform", function ($message) use ($user) {
+            Mail::send('emails.verification', ['userName' => $user->name, 'verifyUrl' => $verifyUrl], function ($message) use ($user) {
                 $message->to($user->email)->subject('Verify Your Email Address - Ajenono Exam Platform');
             });
             Log::info("SMTP Dispatch SUCCESS [registerSchool]: Verification email sent to {$user->email}");
@@ -143,9 +143,8 @@ class AuthController extends Controller
         $resetUrl = route('password.reset', ['token' => $token, 'email' => $user->email]);
 
         try {
-            Mail::raw("Halo {$user->name},\n\nKami menerima permintaan untuk mereset kata sandi akun Ajenono Exam Platform Anda.\n\nKlik tautan berikut untuk membuat kata sandi baru:\n{$resetUrl}\n\nTautan ini hanya berlaku untuk waktu terbatas. Jika Anda tidak merasa meminta reset kata sandi, abaikan email ini.\n\nSalam,\nTim Ajenono Exam Platform", function ($message) use ($user) {
-                $message->to($user->email)
-                        ->subject('Reset Password Link - Ajenono Exam Platform');
+            Mail::send('emails.reset-password', ['userName' => $user->name, 'resetUrl' => $resetUrl], function ($message) use ($user) {
+                $message->to($user->email)->subject('Reset Password Link - Ajenono Exam Platform');
             });
             Log::info("SMTP Dispatch SUCCESS [sendResetLink]: Reset link email sent to {$user->email}");
         } catch (\Throwable $e) {
@@ -236,7 +235,7 @@ class AuthController extends Controller
         );
 
         try {
-            Mail::raw("Halo {$user->name},\n\nBerikut adalah tautan verifikasi email baru untuk akun Ajenono Exam Platform Anda:\n{$verifyUrl}\n\nTautan ini berlaku selama 60 menit. Silakan klik untuk menyelesaikan verifikasi email.\n\nSalam,\nTim Ajenono Exam Platform", function ($message) use ($user) {
+            Mail::send('emails.verification', ['userName' => $user->name, 'verifyUrl' => $verifyUrl], function ($message) use ($user) {
                 $message->to($user->email)->subject('Resend Email Verification - Ajenono Exam Platform');
             });
             Log::info("SMTP Dispatch SUCCESS [resendVerification]: Verification link sent to {$user->email}");
@@ -291,7 +290,7 @@ class AuthController extends Controller
         );
 
         try {
-            Mail::raw("Halo {$user->name},\n\nAlamat email akun Ajenono Exam Platform Anda telah diperbarui ke {$user->email}.\n\nSilakan verifikasi alamat email baru Anda dengan mengklik tautan berikut:\n{$verifyUrl}\n\nTautan ini berlaku selama 60 menit. Silakan klik untuk menyelesaikan verifikasi.\n\nSalam,\nTim Ajenono Exam Platform", function ($message) use ($user) {
+            Mail::send('emails.verification', ['userName' => $user->name, 'verifyUrl' => $verifyUrl], function ($message) use ($user) {
                 $message->to($user->email)->subject('Verify Your New Email Address - Ajenono Exam Platform');
             });
             Log::info("SMTP Dispatch SUCCESS [changeUnverifiedEmailAndResend]: Updated email verification sent to {$user->email}");
