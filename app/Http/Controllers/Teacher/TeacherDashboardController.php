@@ -20,6 +20,8 @@ class TeacherDashboardController extends Controller
             ->count();
         $examsCount = Exam::where('school_id', $teacher->school_id)->count();
 
+        $subjects = Subject::where('school_id', $teacher->school_id)->get();
+
         $questionGroups = QuestionGroup::where('school_id', $teacher->school_id)
             ->where('teacher_id', $teacher->id)
             ->withCount('questions')
@@ -30,23 +32,37 @@ class TeacherDashboardController extends Controller
             ->latest()
             ->get();
 
-        return view('teacher.dashboard', compact('groupsCount', 'examsCount', 'questionGroups', 'exams'));
+        return view('teacher.dashboard', compact('groupsCount', 'examsCount', 'subjects', 'questionGroups', 'exams'));
     }
 
     public function createQuestionGroup(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'subject_id' => 'nullable|exists:subjects,id',
             'description' => 'nullable|string',
         ]);
 
         $teacher = Auth::user();
-        $subject = Subject::where('school_id', $teacher->school_id)->first();
+
+        if ($request->filled('subject_id')) {
+            $subjectId = $request->subject_id;
+        } else {
+            $subject = Subject::where('school_id', $teacher->school_id)->first();
+            if (!$subject) {
+                $subject = Subject::create([
+                    'school_id' => $teacher->school_id,
+                    'name' => 'Umum / General',
+                    'code' => 'UMUM',
+                ]);
+            }
+            $subjectId = $subject->id;
+        }
 
         QuestionGroup::create([
             'school_id' => $teacher->school_id,
             'teacher_id' => $teacher->id,
-            'subject_id' => $subject ? $subject->id : 1,
+            'subject_id' => $subjectId,
             'name' => $request->name,
             'description' => $request->description,
         ]);

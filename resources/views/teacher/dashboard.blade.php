@@ -98,6 +98,16 @@
                 <label for="name">Group Name</label>
                 <input type="text" name="name" class="form-control" placeholder="Web Development Basics" required>
             </div>
+            @if($subjects->count() > 0)
+                <div class="form-group">
+                    <label for="subject_id">Subject / Mata Pelajaran</label>
+                    <select name="subject_id" id="subject_id" class="form-control">
+                        @foreach($subjects as $subj)
+                            <option value="{{ $subj->id }}">{{ $subj->name }} ({{ $subj->code }})</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
             <div class="form-group">
                 <label for="description">Description</label>
                 <textarea name="description" class="form-control" rows="3" placeholder="Description or target chapter..."></textarea>
