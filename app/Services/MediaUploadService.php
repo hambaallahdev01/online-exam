@@ -172,4 +172,82 @@ class MediaUploadService
 
         return $binary ?: null;
     }
+
+    /**
+     * Delete uploaded file from S3 / Local storage by URL.
+     */
+    public static function deleteFile(string $url): bool
+    {
+        if (empty($url)) {
+            return false;
+        }
+
+        // Parse path relative to storage, e.g. "questions/abc.jpg"
+        $parsedUrl = parse_url($url, PHP_URL_PATH);
+        if (!$parsedUrl) {
+            return false;
+        }
+
+        // Strip leading slash or 'storage/' prefix if present
+        $path = ltrim($parsedUrl, '/');
+        if (str_starts_with($path, 'storage/')) {
+            $path = substr($path, 8);
+        }
+
+        $defaultDisk = config('filesystems.default', 'public');
+        $deleted = false;
+
+        try {
+            if (Storage::disk($defaultDisk)->exists($path)) {
+                $deleted = Storage::disk($defaultDisk)->delete($path);
+            }
+        } catch (\Throwable $e) {
+            Log::error("Failed to delete media from disk [{$defaultDisk}]: " . $e->getMessage());
+        }
+
+        // Also check fallback 'public' disk if default disk is not public
+        if ($defaultDisk !== 'public') {
+            try {
+                if (Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
+                    $deleted = true;
+                }
+            } catch (\Throwable $e) {
+                // Ignore fallback delete errors
+            }
+        }
+
+        return $deleted;
+    }
+
+    /**
+     * Extract all image/PDF URLs from HTML content or option JSON array and delete them from storage.
+     */
+    public static function deleteMediaFromContent(mixed $content): void
+    {
+        if (empty($content)) {
+            return;
+        }
+
+        $urls = [];
+        $text = is_array($content) || is_object($content) ? json_encode($content, JSON_UNESCAPED_SLASHES) : (string)$content;
+        $text = stripslashes($text);
+
+        // 1. Match full http(s) URLs
+        preg_match_all('/https?:\/\/[^\s"\'<>]+/i', $text, $matches1);
+        if (!empty($matches1[0])) {
+            $urls = array_merge($urls, $matches1[0]);
+        }
+
+        // 2. Match relative src/href paths (e.g. /storage/questions/xyz.jpg or questions/xyz.jpg)
+        preg_match_all('/(?:src|href)=["\']([^"\']+)["\']/i', $text, $matches2);
+        if (!empty($matches2[1])) {
+            $urls = array_merge($urls, $matches2[1]);
+        }
+
+        foreach (array_unique($urls) as $url) {
+            $cleanUrl = trim(str_replace(['\\', '"', "'"], '', $url));
+            static::deleteFile($cleanUrl);
+        }
+    }
 }

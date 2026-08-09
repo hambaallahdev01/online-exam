@@ -47,7 +47,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/question-groups', [TeacherDashboardController::class, 'createQuestionGroup'])->name('question-groups.store');
         Route::get('/question-groups/{group}', [TeacherDashboardController::class, 'showQuestionGroup'])->name('question-groups.show');
         Route::post('/question-groups/{group}/questions', [TeacherDashboardController::class, 'storeQuestion'])->name('questions.store');
+        Route::delete('/questions/{question}', [TeacherDashboardController::class, 'destroyQuestion'])->name('questions.destroy');
         Route::post('/media/upload', [TeacherDashboardController::class, 'uploadMedia'])->name('media.upload');
+        Route::post('/media/delete', [TeacherDashboardController::class, 'deleteMedia'])->name('media.delete');
         Route::post('/exams', [TeacherDashboardController::class, 'storeExam'])->name('exams.store');
     });
 
