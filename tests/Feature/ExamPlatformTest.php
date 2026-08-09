@@ -27,7 +27,7 @@ class ExamPlatformTest extends TestCase
             'password_confirmation' => 'password123',
         ]);
 
-        $response->assertRedirect(route('admin.dashboard'));
+        $response->assertRedirect(route('login'));
         $this->assertDatabaseHas('schools', ['code' => 'STJUDE']);
         $this->assertDatabaseHas('users', ['email' => 'francis@stjude.org', 'role' => 'admin']);
     }
@@ -40,6 +40,7 @@ class ExamPlatformTest extends TestCase
             'name' => 'Admin User',
             'email' => 'admin@test.org',
             'role' => 'admin',
+            'email_verified_at' => now(),
             'password' => \Illuminate\Support\Facades\Hash::make('password123'),
         ]);
 
@@ -50,6 +51,27 @@ class ExamPlatformTest extends TestCase
 
         $response->assertRedirect(route('admin.dashboard'));
         $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_unverified_user_cannot_login()
+    {
+        $school = School::create(['name' => 'Demo', 'email' => 'demo@school.org']);
+        $user = User::create([
+            'school_id' => $school->id,
+            'name' => 'Unverified User',
+            'email' => 'unverified@test.org',
+            'role' => 'admin',
+            'email_verified_at' => null,
+            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+        ]);
+
+        $response = $this->post('/', [
+            'email' => 'unverified@test.org',
+            'password' => 'password123',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
     }
 
     public function test_student_can_enter_exam_token_and_fetch_payload()
