@@ -206,4 +206,36 @@ class TeacherDashboardController extends Controller
             ], 422);
         }
     }
+
+    public function deleteMedia(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|string',
+        ]);
+
+        try {
+            $deleted = \App\Services\MediaUploadService::deleteFile($request->url);
+
+            return response()->json([
+                'status' => $deleted ? 'success' : 'info',
+                'message' => $deleted ? 'Media file deleted from storage successfully.' : 'Media file not found or already removed.',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to delete media: ' . $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    public function destroyQuestion(Question $question)
+    {
+        if ($question->school_id !== Auth::user()->school_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $question->delete();
+
+        return back()->with('success', 'Question and all associated media files deleted successfully!');
+    }
 }

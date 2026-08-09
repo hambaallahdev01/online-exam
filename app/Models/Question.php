@@ -27,6 +27,15 @@ class Question extends Model
         'weight' => 'integer',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Question $question) {
+            \App\Services\MediaUploadService::deleteMediaFromContent($question->content);
+            \App\Services\MediaUploadService::deleteMediaFromContent($question->options_json);
+            \App\Services\MediaUploadService::deleteMediaFromContent($question->explanation);
+        });
+    }
+
     public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);
