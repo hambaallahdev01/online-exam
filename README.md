@@ -262,7 +262,19 @@ To minimize storage space and save bandwidth on both local server and Linode S3:
   - School Registration: Max 5 attempts per hour per IP (`throttle:register-school`).
 - **HTTP Security Headers**: Global middleware [`SecurityHeaders`](file:///c:/workspace/pribadi/ujian-online/app/Http/Middleware/SecurityHeaders.php) automatically injects `X-Frame-Options: SAMEORIGIN` (anti-clickjacking/exam runner framing), `X-Content-Type-Options: nosniff`, and `X-XSS-Protection`.
 - **Zero External CDN Dependencies**: All CSS, JavaScript, icons (FontAwesome 6 Free), and layout utilities are served locally from `public/vendor/`. This prevents potential third-party script injection or CDN outage disruptions during exam sessions.
-- **CSRF & Session Protection**: All REST API endpoints enforce Laravel CSRF token verification and multi-role session guards.
+- **Password Reset & Email Verification**: Integrated password recovery workflow (`/forgot-password` & `/reset-password`) and email verification via secure SMTP delivery.
+
+### SMTP Mail Setup (`.env`)
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=mail.domain.com
+MAIL_PORT=465
+MAIL_USERNAME=your_email@domain.com
+MAIL_PASSWORD=your_password
+MAIL_SCHEME=smtps
+MAIL_FROM_ADDRESS=your_email@domain.com
+MAIL_FROM_NAME="${APP_NAME}"
+```
 
 ---
 

@@ -18,9 +18,12 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
             </div>
-            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
-                <input type="checkbox" id="remember" name="remember">
-                <label for="remember" style="margin-bottom: 0;">Remember me</label>
+            <div class="form-group" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember" style="margin-bottom: 0;">Remember me</label>
+                </div>
+                <a href="{{ route('password.request') }}" style="font-size: 0.85rem; color: var(--accent); text-decoration: underline;">Forgot Password?</a>
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">Sign In</button>
         </form>
