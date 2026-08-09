@@ -69,19 +69,25 @@ class MediaUploadService
 
         try {
             if ($binary !== null) {
-                Storage::disk($defaultDisk)->put($path, $binary);
+                Storage::disk($defaultDisk)->put($path, $binary, 'public');
                 return Storage::disk($defaultDisk)->url($path);
             }
-            $storedPath = $file->storeAs($folder, $filename, $defaultDisk);
+            $storedPath = $file->storeAs($folder, $filename, [
+                'disk' => $defaultDisk,
+                'visibility' => 'public',
+            ]);
             return Storage::disk($defaultDisk)->url($storedPath);
         } catch (\Throwable $e) {
             // Fallback to local 'public' disk if S3 / Guzzle / cURL fails on hosting
             if ($defaultDisk !== 'public') {
                 if ($binary !== null) {
-                    Storage::disk('public')->put($path, $binary);
+                    Storage::disk('public')->put($path, $binary, 'public');
                     return Storage::disk('public')->url($path);
                 }
-                $storedPath = $file->storeAs($folder, $filename, 'public');
+                $storedPath = $file->storeAs($folder, $filename, [
+                    'disk' => 'public',
+                    'visibility' => 'public',
+                ]);
                 return Storage::disk('public')->url($storedPath);
             }
             throw $e;

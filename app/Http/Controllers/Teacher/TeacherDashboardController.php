@@ -172,12 +172,23 @@ class TeacherDashboardController extends Controller
 
     public function uploadMedia(Request $request)
     {
-        $request->validate([
-            'file' => 'required|max:10240',
-        ]);
+        if (!$request->hasFile('file')) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No file received or file size exceeds upload_max_filesize in php.ini.',
+            ], 422);
+        }
+
+        $file = $request->file('file');
+
+        if (!$file->isValid()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'File upload error: ' . $file->getErrorMessage() . '. Check upload_max_filesize & post_max_size in php.ini.',
+            ], 422);
+        }
 
         try {
-            $file = $request->file('file');
             $url = \App\Services\MediaUploadService::upload($file, 'questions');
             $extension = strtolower($file->getClientOriginalExtension());
             $isPdf = $extension === 'pdf';
