@@ -8,8 +8,9 @@ use App\Http\Controllers\Teacher\TeacherDashboardController;
 use Illuminate\Support\Facades\Route;
 
 // Guest Routes
-Route::get('/', [AuthController::class, 'showLogin'])->name('login');
+Route::view('/', 'landing')->name('landing');
 Route::post('/', [AuthController::class, 'login'])->middleware('throttle:login');
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:login');
 Route::get('/register-school', [AuthController::class, 'showRegisterSchool'])->name('register.school');
 Route::post('/register-school', [AuthController::class, 'registerSchool'])->middleware('throttle:register-school');
