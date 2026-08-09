@@ -3,23 +3,59 @@
 @section('title', 'Manage Questions - ' . $group->name)
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('vendor/quill/quill.snow.css') }}">
 <style>
-    .ql-toolbar {
-        border-radius: 0.5rem 0.5rem 0 0 !important;
-        border-color: var(--border-color) !important;
-        background: var(--bg-card-hover) !important;
+    .editor-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        padding: 0.5rem;
+        background: var(--bg-card-hover);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem 0.5rem 0 0;
+        border-bottom: none;
     }
-    .ql-container {
-        border-radius: 0 0 0.5rem 0.5rem !important;
-        border-color: var(--border-color) !important;
-        background: var(--bg-card) !important;
-        color: var(--text-main) !important;
-        font-family: inherit !important;
+    .editor-btn {
+        background: var(--bg-card);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        border-radius: 0.35rem;
+        padding: 0.35rem 0.65rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: background 0.15s ease, border-color 0.15s ease;
     }
-    .ql-editor {
-        min-height: 180px !important;
-        font-size: 1rem !important;
+    .editor-btn:hover {
+        background: var(--primary);
+        color: #ffffff;
+        border-color: var(--primary);
+    }
+    .editor-select {
+        background: var(--bg-card);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        border-radius: 0.35rem;
+        padding: 0.3rem 0.5rem;
+        font-size: 0.85rem;
+    }
+    .editor-content {
+        min-height: 180px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 0.85rem;
+        background: var(--bg-card);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        border-radius: 0 0 0.5rem 0.5rem;
+        outline: none;
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+    .editor-content:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
     }
     .pdf-attachment-badge {
         display: inline-flex;
@@ -82,40 +118,43 @@
                 </select>
             </div>
 
-            <!-- WYSIWYG Editor Container -->
+            <!-- Native Lightweight WYSIWYG Editor -->
             <div class="form-group">
-                <label for="content">Isi Pertanyaan / Instruksi Soal (WYSIWYG Rich Editor)</label>
-                <div id="quillToolbar">
-                    <span class="ql-formats">
-                        <select class="ql-header">
-                            <option selected></option>
-                            <option value="1">Heading 1</option>
-                            <option value="2">Heading 2</option>
-                        </select>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-bold" title="Bold"></button>
-                        <button class="ql-italic" title="Italic"></button>
-                        <button class="ql-underline" title="Underline"></button>
-                        <button class="ql-strike" title="Strike"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <select class="ql-color" title="Text Color"></select>
-                        <select class="ql-background" title="Background Color"></select>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-list" value="ordered" title="Numbered List"></button>
-                        <button class="ql-list" value="bullet" title="Bulleted List"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <button type="button" onclick="triggerMediaUpload('image')" title="Upload & Resizing Gambar (Max 1024x1024)"><i class="fa-solid fa-image"></i></button>
-                        <button type="button" onclick="insertYoutubeVideo()" title="Embed Video YouTube"><i class="fa-brands fa-youtube" style="color: #ef4444;"></i></button>
-                        <button type="button" onclick="triggerMediaUpload('pdf')" title="Lampirkan Dokumen PDF (Max 5MB)"><i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i></button>
-                        <button class="ql-link" title="Insert Link"></button>
-                        <button class="ql-clean" title="Remove Formatting"></button>
-                    </span>
+                <label for="editorContent">Isi Pertanyaan / Instruksi Soal (WYSIWYG Rich Editor)</label>
+                
+                <div class="editor-toolbar">
+                    <select class="editor-select" onchange="execCmd('formatBlock', this.value); this.selectedIndex=0;">
+                        <option value="" disabled selected>Format Paragraf</option>
+                        <option value="p">Paragraf Standar</option>
+                        <option value="h3">Judul Utama (H3)</option>
+                        <option value="h4">Sub Judul (H4)</option>
+                        <option value="pre">Blok Kode / Teks Tetap</option>
+                    </select>
+
+                    <button type="button" class="editor-btn" onclick="execCmd('bold')" title="Tebal (Bold)"><i class="fa-solid fa-bold"></i></button>
+                    <button type="button" class="editor-btn" onclick="execCmd('italic')" title="Miring (Italic)"><i class="fa-solid fa-italic"></i></button>
+                    <button type="button" class="editor-btn" onclick="execCmd('underline')" title="Garis Bawah (Underline)"><i class="fa-solid fa-underline"></i></button>
+                    <button type="button" class="editor-btn" onclick="execCmd('strikeThrough')" title="Coret (Strikethrough)"><i class="fa-solid fa-strikethrough"></i></button>
+                    
+                    <button type="button" class="editor-btn" onclick="execCmd('insertUnorderedList')" title="Daftar Bullet"><i class="fa-solid fa-list-ul"></i></button>
+                    <button type="button" class="editor-btn" onclick="execCmd('insertOrderedList')" title="Daftar Angka"><i class="fa-solid fa-list-ol"></i></button>
+                    
+                    <button type="button" class="editor-btn" onclick="triggerMediaUpload('image')" title="Upload & Auto-Resize Gambar (Max 1024x1024)">
+                        <i class="fa-solid fa-image" style="color: var(--primary);"></i> Sisipkan Gambar
+                    </button>
+
+                    <button type="button" class="editor-btn" onclick="insertYoutubeVideo()" title="Embed Video YouTube">
+                        <i class="fa-brands fa-youtube" style="color: #ef4444;"></i> Embed YouTube
+                    </button>
+
+                    <button type="button" class="editor-btn" onclick="triggerMediaUpload('pdf')" title="Lampirkan Dokumen PDF (Max 5MB)">
+                        <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i> Dokumen PDF
+                    </button>
+
+                    <button type="button" class="editor-btn" onclick="execCmd('removeFormat')" title="Hapus Format"><i class="fa-solid fa-eraser"></i></button>
                 </div>
-                <div id="quillEditor"></div>
+
+                <div id="editorContent" class="editor-content" contenteditable="true"></div>
                 <input type="hidden" name="content" id="hiddenQuestionContent" required>
                 <input type="file" id="mediaFileInput" style="display: none;" onchange="handleMediaUpload(this.files[0])">
             </div>
@@ -219,23 +258,21 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('vendor/quill/quill.min.js') }}"></script>
 <script>
-let quill;
 let currentUploadType = 'image';
 
-document.addEventListener("DOMContentLoaded", function () {
-    quill = new Quill('#quillEditor', {
-        modules: {
-            toolbar: '#quillToolbar'
-        },
-        placeholder: 'Ketik isi soal atau instruksi di sini... Gunakan toolbar untuk menambahkan Gambar, Video YouTube, atau Dokumen PDF.',
-        theme: 'snow'
-    });
+function execCmd(command, value = null) {
+    document.execCommand(command, false, value);
+    document.getElementById('editorContent').focus();
+}
 
-    document.getElementById('createQuestionForm').addEventListener('submit', function (e) {
-        const html = quill.root.innerHTML;
-        const textContent = quill.getText().trim();
+document.addEventListener("DOMContentLoaded", function () {
+    const editor = document.getElementById('editorContent');
+    const form = document.getElementById('createQuestionForm');
+
+    form.addEventListener('submit', function (e) {
+        const html = editor.innerHTML.trim();
+        const textContent = editor.innerText.trim();
         
         // Prevent empty form submission
         if (textContent.length === 0 && !html.includes('<img') && !html.includes('<iframe') && !html.includes('pdf-attachment-badge')) {
@@ -266,9 +303,8 @@ function handleMediaUpload(file) {
     formData.append('file', file);
     formData.append('_token', '{{ csrf_token() }}');
 
-    // Show loading state
-    const range = quill.getSelection(true);
-    quill.insertText(range.index, '[Uploading media...]', 'italic', true);
+    const editor = document.getElementById('editorContent');
+    editor.focus();
 
     fetch('{{ route("teacher.media.upload") }}', {
         method: 'POST',
@@ -279,28 +315,22 @@ function handleMediaUpload(file) {
     })
     .then(response => response.json())
     .then(data => {
-        // Remove placeholder text
-        quill.deleteText(range.index, 20);
-
         if (data.status === 'success') {
             if (data.is_pdf) {
-                // Insert PDF badge
-                const pdfHtml = `<p><a href="${data.url}" target="_blank" class="pdf-attachment-badge"><i class="fa-solid fa-file-pdf"></i> Unduh Lampiran PDF (${data.original_name})</a></p>`;
-                quill.clipboard.dangerouslyPasteHTML(range.index, pdfHtml);
+                const pdfHtml = `<p><a href="${data.url}" target="_blank" class="pdf-attachment-badge"><i class="fa-solid fa-file-pdf"></i> Unduh Lampiran PDF (${data.original_name})</a></p><p><br></p>`;
+                document.execCommand('insertHTML', false, pdfHtml);
             } else {
-                // Insert Resized Image
-                quill.insertEmbed(range.index, 'image', data.url);
+                const imgHtml = `<p><img src="${data.url}" alt="Gambar Soal" style="max-width: 100%; height: auto; border-radius: 0.5rem; margin: 0.5rem 0;"></p><p><br></p>`;
+                document.execCommand('insertHTML', false, imgHtml);
             }
         } else {
             alert('Upload gagal: ' + (data.message || 'Error server'));
         }
     })
     .catch(err => {
-        quill.deleteText(range.index, 20);
         alert('Upload gagal: ' + err.message);
     });
 
-    // Reset input
     document.getElementById('mediaFileInput').value = '';
 }
 
@@ -314,9 +344,9 @@ function insertYoutubeVideo() {
 
     if (match && match[2].length === 11) {
         videoId = match[2];
-        const embedHtml = `<div class="video-responsive-container"><iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe></div>`;
-        const range = quill.getSelection(true);
-        quill.clipboard.dangerouslyPasteHTML(range.index, embedHtml);
+        const embedHtml = `<div class="video-responsive-container"><iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe></div><p><br></p>`;
+        document.getElementById('editorContent').focus();
+        document.execCommand('insertHTML', false, embedHtml);
     } else {
         alert('URL Video YouTube tidak valid!');
     }
