@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Beranda')
+@section('title', 'Ajenono - Aplikasi Ujian Elektronik Online V2')
 
 @section('styles')
 <style>
