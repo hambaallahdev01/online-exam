@@ -153,4 +153,30 @@ class TeacherDashboardController extends Controller
 
         return back()->with('success', 'Exam created and published!');
     }
+
+    public function uploadMedia(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|max:10240',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $url = \App\Services\MediaUploadService::upload($file, 'questions');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $isPdf = $extension === 'pdf' || $file->getMimeType() === 'application/pdf';
+
+            return response()->json([
+                'status' => 'success',
+                'url' => $url,
+                'is_pdf' => $isPdf,
+                'original_name' => $file->getClientOriginalName(),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
 }
