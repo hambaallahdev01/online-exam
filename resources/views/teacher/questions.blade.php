@@ -179,7 +179,7 @@
                         <i class="fa-solid fa-image" style="color: var(--primary);"></i> Sisipkan Gambar
                     </button>
 
-                    <button type="button" class="editor-btn" onclick="insertYoutubeVideo()" title="Embed Video YouTube">
+                    <button type="button" class="editor-btn" onclick="insertYoutubeVideo('editorContent')" title="Embed Video YouTube">
                         <i class="fa-brands fa-youtube" style="color: #ef4444;"></i> Embed YouTube
                     </button>
 
@@ -205,60 +205,19 @@
                 <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem; color: var(--danger);" onclick="deleteSelectedImg()"><i class="fa-solid fa-trash"></i> Hapus</button>
             </div>
 
-            <!-- Rich WYSIWYG Editors for Options A, B, C, D -->
+            <!-- Dynamic Rich WYSIWYG Editors for Options -->
             <div id="optionsContainer">
-                <div class="form-group">
-                    <label>Pilihan A (WYSIWYG Editor)</label>
-                    <div class="editor-toolbar" style="padding: 0.25rem 0.5rem;">
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionA', 'bold')"><i class="fa-solid fa-bold"></i></button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionA', 'italic')"><i class="fa-solid fa-italic"></i></button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="triggerMediaUpload('image', 'editorOptionA')"><i class="fa-solid fa-image" style="color: var(--primary);"></i> Sisipkan Gambar</button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionA', 'removeFormat')"><i class="fa-solid fa-eraser"></i></button>
-                    </div>
-                    <div id="editorOptionA" class="option-editor-content" contenteditable="true"></div>
-                    <input type="hidden" name="option_a" id="hiddenOptionA">
+                <div id="dynamicOptionsList" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Option items will be rendered dynamically by JS -->
                 </div>
-
-                <div class="form-group">
-                    <label>Pilihan B (WYSIWYG Editor)</label>
-                    <div class="editor-toolbar" style="padding: 0.25rem 0.5rem;">
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionB', 'bold')"><i class="fa-solid fa-bold"></i></button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionB', 'italic')"><i class="fa-solid fa-italic"></i></button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="triggerMediaUpload('image', 'editorOptionB')"><i class="fa-solid fa-image" style="color: var(--primary);"></i> Sisipkan Gambar</button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionB', 'removeFormat')"><i class="fa-solid fa-eraser"></i></button>
-                    </div>
-                    <div id="editorOptionB" class="option-editor-content" contenteditable="true"></div>
-                    <input type="hidden" name="option_b" id="hiddenOptionB">
-                </div>
-
-                <div class="form-group">
-                    <label>Pilihan C (WYSIWYG Editor)</label>
-                    <div class="editor-toolbar" style="padding: 0.25rem 0.5rem;">
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionC', 'bold')"><i class="fa-solid fa-bold"></i></button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionC', 'italic')"><i class="fa-solid fa-italic"></i></button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="triggerMediaUpload('image', 'editorOptionC')"><i class="fa-solid fa-image" style="color: var(--primary);"></i> Sisipkan Gambar</button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionC', 'removeFormat')"><i class="fa-solid fa-eraser"></i></button>
-                    </div>
-                    <div id="editorOptionC" class="option-editor-content" contenteditable="true"></div>
-                    <input type="hidden" name="option_c" id="hiddenOptionC">
-                </div>
-
-                <div class="form-group">
-                    <label>Pilihan D (WYSIWYG Editor)</label>
-                    <div class="editor-toolbar" style="padding: 0.25rem 0.5rem;">
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionD', 'bold')"><i class="fa-solid fa-bold"></i></button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionD', 'italic')"><i class="fa-solid fa-italic"></i></button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="triggerMediaUpload('image', 'editorOptionD')"><i class="fa-solid fa-image" style="color: var(--primary);"></i> Sisipkan Gambar</button>
-                        <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('editorOptionD', 'removeFormat')"><i class="fa-solid fa-eraser"></i></button>
-                    </div>
-                    <div id="editorOptionD" class="option-editor-content" contenteditable="true"></div>
-                    <input type="hidden" name="option_d" id="hiddenOptionD">
-                </div>
+                <button type="button" class="btn btn-secondary" onclick="addOptionField()" style="margin-top: 1rem; width: 100%; border-style: dashed;">
+                    <i class="fa-solid fa-plus"></i> Tambah Opsi Jawaban Baru
+                </button>
             </div>
 
             <input type="file" id="mediaFileInput" style="display: none;" onchange="handleMediaUpload(this.files[0])">
 
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 1.25rem;">
                 <label for="correct_answer" id="correctAnswerLabel">Kunci Jawaban</label>
                 <input type="text" name="correct_answer" id="correct_answer" class="form-control" placeholder="Contoh: B (atau fact / opinion / A,C atau json pairs / ordered items)">
                 <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;" id="correctAnswerHint">
@@ -351,6 +310,8 @@
 let currentUploadType = 'image';
 let currentUploadTargetId = 'editorContent';
 let selectedImg = null;
+let optionCount = 0;
+const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
 
 function execCmd(command, value = null) {
     document.execCommand(command, false, value);
@@ -365,7 +326,88 @@ function execOptionCmd(editorId, command, value = null) {
     }
 }
 
+function createOptionHTML(index) {
+    const label = optionLabels[index] || ('P' + (index + 1));
+    const editorId = `editorOption_${index}`;
+    return `
+        <div class="form-group option-item-row" id="optionRow_${index}" style="background: var(--bg-body); padding: 0.85rem; border-radius: 0.5rem; border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                <label style="margin: 0; font-weight: 600;">Pilihan ${label} (WYSIWYG Editor)</label>
+                <button type="button" class="btn btn-secondary btn-remove-option" onclick="removeOptionField(${index})" style="padding: 0.15rem 0.5rem; font-size: 0.75rem; color: var(--danger); border-color: var(--danger);" title="Hapus Opsi">
+                    <i class="fa-solid fa-trash-can"></i> Hapus Opsi
+                </button>
+            </div>
+            <div class="editor-toolbar" style="padding: 0.25rem 0.5rem;">
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'bold')"><i class="fa-solid fa-bold"></i></button>
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'italic')"><i class="fa-solid fa-italic"></i></button>
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'underline')"><i class="fa-solid fa-underline"></i></button>
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="triggerMediaUpload('image', '${editorId}')" title="Sisipkan Gambar">
+                    <i class="fa-solid fa-image" style="color: var(--primary);"></i> Gambar
+                </button>
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="insertYoutubeVideo('${editorId}')" title="Embed YouTube">
+                    <i class="fa-brands fa-youtube" style="color: #ef4444;"></i> YouTube
+                </button>
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="triggerMediaUpload('pdf', '${editorId}')" title="Dokumen PDF">
+                    <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i> PDF
+                </button>
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'removeFormat')"><i class="fa-solid fa-eraser"></i></button>
+            </div>
+            <div id="${editorId}" class="option-editor-content" contenteditable="true"></div>
+            <input type="hidden" name="options[]" id="hiddenOption_${index}">
+        </div>
+    `;
+}
+
+function renderInitialOptions() {
+    const list = document.getElementById('dynamicOptionsList');
+    list.innerHTML = '';
+    optionCount = 0;
+    // Initial 4 options (A, B, C, D)
+    for (let i = 0; i < 4; i++) {
+        addOptionField();
+    }
+}
+
+function addOptionField() {
+    const list = document.getElementById('dynamicOptionsList');
+    const index = optionCount;
+    const div = document.createElement('div');
+    div.innerHTML = createOptionHTML(index);
+    list.appendChild(div.firstElementChild);
+    optionCount++;
+    updateOptionLabelsAndButtons();
+}
+
+function removeOptionField(index) {
+    const rows = document.querySelectorAll('.option-item-row');
+    if (rows.length <= 2) {
+        alert('Minimal harus ada 2 pilihan jawaban!');
+        return;
+    }
+    const targetRow = document.getElementById(`optionRow_${index}`);
+    if (targetRow) {
+        targetRow.remove();
+        updateOptionLabelsAndButtons();
+    }
+}
+
+function updateOptionLabelsAndButtons() {
+    const rows = document.querySelectorAll('.option-item-row');
+    rows.forEach((row, i) => {
+        const label = optionLabels[i] || ('P' + (i + 1));
+        const labelEl = row.querySelector('label');
+        if (labelEl) labelEl.textContent = `Pilihan ${label} (WYSIWYG Editor)`;
+
+        const btnRemove = row.querySelector('.btn-remove-option');
+        if (btnRemove) {
+            btnRemove.style.display = rows.length <= 2 ? 'none' : 'inline-flex';
+        }
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    renderInitialOptions();
+
     const editor = document.getElementById('editorContent');
     const form = document.getElementById('createQuestionForm');
     const popover = document.getElementById('imageResizerPopover');
@@ -408,11 +450,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.getElementById('hiddenQuestionContent').value = html;
 
-        // Sync option editors to hidden input values
-        document.getElementById('hiddenOptionA').value = document.getElementById('editorOptionA').innerHTML.trim();
-        document.getElementById('hiddenOptionB').value = document.getElementById('editorOptionB').innerHTML.trim();
-        document.getElementById('hiddenOptionC').value = document.getElementById('editorOptionC').innerHTML.trim();
-        document.getElementById('hiddenOptionD').value = document.getElementById('editorOptionD').innerHTML.trim();
+        // Sync dynamic option editors to hidden inputs
+        const rows = document.querySelectorAll('.option-item-row');
+        rows.forEach(row => {
+            const editorDiv = row.querySelector('.option-editor-content');
+            const hiddenInput = row.querySelector('input[name="options[]"]');
+            if (editorDiv && hiddenInput) {
+                hiddenInput.value = editorDiv.innerHTML.trim();
+            }
+        });
     });
 });
 
@@ -511,7 +557,7 @@ function handleMediaUpload(file) {
     document.getElementById('mediaFileInput').value = '';
 }
 
-function insertYoutubeVideo() {
+function insertYoutubeVideo(targetId = 'editorContent') {
     const url = prompt('Masukkan URL Video YouTube (Contoh: https://www.youtube.com/watch?v=VIDEO_ID atau https://youtu.be/VIDEO_ID):');
     if (!url) return;
 
@@ -522,8 +568,11 @@ function insertYoutubeVideo() {
     if (match && match[2].length === 11) {
         videoId = match[2];
         const embedHtml = `<div class="video-responsive-container"><iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe></div><p><br></p>`;
-        document.getElementById('editorContent').focus();
-        document.execCommand('insertHTML', false, embedHtml);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+            targetEl.focus();
+            document.execCommand('insertHTML', false, embedHtml);
+        }
     } else {
         alert('URL Video YouTube tidak valid!');
     }
@@ -538,7 +587,7 @@ function toggleOptionFields(type) {
     if (type === 'single_choice' || type === 'multiple_choice') {
         container.style.display = 'block';
         label.textContent = 'Kunci Jawaban';
-        hint.textContent = 'Pilihan Ganda: A/B/C/D. Pilihan Banyak: A,B,C';
+        hint.textContent = 'Pilihan Ganda: A/B/C/D/E. Pilihan Banyak: A,B,C';
         input.required = true;
     } else {
         container.style.display = 'none';
