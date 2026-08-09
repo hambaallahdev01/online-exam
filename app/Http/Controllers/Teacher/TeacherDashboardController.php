@@ -81,6 +81,8 @@ class TeacherDashboardController extends Controller
         $validated = $request->validate([
             'question_type' => 'required|in:single_choice,multiple_choice,true_false,essay,fact_opinion,matching,sorting',
             'content' => 'required|string',
+            'options' => 'nullable|array',
+            'options.*' => 'nullable|string',
             'option_a' => 'nullable|string',
             'option_b' => 'nullable|string',
             'option_c' => 'nullable|string',
@@ -94,12 +96,25 @@ class TeacherDashboardController extends Controller
         $correctAnswers = !empty($validated['correct_answer']) ? [$validated['correct_answer']] : [];
 
         if ($validated['question_type'] === 'single_choice' || $validated['question_type'] === 'multiple_choice') {
-            $options = [
-                ['id' => 'A', 'text' => $request->option_a],
-                ['id' => 'B', 'text' => $request->option_b],
-                ['id' => 'C', 'text' => $request->option_c],
-                ['id' => 'D', 'text' => $request->option_d],
-            ];
+            if (!empty($request->options) && is_array($request->options)) {
+                $options = [];
+                $labels = range('A', 'Z');
+                foreach (array_values($request->options) as $i => $text) {
+                    $letter = $labels[$i] ?? ('P' . ($i + 1));
+                    $options[] = [
+                        'id' => $letter,
+                        'text' => $text,
+                    ];
+                }
+            } else {
+                $options = array_values(array_filter([
+                    ['id' => 'A', 'text' => $request->option_a],
+                    ['id' => 'B', 'text' => $request->option_b],
+                    ['id' => 'C', 'text' => $request->option_c],
+                    ['id' => 'D', 'text' => $request->option_d],
+                ], fn($opt) => !empty($opt['text'])));
+            }
+
             if ($validated['question_type'] === 'multiple_choice') {
                 $correctAnswers = array_map('trim', explode(',', $validated['correct_answer'] ?? ''));
             }
