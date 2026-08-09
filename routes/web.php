@@ -50,3 +50,28 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 });
+
+// Redis Diagnostic Route for cPanel Testing
+Route::get('/test-redis', function () {
+    if (!extension_loaded('redis')) {
+        return response()->json(['status' => 'error', 'message' => 'PHP extension redis is NOT loaded in cPanel PHP selector.']);
+    }
+    try {
+        \Illuminate\Support\Facades\Redis::set('test_cpanel_key', 'OK - ' . date('Y-m-d H:i:s'));
+        $val = \Illuminate\Support\Facades\Redis::get('test_cpanel_key');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Redis server is UP and connected successfully!',
+            'test_value' => $val,
+            'redis_host' => env('REDIS_HOST', '127.0.0.1'),
+            'redis_port' => env('REDIS_PORT', 6379),
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Redis extension is active, but connection to Redis server failed.',
+            'error_detail' => $e->getMessage(),
+            'hint' => 'Check if Redis server daemon is running on cPanel or ask hosting provider for exact host/port/socket.',
+        ]);
+    }
+});

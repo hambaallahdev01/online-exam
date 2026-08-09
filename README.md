@@ -178,9 +178,42 @@ Easily deploy on standard cPanel/DirectAdmin shared web hosting without root acc
    QUEUE_CONNECTION=sync
    ```
 4. **Run Migrations via Cron Job or SSH**:
+   Use cPanel's exact PHP 8 binary path (e.g. `/opt/cpanel/ea-php85/root/usr/bin/php` or `/opt/alt/php85/usr/bin/php`):
    ```bash
-   php artisan migrate --force
+   /opt/cpanel/ea-php85/root/usr/bin/php artisan migrate --force
    ```
+
+5. **cPanel CLI Troubleshooting & Composer Setup Guide**:
+   On cPanel servers (CloudLinux / EasyApache 4), system CLI `php` often defaults to a legacy PHP version (e.g. PHP 5.6). Follow these step-by-step instructions to run Composer and Artisan commands using PHP 8.5:
+
+   - **Step 1: Locate Exact PHP 8 Binary**:
+     Check available PHP 8 binaries on your cPanel server:
+     - EasyApache 4 path: `/opt/cpanel/ea-php85/root/usr/bin/php` (or `ea-php83`)
+     - CloudLinux Alt-PHP path: `/opt/alt/php85/usr/bin/php` (or `php83`)
+
+   - **Step 2: Download Composer v2 with Suhosin Bypass**:
+     If Suhosin security extension is active on cPanel:
+     ```bash
+     /opt/cpanel/ea-php85/root/usr/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+     /opt/cpanel/ea-php85/root/usr/bin/php -d suhosin.executor.include.whitelist=phar composer-setup.php
+     /opt/cpanel/ea-php85/root/usr/bin/php -r "unlink('composer-setup.php');"
+     ```
+
+   - **Step 3: Run Composer Install & Regenerate Autoload Classmap**:
+     ```bash
+     /opt/cpanel/ea-php85/root/usr/bin/php -d suhosin.executor.include.whitelist=phar composer.phar install --no-dev --optimize-autoloader
+     /opt/cpanel/ea-php85/root/usr/bin/php -d suhosin.executor.include.whitelist=phar composer.phar dump-autoload -o
+     /opt/cpanel/ea-php85/root/usr/bin/php artisan optimize:clear
+     /opt/cpanel/ea-php85/root/usr/bin/php artisan package:discover
+     ```
+     *Note*: Re-dumping the autoloader classmap with `--optimize-autoloader` using PHP 8.5 resolves any `Class "SortDirection" not found` autoloader mismatches caused by legacy PHP CLI dump operations.
+
+   - **Step 4: (Optional) Create Terminal Alias for Convenience**:
+     ```bash
+     echo "alias php='/opt/cpanel/ea-php85/root/usr/bin/php'" >> ~/.bashrc
+     echo "alias composer='/opt/cpanel/ea-php85/root/usr/bin/php -d suhosin.executor.include.whitelist=phar ~/composer.phar'" >> ~/.bashrc
+     source ~/.bashrc
+     ```
 
 ---
 
