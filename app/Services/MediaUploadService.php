@@ -70,22 +70,14 @@ class MediaUploadService
 
         try {
             if ($binary !== null) {
-                if ($defaultDisk === 's3') {
-                    Storage::disk('s3')->put($path, $binary);
-                } else {
-                    Storage::disk($defaultDisk)->put($path, $binary, 'public');
-                }
+                Storage::disk($defaultDisk)->put($path, $binary, 'public');
                 return Storage::disk($defaultDisk)->url($path);
             }
 
-            if ($defaultDisk === 's3') {
-                $storedPath = $file->storeAs($folder, $filename, 's3');
-            } else {
-                $storedPath = $file->storeAs($folder, $filename, [
-                    'disk' => $defaultDisk,
-                    'visibility' => 'public',
-                ]);
-            }
+            $storedPath = $file->storeAs($folder, $filename, [
+                'disk' => $defaultDisk,
+                'visibility' => 'public',
+            ]);
 
             return Storage::disk($defaultDisk)->url($storedPath);
         } catch (\Throwable $e) {
