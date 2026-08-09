@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@demo.org',
             'identity_number' => 'ADM001',
             'role' => 'admin',
+            'email_verified_at' => now(),
             'password' => Hash::make('password'),
         ]);
 
@@ -44,6 +45,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'teacher@demo.org',
             'identity_number' => 'NIP19850101',
             'role' => 'teacher',
+            'email_verified_at' => now(),
             'password' => Hash::make('password'),
         ]);
 
@@ -54,6 +56,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'student@demo.org',
             'identity_number' => 'NIS2026001',
             'role' => 'student',
+            'email_verified_at' => now(),
             'password' => Hash::make('password'),
         ]);
 

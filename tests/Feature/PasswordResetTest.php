@@ -30,6 +30,7 @@ class PasswordResetTest extends TestCase
             'name' => 'Admin User',
             'email' => 'admin@test.org',
             'role' => 'admin',
+            'email_verified_at' => now(),
             'password' => Hash::make('oldpassword'),
         ]);
 
@@ -49,6 +50,7 @@ class PasswordResetTest extends TestCase
             'name' => 'Admin User',
             'email' => 'admin@test.org',
             'role' => 'admin',
+            'email_verified_at' => now(),
             'password' => Hash::make('oldpassword'),
         ]);
 

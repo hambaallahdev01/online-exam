@@ -33,8 +33,20 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $request->boolean('remember'))) {
+            $user = Auth::user();
+
+            if (!$user->hasVerifiedEmail()) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                throw ValidationException::withMessages([
+                    'email' => __('Your email address is not verified yet. Please check your inbox for the verification link.'),
+                ]);
+            }
+
             $request->session()->regenerate();
-            return $this->redirectUser(Auth::user());
+            return $this->redirectUser($user);
         }
 
         throw ValidationException::withMessages([
@@ -73,9 +85,22 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        Auth::login($user);
+        // Send verification email
+        $verifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1($user->getEmailForVerification())]
+        );
 
-        return redirect()->route('admin.dashboard')->with('success', 'School account created successfully!');
+        try {
+            Mail::raw("Halo {$user->name},\n\nTerima kasih telah mendaftarkan sekolah {$school->name} di Ajenono Exam Platform.\n\nSilakan verifikasi email Anda dengan mengklik tautan berikut:\n{$verifyUrl}\n\nSetelah email terverifikasi, Anda dapat login ke platform.\n\nSalam,\nTim Ajenono Exam Platform", function ($message) use ($user) {
+                $message->to($user->email)->subject('Verify Your Email Address - Ajenono Exam Platform');
+            });
+        } catch (\Throwable $e) {
+            // Mail fallback
+        }
+
+        return redirect()->route('login')->with('success', 'School account registered successfully! A verification email has been sent to ' . $user->email . '. Please verify your email before logging in.');
     }
 
     public function showForgotPassword()
