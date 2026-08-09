@@ -54,7 +54,7 @@
 
             <div class="form-group">
                 <label for="correct_answer" id="correctAnswerLabel">Correct Answer Key / Text</label>
-                <input type="text" name="correct_answer" id="correct_answer" class="form-control" placeholder="e.g. B (or fact / opinion / A,C or json pairs / ordered items)" required>
+                <input type="text" name="correct_answer" id="correct_answer" class="form-control" placeholder="e.g. B (or fact / opinion / A,C or json pairs / ordered items)">
                 <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;" id="correctAnswerHint">
                     For Single Choice: A/B/C/D. For Multiple: A,B,C. For Fact/Opinion: fact or opinion. For Sorting: Item1,Item2,Item3.
                 </small>
@@ -124,23 +124,35 @@
 <script>
 function toggleOptionFields(type) {
     const container = document.getElementById('optionsContainer');
+    const label = document.getElementById('correctAnswerLabel');
     const hint = document.getElementById('correctAnswerHint');
+    const input = document.getElementById('correct_answer');
     
     if (type === 'single_choice' || type === 'multiple_choice') {
         container.style.display = 'block';
+        label.textContent = 'Correct Answer Key';
         hint.textContent = 'For Single Choice: A/B/C/D. For Multiple Choice: A,B,C';
+        input.required = true;
     } else {
         container.style.display = 'none';
-        if (type === 'fact_opinion') {
-            hint.textContent = 'Enter: "fact" or "opinion"';
-        } else if (type === 'true_false') {
-            hint.textContent = 'Enter: "true" or "false"';
-        } else if (type === 'sorting') {
-            hint.textContent = 'Enter items in correct order separated by comma, e.g.: First Step, Second Step, Third Step';
-        } else if (type === 'matching') {
-            hint.textContent = 'Enter JSON pairs e.g.: {"Indonesia":"Jakarta","Japan":"Tokyo"}';
+        if (type === 'essay') {
+            label.textContent = 'Correct Answer Key / Grading Rubric (Optional)';
+            hint.textContent = 'Kunci/Rubrik bersifat OPSIONAL untuk soal esai. Jawaban penalaran siswa dapat dinilai secara manual oleh guru.';
+            input.required = false;
         } else {
-            hint.textContent = 'Enter correct answer text';
+            label.textContent = 'Correct Answer Key';
+            input.required = true;
+            if (type === 'fact_opinion') {
+                hint.textContent = 'Enter: "fact" or "opinion"';
+            } else if (type === 'true_false') {
+                hint.textContent = 'Enter: "true" or "false"';
+            } else if (type === 'sorting') {
+                hint.textContent = 'Enter items in correct order separated by comma, e.g.: First Step, Second Step, Third Step';
+            } else if (type === 'matching') {
+                hint.textContent = 'Enter JSON pairs e.g.: {"Indonesia":"Jakarta","Japan":"Tokyo"}';
+            } else {
+                hint.textContent = 'Enter correct answer text';
+            }
         }
     }
 }
