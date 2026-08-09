@@ -45,9 +45,18 @@
                         <td><strong>{{ $g->name }}</strong></td>
                         <td>{{ $g->questions_count }} questions</td>
                         <td>
-                            <a href="{{ route('teacher.question-groups.show', $g->id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
-                                <i class="fa-solid fa-list-check"></i> Manage Questions
-                            </a>
+                            <div style="display: flex; gap: 0.4rem;">
+                                <a href="{{ route('teacher.question-groups.show', $g->id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+                                    <i class="fa-solid fa-list-check"></i> Manage Questions
+                                </a>
+                                <form action="{{ route('teacher.question-groups.destroy', $g->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus bank soal ini beserta semua soal di dalamnya?');" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger);" title="Hapus Bank Soal">
+                                        <i class="fa-solid fa-trash-can"></i> Hapus
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @empty
@@ -137,7 +146,12 @@
             </div>
             <div class="form-group">
                 <label for="token">Exam Token (6 chars)</label>
-                <input type="text" name="token" class="form-control" placeholder="EXAM26" style="text-transform: uppercase;" required>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" name="token" id="examTokenInput" class="form-control" placeholder="EXAM26" style="text-transform: uppercase;" required>
+                    <button type="button" class="btn btn-secondary" onclick="generateToken()" style="white-space: nowrap;" title="Generate Random Token">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
+                    </button>
+                </div>
             </div>
             <div class="form-group">
                 <label for="duration_minutes">Duration (Minutes)</label>
@@ -232,6 +246,15 @@ function openEditExamModal(exam) {
     activeSelect.value = exam.is_active ? '1' : '0';
 
     modal.style.display = 'flex';
+}
+
+function generateToken() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let token = '';
+    for (let i = 0; i < 6; i++) {
+        token += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('examTokenInput').value = token;
 }
 </script>
 @endsection
