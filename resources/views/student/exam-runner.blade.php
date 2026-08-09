@@ -173,7 +173,7 @@ function renderQuestion(index) {
     const q = questions[currentIndex];
     document.getElementById('questionHeader').textContent = `Question ${currentIndex + 1} of ${questions.length}`;
     document.getElementById('questionTypeBadge').textContent = q.type.replace('_', ' ').toUpperCase();
-    document.getElementById('questionText').textContent = q.content;
+    document.getElementById('questionText').innerHTML = q.content;
     document.getElementById('flagQuestionCheckbox').checked = !!flaggedQuestions[q.id];
 
     const optionsBox = document.getElementById('optionsBox');
@@ -209,7 +209,7 @@ function renderQuestion(index) {
 
             label.innerHTML = `
                 <input type="radio" name="opt_${q.id}" value="${opt.id}" ${isChecked ? 'checked' : ''} onchange="handleSingleSelect('${q.id}', '${opt.id}')">
-                <span><strong>${opt.id}.</strong> ${opt.text}</span>
+                <span dir="auto" style="width: 100%;"><strong>${opt.id}.</strong> ${opt.text}</span>
             `;
             optionsBox.appendChild(label);
         });
@@ -231,7 +231,7 @@ function renderQuestion(index) {
 
             label.innerHTML = `
                 <input type="checkbox" name="opt_${q.id}" value="${opt.id}" ${isChecked ? 'checked' : ''} onchange="handleMultipleSelect('${q.id}', '${opt.id}', this.checked)">
-                <span><strong>${opt.id}.</strong> ${opt.text}</span>
+                <span dir="auto" style="width: 100%;"><strong>${opt.id}.</strong> ${opt.text}</span>
             `;
             optionsBox.appendChild(label);
         });
