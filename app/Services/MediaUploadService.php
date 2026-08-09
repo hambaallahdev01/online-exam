@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -69,15 +70,31 @@ class MediaUploadService
 
         try {
             if ($binary !== null) {
-                Storage::disk($defaultDisk)->put($path, $binary, 'public');
+                try {
+                    Storage::disk($defaultDisk)->put($path, $binary, 'public');
+                } catch (\Throwable $aclException) {
+                    // Fallback: Upload without explicit ACL header if Linode S3 bucket policy is already public
+                    Storage::disk($defaultDisk)->put($path, $binary);
+                }
                 return Storage::disk($defaultDisk)->url($path);
             }
-            $storedPath = $file->storeAs($folder, $filename, [
-                'disk' => $defaultDisk,
-                'visibility' => 'public',
-            ]);
+
+            try {
+                $storedPath = $file->storeAs($folder, $filename, [
+                    'disk' => $defaultDisk,
+                    'visibility' => 'public',
+                ]);
+            } catch (\Throwable $aclException) {
+                $storedPath = $file->storeAs($folder, $filename, $defaultDisk);
+            }
+
             return Storage::disk($defaultDisk)->url($storedPath);
         } catch (\Throwable $e) {
+            Log::error("S3 Upload Failed for disk [{$defaultDisk}]: " . $e->getMessage(), [
+                'path' => $path,
+                'exception' => $e->getTraceAsString(),
+            ]);
+
             // Fallback to local 'public' disk if S3 / Guzzle / cURL fails on hosting
             if ($defaultDisk !== 'public') {
                 if ($binary !== null) {
