@@ -307,6 +307,69 @@
             color: #b91c1c;
         }
 
+        /* Custom Glassmorphic Toast & Confirm Modal Engine (Zero External Dependencies) */
+        .toast-container-wrapper {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            pointer-events: none;
+        }
+        .toast-box {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1.25rem;
+            border-radius: 0.6rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-main);
+            animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .toast-box.success { border-left: 4px solid var(--status-answered); }
+        .toast-box.error { border-left: 4px solid var(--danger); }
+        .toast-box.warning { border-left: 4px solid var(--warning); }
+        .toast-box.info { border-left: 4px solid var(--accent); }
+
+        @keyframes toastSlideIn {
+            from { opacity: 0; transform: translateY(-12px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(6px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: confirmFadeIn 0.2s ease forwards;
+        }
+        .confirm-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.85rem;
+            padding: 1.75rem;
+            width: 420px;
+            max-width: 90%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            text-align: center;
+            color: var(--text-main);
+        }
+        @keyframes confirmFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         footer {
             border-top: 1px solid var(--border-color);
             padding: 1.5rem;
@@ -352,13 +415,11 @@
             </div>
             <ul class="nav-links">
                 @auth
-                    @if(Auth::user()->isAdmin())
+                    @if(Auth::user()->role === 'admin')
                         <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li><a href="{{ route('admin.teachers') }}">Teachers</a></li>
-                        <li><a href="{{ route('admin.students') }}">Students</a></li>
-                    @elseif(Auth::user()->isTeacher())
+                    @elseif(Auth::user()->role === 'teacher')
                         <li><a href="{{ route('teacher.dashboard') }}">Dashboard</a></li>
-                    @else
+                    @elseif(Auth::user()->role === 'student')
                         <li><a href="{{ route('student.dashboard') }}">Exam Portal</a></li>
                     @endif
                     <li>
@@ -371,7 +432,7 @@
                     <li><a href="{{ route('login') }}">Login</a></li>
                     <li><a href="{{ route('register.school') }}" class="btn btn-primary">Register School</a></li>
                 @endauth
-
+                
                 <li>
                     <button id="themeToggle" class="theme-toggle-btn" onclick="toggleTheme()">
                         🌙 Dark
@@ -421,6 +482,70 @@
             const saved = localStorage.getItem('exam_theme') || 'light';
             applyTheme(saved);
         });
+
+        // Global Glassmorphic Toast Engine (Zero External Dependencies)
+        window.ExamToast = {
+            show(message, type = 'info', duration = 3500) {
+                let container = document.getElementById('globalToastContainer');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'globalToastContainer';
+                    container.className = 'toast-container-wrapper';
+                    document.body.appendChild(container);
+                }
+
+                const toast = document.createElement('div');
+                toast.className = `toast-box ${type}`;
+                
+                let iconHtml = '<i class="fa-solid fa-circle-info" style="color: var(--accent);"></i>';
+                if (type === 'success') iconHtml = '<i class="fa-solid fa-circle-check" style="color: var(--status-answered);"></i>';
+                if (type === 'error') iconHtml = '<i class="fa-solid fa-circle-xmark" style="color: var(--danger);"></i>';
+                if (type === 'warning') iconHtml = '<i class="fa-solid fa-triangle-exclamation" style="color: var(--warning);"></i>';
+
+                toast.innerHTML = `${iconHtml} <span>${message}</span>`;
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-10px)';
+                    toast.style.transition = 'all 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            },
+            success(msg) { this.show(msg, 'success'); },
+            error(msg) { this.show(msg, 'error'); },
+            warning(msg) { this.show(msg, 'warning'); },
+            info(msg) { this.show(msg, 'info'); }
+        };
+
+        // Global Glassmorphic Confirmation Modal Engine
+        window.ExamConfirm = function(title, text, confirmBtnText = 'Ya, Lanjutkan') {
+            return new Promise((resolve) => {
+                const overlay = document.createElement('div');
+                overlay.className = 'confirm-overlay';
+                overlay.innerHTML = `
+                    <div class="confirm-card">
+                        <div style="font-size: 2.5rem; color: var(--warning); margin-bottom: 0.75rem;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">${title}</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5;">${text}</p>
+                        <div style="display: flex; gap: 0.75rem; justify-content: center;">
+                            <button class="btn btn-secondary" id="confirmBtnCancel" style="flex: 1;">Batal</button>
+                            <button class="btn btn-danger" id="confirmBtnOk" style="flex: 1;">${confirmBtnText}</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+
+                overlay.querySelector('#confirmBtnCancel').onclick = () => {
+                    overlay.remove();
+                    resolve(false);
+                };
+                overlay.querySelector('#confirmBtnOk').onclick = () => {
+                    overlay.remove();
+                    resolve(true);
+                };
+            });
+        };
     </script>
 
     @yield('scripts')
