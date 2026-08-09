@@ -267,14 +267,14 @@ To minimize storage space and save bandwidth on both local server and Linode S3:
 
 ### SMTP Mail & Cloudflare Turnstile Setup (`.env`)
 ```env
-# SMTP Mail Setup
+# SMTP Mail Setup (Brevo / Sendinblue recommended)
 MAIL_MAILER=smtp
-MAIL_HOST=mail.domain.com
-MAIL_PORT=465
-MAIL_USERNAME=your_email@domain.com
-MAIL_PASSWORD=your_password
-MAIL_SCHEME=smtps
-MAIL_FROM_ADDRESS=your_email@domain.com
+MAIL_HOST=smtp-relay.brevo.com
+MAIL_PORT=587
+MAIL_USERNAME=your_brevo_account_email
+MAIL_PASSWORD=your_brevo_smtp_key
+MAIL_SCHEME=smtp
+MAIL_FROM_ADDRESS=your_brevo_verified_sender_email
 MAIL_FROM_NAME="${APP_NAME}"
 
 # Cloudflare Turnstile CAPTCHA (Optional)
