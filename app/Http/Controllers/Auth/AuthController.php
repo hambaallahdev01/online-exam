@@ -117,19 +117,30 @@ class AuthController extends Controller
     public function sendResetLink(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email',
+            'email' => 'required|email',
             'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
         ]);
 
         $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            $school = School::where('email', $request->email)->first();
+            if ($school) {
+                $user = User::where('school_id', $school->id)->where('role', 'admin')->first();
+            }
+        }
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'The selected email is not registered in our records.']);
+        }
+
         $token = Str::random(60);
 
         DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $request->email],
+            ['email' => $user->email],
             ['token' => Hash::make($token), 'created_at' => now()]
         );
 
-        $resetUrl = route('password.reset', ['token' => $token, 'email' => $request->email]);
+        $resetUrl = route('password.reset', ['token' => $token, 'email' => $user->email]);
 
         try {
             Mail::raw("Halo {$user->name},\n\nKami menerima permintaan untuk mereset kata sandi akun Ajenono Exam Platform Anda.\n\nKlik tautan berikut untuk membuat kata sandi baru:\n{$resetUrl}\n\nTautan ini hanya berlaku untuk waktu terbatas. Jika Anda tidak merasa meminta reset kata sandi, abaikan email ini.\n\nSalam,\nTim Ajenono Exam Platform", function ($message) use ($user) {
@@ -198,11 +209,21 @@ class AuthController extends Controller
     public function resendVerification(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|exists:users,email',
+            'email' => 'required|email',
             'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
         ]);
 
         $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            $school = School::where('email', $request->email)->first();
+            if ($school) {
+                $user = User::where('school_id', $school->id)->where('role', 'admin')->first();
+            }
+        }
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'The selected email is not registered in our records.']);
+        }
 
         if ($user->hasVerifiedEmail()) {
             return redirect()->route('login')->with('info', 'Your email address is already verified. Please sign in.');
@@ -233,13 +254,23 @@ class AuthController extends Controller
     public function changeUnverifiedEmailAndResend(Request $request)
     {
         $request->validate([
-            'old_email' => 'required|email|exists:users,email',
+            'old_email' => 'required|email',
             'password' => 'required|string',
             'new_email' => 'required|email|max:255|unique:users,email',
             'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
         ]);
 
         $user = User::where('email', $request->old_email)->first();
+        if (!$user) {
+            $school = School::where('email', $request->old_email)->first();
+            if ($school) {
+                $user = User::where('school_id', $school->id)->where('role', 'admin')->first();
+            }
+        }
+
+        if (!$user) {
+            return back()->withErrors(['old_email' => 'The selected email is not registered in our records.']);
+        }
 
         if ($user->hasVerifiedEmail()) {
             return redirect()->route('login')->with('info', 'Your email address is already verified. Please sign in.');
