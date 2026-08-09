@@ -35,8 +35,9 @@
         </form>
     </div>
 
-    <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
-        New School? <a href="{{ route('register.school') }}" style="color: var(--primary);">Register your School Account</a>
+    <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem; display: flex; flex-direction: column; gap: 0.4rem;">
+        <div>New School? <a href="{{ route('register.school') }}" style="color: var(--primary);">Register your School Account</a></div>
+        <div>Didn't receive verification email? <a href="{{ route('verification.resend.show') }}" style="color: var(--accent); text-decoration: underline;">Resend Verification Link</a></div>
     </div>
 </div>
 @endsection
