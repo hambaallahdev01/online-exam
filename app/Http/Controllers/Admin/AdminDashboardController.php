@@ -80,4 +80,20 @@ class AdminDashboardController extends Controller
 
         return back()->with('success', 'Student registered successfully!');
     }
+
+    public function updateSchoolProfile(Request $request)
+    {
+        $school = Auth::user()->school;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:schools,email,' . $school->id,
+            'phone' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:500',
+        ]);
+
+        $school->update($validated);
+
+        return back()->with('success', 'School identity profile updated successfully!');
+    }
 }

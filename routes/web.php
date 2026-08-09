@@ -34,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
     // Admin Routes
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::post('/profile', [AdminDashboardController::class, 'updateSchoolProfile'])->name('profile.update');
         Route::get('/teachers', [AdminDashboardController::class, 'teachers'])->name('teachers');
         Route::post('/teachers', [AdminDashboardController::class, 'storeTeacher']);
         Route::get('/students', [AdminDashboardController::class, 'students'])->name('students');

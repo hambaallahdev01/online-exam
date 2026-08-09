@@ -157,14 +157,14 @@ class TeacherDashboardController extends Controller
     public function uploadMedia(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|max:10240',
+            'file' => 'required|max:10240',
         ]);
 
         try {
             $file = $request->file('file');
             $url = \App\Services\MediaUploadService::upload($file, 'questions');
             $extension = strtolower($file->getClientOriginalExtension());
-            $isPdf = $extension === 'pdf' || $file->getMimeType() === 'application/pdf';
+            $isPdf = $extension === 'pdf';
 
             return response()->json([
                 'status' => 'success',
