@@ -13,6 +13,16 @@ Route::post('/', [AuthController::class, 'login'])->middleware('throttle:login')
 Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:login');
 Route::get('/register-school', [AuthController::class, 'showRegisterSchool'])->name('register.school');
 Route::post('/register-school', [AuthController::class, 'registerSchool'])->middleware('throttle:register-school');
+
+// Forgot Password & Reset Password Routes
+Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email')->middleware('throttle:5,1');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+// Email Verification Route
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Authenticated Routes
