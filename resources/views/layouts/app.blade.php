@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
     <title>@yield('title', 'Exam System') - Open Source Online Exam Platform</title>
     <style>
+        @font-face {
+            font-family: 'KFGQPC Uthman Taha Naskh';
+            src: url("{{ asset('vendor/KFGQPC Uthman Taha Naskh Regular.ttf') }}") format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+            unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+        }
+
         :root {
             /* Warm Light Mode Palette (Default) */
             --bg-body: #FAF7F5;
@@ -30,11 +39,11 @@
             --status-active: #2563EB;
             --status-timer: #DC2626;
 
-            --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans CJK SC', 'Noto Sans CJK JP', 'Microsoft YaHei', 'Meiryo', 'Amiri', 'Traditional Arabic', sans-serif;
+            --font-family: 'KFGQPC Uthman Taha Naskh', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans CJK SC', 'Noto Sans CJK JP', 'Microsoft YaHei', 'Meiryo', 'Amiri', 'Traditional Arabic', sans-serif;
         }
 
         /* Multilingual RTL Support */
-        [dir="rtl"] { text-align: right; direction: rtl; }
+        [dir="rtl"] { text-align: right; direction: rtl; font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri', serif; line-height: 2; }
         [dir="auto"] { text-align: start; }
 
         [data-theme="dark"] {
