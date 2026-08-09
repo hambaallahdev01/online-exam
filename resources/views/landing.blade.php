@@ -44,12 +44,15 @@
         font-size: 1rem;
     }
     .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 1.5rem;
         margin-bottom: 3rem;
     }
     .feature-card {
+        flex: 1 1 250px;
+        max-width: 400px;
         background-color: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: 0.75rem;
