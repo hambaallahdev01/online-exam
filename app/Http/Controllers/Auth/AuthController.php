@@ -214,6 +214,46 @@ class AuthController extends Controller
         return back()->with('success', 'A new verification link has been sent to your email address (' . $user->email . ').');
     }
 
+    public function changeUnverifiedEmailAndResend(Request $request)
+    {
+        $request->validate([
+            'old_email' => 'required|email|exists:users,email',
+            'password' => 'required|string',
+            'new_email' => 'required|email|max:255|unique:users,email',
+            'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
+        ]);
+
+        $user = User::where('email', $request->old_email)->first();
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->route('login')->with('info', 'Your email address is already verified. Please sign in.');
+        }
+
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['password' => 'Incorrect password provided for account email change.']);
+        }
+
+        // Update email to new email address
+        $user->update(['email' => $request->new_email]);
+
+        // Send verification email to new address
+        $verifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1($user->getEmailForVerification())]
+        );
+
+        try {
+            Mail::raw("Halo {$user->name},\n\nAlamat email akun Ajenono Exam Platform Anda telah diperbarui ke {$user->email}.\n\nSilakan verifikasi alamat email baru Anda dengan mengklik tautan berikut:\n{$verifyUrl}\n\nTautan ini berlaku selama 60 menit. Silakan klik untuk menyelesaikan verifikasi.\n\nSalam,\nTim Ajenono Exam Platform", function ($message) use ($user) {
+                $message->to($user->email)->subject('Verify Your New Email Address - Ajenono Exam Platform');
+            });
+        } catch (\Throwable $e) {
+            return back()->withErrors(['new_email' => 'Email updated, but failed to send verification email: ' . $e->getMessage()]);
+        }
+
+        return redirect()->route('login')->with('success', 'Email address updated successfully! A new verification link has been sent to ' . $user->email . '. Please verify your email before logging in.');
+    }
+
     public function logout(Request $request)
     {
         Auth::logout();

@@ -83,4 +83,29 @@ class EmailVerificationTest extends TestCase
         $response->assertRedirect(route('login'));
         $this->assertNotNull($user->fresh()->email_verified_at);
     }
+
+    public function test_unverified_user_can_change_email_and_resend_verification_link()
+    {
+        Mail::fake();
+
+        $school = School::create(['name' => 'Demo', 'email' => 'demo@school.org']);
+        $user = User::create([
+            'school_id' => $school->id,
+            'name' => 'Yahoo User',
+            'email' => 'user@yahoo.co.id',
+            'role' => 'admin',
+            'email_verified_at' => null,
+            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+        ]);
+
+        $response = $this->post(route('verification.change.resend'), [
+            'old_email' => 'user@yahoo.co.id',
+            'password' => 'password123',
+            'new_email' => 'user@gmail.com',
+        ]);
+
+        $response->assertRedirect(route('login'));
+        $this->assertEquals('user@gmail.com', $user->fresh()->email);
+        $this->assertDatabaseHas('users', ['email' => 'user@gmail.com']);
+    }
 }
