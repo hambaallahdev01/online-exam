@@ -436,8 +436,13 @@ async function autosaveAnswers() {
     }
 }
 
-function confirmSubmitExam() {
-    if (confirm('Are you sure you want to finish and submit your exam? You cannot change your answers after submitting.')) {
+async function confirmSubmitExam() {
+    const isConfirmed = await ExamConfirm(
+        'Selesaikan & Kirim Ujian?',
+        'Apakah Anda yakin ingin menyelesaikan ujian ini? Jawaban Anda tidak dapat diubah lagi setelah ujian dikirimkan.',
+        'Ya, Selesaikan Ujian'
+    );
+    if (isConfirmed) {
         submitExam(false);
     }
 }
@@ -445,6 +450,12 @@ function confirmSubmitExam() {
 async function submitExam(isAutoSubmit = false) {
     clearInterval(timerInterval);
     clearInterval(autosaveInterval);
+
+    if (isAutoSubmit) {
+        ExamToast.warning('Waktu Ujian telah habis! Mengirimkan jawaban otomatis...');
+    } else {
+        ExamToast.info('Mengirimkan seluruh jawaban ujian. Mohon tunggu...');
+    }
 
     try {
         const response = await fetch(`/student/api/exam/${EXAM_ID}/submit`, {
@@ -461,11 +472,15 @@ async function submitExam(isAutoSubmit = false) {
         const res = await response.json();
 
         if (res.status === 'success' || res.status === 'already_submitted') {
-            alert(`Exam submitted successfully! Score: ${res.score ?? 'Processed'}`);
-            window.location.href = res.redirect_url || '/student/dashboard';
+            ExamToast.success(`Ujian berhasil dikirim! Nilai Akhir: ${res.score ?? 'Diproses'}`);
+            setTimeout(() => {
+                window.location.href = res.redirect_url || '/student/dashboard';
+            }, 1200);
+        } else {
+            ExamToast.error(res.message || 'Gagal mengirimkan ujian.');
         }
     } catch (e) {
-        alert('Failed to submit exam. Please check your internet connection.');
+        ExamToast.error('Gagal mengirimkan ujian. Silakan periksa koneksi internet Anda.');
     }
 }
 </script>
