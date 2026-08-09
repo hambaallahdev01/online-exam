@@ -70,22 +70,21 @@ class MediaUploadService
 
         try {
             if ($binary !== null) {
-                try {
+                if ($defaultDisk === 's3') {
+                    Storage::disk('s3')->put($path, $binary);
+                } else {
                     Storage::disk($defaultDisk)->put($path, $binary, 'public');
-                } catch (\Throwable $aclException) {
-                    // Fallback: Upload without explicit ACL header if Linode S3 bucket policy is already public
-                    Storage::disk($defaultDisk)->put($path, $binary);
                 }
                 return Storage::disk($defaultDisk)->url($path);
             }
 
-            try {
+            if ($defaultDisk === 's3') {
+                $storedPath = $file->storeAs($folder, $filename, 's3');
+            } else {
                 $storedPath = $file->storeAs($folder, $filename, [
                     'disk' => $defaultDisk,
                     'visibility' => 'public',
                 ]);
-            } catch (\Throwable $aclException) {
-                $storedPath = $file->storeAs($folder, $filename, $defaultDisk);
             }
 
             return Storage::disk($defaultDisk)->url($storedPath);
