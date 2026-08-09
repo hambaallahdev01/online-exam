@@ -24,6 +24,7 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 Route::get('/email/resend', [AuthController::class, 'showResendVerification'])->name('verification.resend.show');
 Route::post('/email/resend', [AuthController::class, 'resendVerification'])->name('verification.resend')->middleware('throttle:6,1');
+Route::post('/email/change-and-resend', [AuthController::class, 'changeUnverifiedEmailAndResend'])->name('verification.change.resend')->middleware('throttle:6,1');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
