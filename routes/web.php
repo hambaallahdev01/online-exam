@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Route;
 
 // Guest Routes
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/', [AuthController::class, 'login']);
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/', [AuthController::class, 'login'])->middleware('throttle:login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:login');
 Route::get('/register-school', [AuthController::class, 'showRegisterSchool'])->name('register.school');
-Route::post('/register-school', [AuthController::class, 'registerSchool']);
+Route::post('/register-school', [AuthController::class, 'registerSchool'])->middleware('throttle:register-school');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Authenticated Routes
@@ -42,8 +42,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/enter-token', [StudentDashboardController::class, 'enterToken'])->name('enter-token');
         Route::get('/exam/{exam}', [StudentDashboardController::class, 'runExam'])->name('exam.run');
 
-        // Student Exam API Endpoints (Vanilla JS Fetch)
-        Route::prefix('api/exam/{exam}')->name('exam.api.')->group(function () {
+        // Student Exam API Endpoints (Protected with Rate Limiter)
+        Route::prefix('api/exam/{exam}')->name('exam.api.')->middleware('throttle:api-exam')->group(function () {
             Route::get('/payload', [ExamSessionApiController::class, 'getPayload'])->name('payload');
             Route::post('/autosave', [ExamSessionApiController::class, 'autosave'])->name('autosave');
             Route::post('/submit', [ExamSessionApiController::class, 'submit'])->name('submit');

@@ -255,6 +255,12 @@ To minimize storage space and save bandwidth on both local server and Linode S3:
 
 ## Security & Supply Chain Integrity
 
+- **Cloudflare Real IP Restoration**: Native middleware [`RestoreCloudflareRealIp`](file:///c:/workspace/pribadi/ujian-online/app/Http/Middleware/RestoreCloudflareRealIp.php) extracts genuine student client IPs from `CF-Connecting-IP` headers to prevent proxy spoofing.
+- **Application-Level Anti-DDoS & Throttle Rate Limiting**:
+  - Login Endpoint: Max 5 failed login attempts per minute per IP to prevent brute-force attacks (`throttle:login`).
+  - Student Exam REST API: Max 60 requests per minute to prevent autosave/payload API flooding (`throttle:api-exam`).
+  - School Registration: Max 5 attempts per hour per IP (`throttle:register-school`).
+- **HTTP Security Headers**: Global middleware [`SecurityHeaders`](file:///c:/workspace/pribadi/ujian-online/app/Http/Middleware/SecurityHeaders.php) automatically injects `X-Frame-Options: SAMEORIGIN` (anti-clickjacking/exam runner framing), `X-Content-Type-Options: nosniff`, and `X-XSS-Protection`.
 - **Zero External CDN Dependencies**: All CSS, JavaScript, icons (FontAwesome 6 Free), and layout utilities are served locally from `public/vendor/`. This prevents potential third-party script injection or CDN outage disruptions during exam sessions.
 - **CSRF & Session Protection**: All REST API endpoints enforce Laravel CSRF token verification and multi-role session guards.
 
