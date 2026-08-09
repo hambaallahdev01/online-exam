@@ -113,7 +113,7 @@
 @section('content')
 <div class="hero-section">
     <div class="arabic-text">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم</div>
-    <div class="arabic-text" style="font-size: 1.4rem; margin-bottom: 1.5rem;">اللَّهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ</div>
+    <div class="arabic-text" style="font-size: 1.4rem; margin-bottom: 1.5rem;">اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ</div>
     
     <div class="jargon-badge"><i class="fa-solid fa-hand-holding-heart"></i> Berkhidmat untuk Umat</div>
     
