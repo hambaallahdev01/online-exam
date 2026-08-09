@@ -52,14 +52,40 @@ class MediaUploadService
         if (str_starts_with($mime, 'image/') && extension_loaded('gd') && in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
             $resizedBinary = static::resizeImageProportional($file->getRealPath(), $mime, $maxWidth, $maxHeight);
             if ($resizedBinary !== null) {
-                Storage::disk(config('filesystems.default'))->put($path, $resizedBinary);
-                return Storage::disk(config('filesystems.default'))->url($path);
+                return static::saveToDisk($path, $resizedBinary, $file, $folder, $filename);
             }
         }
 
         // Store PDF or fallback
-        $storedPath = $file->storeAs($folder, $filename, config('filesystems.default'));
-        return Storage::disk(config('filesystems.default'))->url($storedPath);
+        return static::saveToDisk($path, null, $file, $folder, $filename);
+    }
+
+    /**
+     * Store file to configured disk with automatic fallback to local public disk if S3/Guzzle/cURL fails.
+     */
+    protected static function saveToDisk(string $path, ?string $binary, UploadedFile $file, string $folder, string $filename): string
+    {
+        $defaultDisk = config('filesystems.default', 'public');
+
+        try {
+            if ($binary !== null) {
+                Storage::disk($defaultDisk)->put($path, $binary);
+                return Storage::disk($defaultDisk)->url($path);
+            }
+            $storedPath = $file->storeAs($folder, $filename, $defaultDisk);
+            return Storage::disk($defaultDisk)->url($storedPath);
+        } catch (\Throwable $e) {
+            // Fallback to local 'public' disk if S3 / Guzzle / cURL fails on hosting
+            if ($defaultDisk !== 'public') {
+                if ($binary !== null) {
+                    Storage::disk('public')->put($path, $binary);
+                    return Storage::disk('public')->url($path);
+                }
+                $storedPath = $file->storeAs($folder, $filename, 'public');
+                return Storage::disk('public')->url($storedPath);
+            }
+            throw $e;
+        }
     }
 
     /**
