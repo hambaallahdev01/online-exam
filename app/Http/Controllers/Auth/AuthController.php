@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -96,8 +97,13 @@ class AuthController extends Controller
             Mail::raw("Halo {$user->name},\n\nTerima kasih telah mendaftarkan sekolah {$school->name} di Ajenono Exam Platform.\n\nSilakan verifikasi email Anda dengan mengklik tautan berikut:\n{$verifyUrl}\n\nSetelah email terverifikasi, Anda dapat login ke platform.\n\nSalam,\nTim Ajenono Exam Platform", function ($message) use ($user) {
                 $message->to($user->email)->subject('Verify Your Email Address - Ajenono Exam Platform');
             });
+            Log::info("SMTP Dispatch SUCCESS [registerSchool]: Verification email sent to {$user->email}");
         } catch (\Throwable $e) {
-            // Mail fallback
+            Log::error("SMTP Dispatch FAILURE [registerSchool]: " . $e->getMessage(), [
+                'recipient' => $user->email,
+                'exception' => $e->getTraceAsString(),
+            ]);
+            return redirect()->route('login')->with('warning', 'School account created, but SMTP failed to send verification email: ' . $e->getMessage() . '. Check storage/logs/laravel.log for details.');
         }
 
         return redirect()->route('login')->with('success', 'School account registered successfully! A verification email has been sent to ' . $user->email . '. Please verify your email before logging in.');
@@ -130,7 +136,12 @@ class AuthController extends Controller
                 $message->to($user->email)
                         ->subject('Reset Password Link - Ajenono Exam Platform');
             });
+            Log::info("SMTP Dispatch SUCCESS [sendResetLink]: Reset link email sent to {$user->email}");
         } catch (\Throwable $e) {
+            Log::error("SMTP Dispatch FAILURE [sendResetLink]: " . $e->getMessage(), [
+                'recipient' => $user->email,
+                'exception' => $e->getTraceAsString(),
+            ]);
             return back()->withErrors(['email' => 'Failed to send reset link email: ' . $e->getMessage()]);
         }
 
@@ -207,7 +218,12 @@ class AuthController extends Controller
             Mail::raw("Halo {$user->name},\n\nBerikut adalah tautan verifikasi email baru untuk akun Ajenono Exam Platform Anda:\n{$verifyUrl}\n\nTautan ini berlaku selama 60 menit. Silakan klik untuk menyelesaikan verifikasi email.\n\nSalam,\nTim Ajenono Exam Platform", function ($message) use ($user) {
                 $message->to($user->email)->subject('Resend Email Verification - Ajenono Exam Platform');
             });
+            Log::info("SMTP Dispatch SUCCESS [resendVerification]: Verification link sent to {$user->email}");
         } catch (\Throwable $e) {
+            Log::error("SMTP Dispatch FAILURE [resendVerification]: " . $e->getMessage(), [
+                'recipient' => $user->email,
+                'exception' => $e->getTraceAsString(),
+            ]);
             return back()->withErrors(['email' => 'Failed to send verification email: ' . $e->getMessage()]);
         }
 
@@ -247,8 +263,13 @@ class AuthController extends Controller
             Mail::raw("Halo {$user->name},\n\nAlamat email akun Ajenono Exam Platform Anda telah diperbarui ke {$user->email}.\n\nSilakan verifikasi alamat email baru Anda dengan mengklik tautan berikut:\n{$verifyUrl}\n\nTautan ini berlaku selama 60 menit. Silakan klik untuk menyelesaikan verifikasi.\n\nSalam,\nTim Ajenono Exam Platform", function ($message) use ($user) {
                 $message->to($user->email)->subject('Verify Your New Email Address - Ajenono Exam Platform');
             });
+            Log::info("SMTP Dispatch SUCCESS [changeUnverifiedEmailAndResend]: Updated email verification sent to {$user->email}");
         } catch (\Throwable $e) {
-            return back()->withErrors(['new_email' => 'Email updated, but failed to send verification email: ' . $e->getMessage()]);
+            Log::error("SMTP Dispatch FAILURE [changeUnverifiedEmailAndResend]: " . $e->getMessage(), [
+                'recipient' => $user->email,
+                'exception' => $e->getTraceAsString(),
+            ]);
+            return back()->withErrors(['new_email' => 'Email updated, but SMTP failed to send verification email: ' . $e->getMessage()]);
         }
 
         return redirect()->route('login')->with('success', 'Email address updated successfully! A new verification link has been sent to ' . $user->email . '. Please verify your email before logging in.');
