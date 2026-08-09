@@ -22,8 +22,15 @@ class MediaUploadService
      */
     public static function upload(UploadedFile $file, string $folder = 'uploads', int $maxWidth = 1024, int $maxHeight = 1024): string
     {
-        $mime = $file->getMimeType();
         $extension = strtolower($file->getClientOriginalExtension());
+        $mime = class_exists('finfo') ? $file->getMimeType() : ($file->getClientMimeType() ?: match($extension) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'gif' => 'image/gif',
+            'pdf' => 'application/pdf',
+            default => 'application/octet-stream',
+        });
         $sizeInKb = $file->getSize() / 1024;
 
         // Prohibit direct video file uploads to save bandwidth & S3 storage
