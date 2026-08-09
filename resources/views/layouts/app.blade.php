@@ -311,9 +311,14 @@
 <body>
     <header>
         <div class="navbar">
-            <a href="{{ url('/') }}" class="brand">
-                <i class="fa-solid fa-graduation-cap"></i> <span>ExamPlatform</span>
-            </a>
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <a href="{{ url('/') }}" class="brand">
+                    <i class="fa-solid fa-graduation-cap"></i> <span>Ajenono V2</span>
+                </a>
+                <a href="http://ajenono.wongcjdw.com" target="_blank" rel="noopener noreferrer" style="font-size: 0.75rem; color: var(--text-muted); text-decoration: underline; background: rgba(99, 102, 241, 0.1); padding: 0.2rem 0.5rem; border-radius: 0.3rem;" title="Open Ajenono V1 Legacy">
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.65rem;"></i> V1 Legacy
+                </a>
+            </div>
             <ul class="nav-links">
                 @auth
                     @if(Auth::user()->isAdmin())
