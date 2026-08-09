@@ -43,7 +43,7 @@
             </div>
 
             <!-- Question Content -->
-            <div id="questionText" style="font-size: 1.15rem; margin-bottom: 1.75rem; line-height: 1.8; color: var(--text-main); font-weight: 500;"></div>
+            <div id="questionText" dir="auto" style="font-size: 1.15rem; margin-bottom: 1.75rem; line-height: 1.8; color: var(--text-main); font-weight: 500;"></div>
 
             <!-- UI Controls for Options -->
             <div id="optionsBox" style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 2rem;"></div>
