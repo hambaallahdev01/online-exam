@@ -28,8 +28,12 @@
             --status-active: #2563EB;
             --status-timer: #DC2626;
 
-            --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans CJK SC', 'Noto Sans CJK JP', 'Microsoft YaHei', 'Meiryo', 'Amiri', 'Traditional Arabic', sans-serif;
         }
+
+        /* Multilingual RTL Support */
+        [dir="rtl"] { text-align: right; direction: rtl; }
+        [dir="auto"] { text-align: start; }
 
         [data-theme="dark"] {
             /* Charcoal Dark Mode Palette */
