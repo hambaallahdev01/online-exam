@@ -8,11 +8,30 @@
 
 </div>
 
+<p align="center">
+  <a href="https://ajenonov2.wongcjdw.com/"><img src="https://img.shields.io/badge/Live_Demo-ajenonov2.wongcjdw.com-00C7B7?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Live Demo" /></a>
+  <a href="https://github.com/animfahmy/ujian-online/issues"><img src="https://img.shields.io/github/issues/animfahmy/ujian-online?style=for-the-badge&color=orange&logo=github" alt="GitHub Issues" /></a>
+  <a href="https://github.com/animfahmy/ujian-online/stargazers"><img src="https://img.shields.io/github/stars/animfahmy/ujian-online?style=for-the-badge&color=yellow&logo=github" alt="GitHub Stars" /></a>
+  <a href="https://github.com/animfahmy/ujian-online/network/members"><img src="https://img.shields.io/github/forks/animfahmy/ujian-online?style=for-the-badge&color=blue&logo=github" alt="GitHub Forks" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/animfahmy/ujian-online?style=for-the-badge&color=green" alt="MIT License" /></a>
+  <br>
+  <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 13" /></a>
+  <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.2+" /></a>
+</p>
+
 ---
 
 A high-performance, secure, and accessible open-source online examination platform built with **Laravel 13**, **Vanilla JS**, and **MySQL 8+**.
 
 Designed for multi-school and multi-role operations (Administrators, Teachers, Students), with native support for high-concurrency exam scenarios as well as budget-friendly shared hosting environments.
+
+---
+
+## 🌐 Live Demo
+
+Cobalah platform ini secara langsung tanpa perlu instalasi lokal. Anda dapat mendaftarkan sekolah/akun baru, mengelola soal, dan melakukan simulasi ujian secara realtime:
+
+👉 **[https://ajenonov2.wongcjdw.com/](https://ajenonov2.wongcjdw.com/)**
 
 ---
 
@@ -312,8 +331,19 @@ php artisan test
 
 ---
 
+## 🤝 Support, Bug Reports & Feature Requests
+
+Kami menyambut baik masukan, laporan kendala, maupun ide fitur baru untuk pengembangan platform ini:
+
+- 🐛 **Lapor Bug / Kendala**: Jika Anda menemukan bug atau error, silakan buat laporan detail di [GitHub Issues](https://github.com/animfahmy/ujian-online/issues).
+- 💡 **Request Fitur Baru**: Memiliki ide fitur baru atau peningkatan UX? Ajukan di [GitHub Issues](https://github.com/animfahmy/ujian-online/issues).
+- 🔀 **Contribute**: Pull request selalu terbuka untuk perbaikan dan pengembangan bersama.
+
+---
+
 ## License & Attribution
 
 This open-source platform is released under the [MIT License](LICENSE).
 
 Made with ❤️ by [Achmad An'im](https://github.com/animfahmy) &bull; Inspired by [Pak Wong](https://wongcjdw.com) (Big thanks!). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!
+
