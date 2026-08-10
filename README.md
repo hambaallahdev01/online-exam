@@ -29,7 +29,7 @@ Designed for multi-school and multi-role operations (Administrators, Teachers, S
 
 ## 🌐 Live Demo
 
-Cobalah platform ini secara langsung tanpa perlu instalasi lokal. Anda dapat mendaftarkan sekolah/akun baru, mengelola soal, dan melakukan simulasi ujian secara realtime:
+Cobalah platform ini secara langsung tanpa perlu instalasi lokal. Anda dapat mendaftarkan sekolah/akun baru secara mandiri, atau langsung mencoba login menggunakan [Akun Demo & Token Ujian](#-demo-accounts--sample-testing-data) yang telah disediakan:
 
 👉 **[https://ajenonov2.wongcjdw.com/](https://ajenonov2.wongcjdw.com/)**
 
@@ -115,11 +115,34 @@ The platform natively supports 7 comprehensive question formats:
 
 ---
 
-## Demo Accounts for Testing (Password: `password`)
+## 🔑 Demo Accounts & Sample Testing Data
 
-- **Super / School Admin**: `admin@demo.org`
-- **Guru / Teacher**: `teacher@demo.org`
-- **Siswa / Student**: `student@demo.org` (Demo Exam Token: `EXAM26`)
+Baik pada server **Live Demo** ([ajenonov2.wongcjdw.com](https://ajenonov2.wongcjdw.com/)) maupun di lingkungan **Local Development** (setelah menjalankan `php artisan migrate:fresh --seed`), Anda dapat langsung mencoba login menggunakan akun demo berikut. 
+
+Semua akun menggunakan default password: **`password`**.
+
+### 👥 Akun Demo Berdasarkan Role (Sekolah: *Demo International Academy*):
+- 🏫 **Super / School Admin**: `admin@demo.org` &bull; Password: `password`
+  - *Hak Akses*: Manajemen profil sekolah, tahun akademik, kelas, mata pelajaran, serta pendaftaran guru dan siswa.
+- 👨‍🏫 **Guru / Teacher**: `teacher@demo.org` &bull; Password: `password`
+  - *Hak Akses*: Pembuatan & pengelolaan bank soal (7 format tipe soal), penambahan/penghapusan bank soal, generator token ujian, durasi, dan publish ujian.
+- 👨‍🎓 **Siswa / Student**: `student@demo.org` &bull; Password: `password`
+  - *Hak Akses*: Mengikuti ujian realtime dengan fitur autosave, countdown timer, indikator ragu-ragu, dan navigasi soal.
+
+---
+
+### 📝 Daftar Token Ujian Aktif (Siap Diuji oleh Siswa):
+Siswa (`student@demo.org`) dapat langsung memasukkan salah satu Token Ujian di bawah ini saat memasuki dashboard siswa:
+
+| Nama Ujian | Token Ujian | Mata Pelajaran | Durasi | Keterangan |
+| :--- | :---: | :--- | :---: | :--- |
+| **Ujian Komprehensif (Semua Mapel)** | `EXAM26` | Multi-Subject | 120 Menit | Kumpulan 7 Tipe Soal Lengkap |
+| **UTS Matematika 2026** | `MTK26` | Matematika | 60 Menit | Pilihan Ganda & Isian |
+| **UTS Bahasa Indonesia 2026** | `BIN26` | Bahasa Indonesia | 45 Menit | Bacaan & Essay |
+| **UTS Ilmu Pengetahuan Alam 2026** | `IPA26` | IPA | 45 Menit | Pilihan Banyak & Matching |
+| **UTS Ilmu Pengetahuan Sosial 2026** | `IPS26` | IPS | 45 Menit | Fact / Opinion & Sequence |
+| **UTS Bahasa Inggris 2026** | `ENG26` | Bahasa Inggris | 45 Menit | Reading & Matching |
+| **UTS Informatika 2026** | `CS26` | Informatika | 60 Menit | Problem Solving & Logic |
 
 ---
 
