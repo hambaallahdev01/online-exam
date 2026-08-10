@@ -47,6 +47,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
         Route::post('/question-groups', [TeacherDashboardController::class, 'createQuestionGroup'])->name('question-groups.store');
         Route::get('/question-groups/{group}', [TeacherDashboardController::class, 'showQuestionGroup'])->name('question-groups.show');
+        Route::delete('/question-groups/{group}', [TeacherDashboardController::class, 'destroyQuestionGroup'])->name('question-groups.destroy');
         Route::post('/question-groups/{group}/questions', [TeacherDashboardController::class, 'storeQuestion'])->name('questions.store');
         Route::put('/questions/{question}', [TeacherDashboardController::class, 'updateQuestion'])->name('questions.update');
         Route::delete('/questions/{question}', [TeacherDashboardController::class, 'destroyQuestion'])->name('questions.destroy');
