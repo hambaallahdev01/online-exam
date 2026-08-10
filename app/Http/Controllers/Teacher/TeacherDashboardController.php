@@ -76,6 +76,17 @@ class TeacherDashboardController extends Controller
         return view('teacher.questions', compact('group'));
     }
 
+    public function destroyQuestionGroup(QuestionGroup $group)
+    {
+        if ($group->school_id !== Auth::user()->school_id || $group->teacher_id !== Auth::user()->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $group->delete();
+
+        return back()->with('success', 'Question bank and all its questions deleted successfully!');
+    }
+
     public function storeQuestion(Request $request, QuestionGroup $group)
     {
         $validated = $request->validate([
