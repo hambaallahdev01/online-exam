@@ -99,6 +99,31 @@
         border-color: rgba(99, 102, 241, 0.3);
     }
     
+    .badge-lang {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--text-muted);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+    }
+    .badge-lang:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-2px);
+    }
+    .badge-lang.active {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--primary);
+        border-color: var(--accent);
+    }
+    
     @media (max-width: 768px) {
         .hero-title {
             font-size: 2rem;
@@ -128,6 +153,25 @@
     <div class="hero-actions">
         <a href="{{ route('login') }}" class="btn btn-primary"><i class="fa-solid fa-right-to-bracket" style="margin-right: 0.5rem;"></i> {{ __('messages.enter_portal') }}</a>
         <a href="{{ route('register.school') }}" class="btn btn-secondary"><i class="fa-solid fa-school" style="margin-right: 0.5rem;"></i> {{ __('messages.register_school_btn') }}</a>
+    </div>
+
+    <!-- Landing Quick Language Switcher with Font Awesome Flags -->
+    <div style="margin-top: 2rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+            <i class="fa-solid fa-flag" style="color: var(--accent);"></i> {{ __('messages.select_language') }}:
+        </span>
+        <a href="{{ route('set.locale', 'id') }}" class="badge-lang {{ app()->getLocale() === 'id' ? 'active' : '' }}" title="Bahasa Indonesia">
+            <i class="fa-solid fa-flag" style="color: #ef4444;"></i> 🇮🇩 ID
+        </a>
+        <a href="{{ route('set.locale', 'en') }}" class="badge-lang {{ app()->getLocale() === 'en' ? 'active' : '' }}" title="English (GB)">
+            <i class="fa-solid fa-flag" style="color: #3b82f6;"></i> 🇬🇧 EN
+        </a>
+        <a href="{{ route('set.locale', 'ar') }}" class="badge-lang {{ app()->getLocale() === 'ar' ? 'active' : '' }}" title="العربية">
+            <i class="fa-solid fa-flag" style="color: #10b981;"></i> 🇸🇦 AR
+        </a>
+        <a href="{{ route('set.locale', 'zh') }}" class="badge-lang {{ app()->getLocale() === 'zh' ? 'active' : '' }}" title="中文">
+            <i class="fa-solid fa-flag" style="color: #f59e0b;"></i> 🇨🇳 ZH
+        </a>
     </div>
 </div>
 

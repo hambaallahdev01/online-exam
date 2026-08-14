@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Route;
 
 // Guest Routes
 Route::view('/', 'landing')->name('landing');
+Route::get('/set-locale/{locale}', function (string $locale) {
+    if (in_array($locale, ['id', 'en', 'ar', 'zh'])) {
+        session(['visitor_geo_locale' => $locale]);
+    }
+    return back();
+})->name('set.locale');
 Route::post('/', [AuthController::class, 'login'])->middleware('throttle:login');
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:login');

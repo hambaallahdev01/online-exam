@@ -208,6 +208,98 @@
             gap: 0.4rem;
         }
 
+        .lang-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .lang-dropdown-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.4rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            transition: all 0.2s ease;
+        }
+
+        .lang-dropdown-btn:hover {
+            border-color: var(--primary);
+            background: var(--bg-card-hover);
+        }
+
+        .lang-dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.4rem);
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.6rem;
+            min-width: 190px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 0.4rem 0;
+            backdrop-filter: blur(8px);
+        }
+
+        [dir="rtl"] .lang-dropdown-menu {
+            right: auto;
+            left: 0;
+        }
+
+        .lang-dropdown-menu.show {
+            display: block;
+            animation: dropdownFadeIn 0.15s ease-out;
+        }
+
+        @keyframes dropdownFadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lang-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.55rem 0.9rem;
+            color: var(--text-main) !important;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.15s ease;
+        }
+
+        .lang-dropdown-item:hover {
+            background-color: var(--bg-card-hover);
+            color: var(--primary) !important;
+            padding-left: 1.1rem;
+        }
+
+        [dir="rtl"] .lang-dropdown-item:hover {
+            padding-left: 0.9rem;
+            padding-right: 1.1rem;
+        }
+
+        .lang-dropdown-item.active {
+            font-weight: 700;
+            background-color: rgba(99, 102, 241, 0.12);
+            color: var(--primary) !important;
+        }
+
+        .flag-icon-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.25rem;
+            height: 1.25rem;
+            font-size: 0.9rem;
+        }
+
         .container {
             max-width: 1200px;
             width: 100%;
@@ -453,6 +545,39 @@
                     <li><a href="{{ route('register.school') }}" class="btn btn-primary">{{ __('messages.register_school') }}</a></li>
                 @endauth
                 
+                <li class="lang-dropdown">
+                    <button type="button" class="lang-dropdown-btn" id="langDropdownTrigger" onclick="toggleLangDropdown(event)" title="{{ __('messages.select_language') }}">
+                        <i class="fa-solid fa-flag" style="color: var(--accent);"></i>
+                        <span style="font-weight: 600;">
+                            @if(app()->getLocale() === 'id') 🇮🇩 ID
+                            @elseif(app()->getLocale() === 'en') 🇬🇧 EN
+                            @elseif(app()->getLocale() === 'ar') 🇸🇦 AR
+                            @elseif(app()->getLocale() === 'zh') 🇨🇳 ZH
+                            @else {{ strtoupper(app()->getLocale()) }}
+                            @endif
+                        </span>
+                        <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i>
+                    </button>
+                    <div class="lang-dropdown-menu" id="langDropdownMenu">
+                        <a href="{{ route('set.locale', 'id') }}" class="lang-dropdown-item {{ app()->getLocale() === 'id' ? 'active' : '' }}">
+                            <span class="flag-icon-tag"><i class="fa-solid fa-flag" style="color: #ef4444;"></i></span>
+                            <span>🇮🇩 {{ __('messages.lang_id') }}</span>
+                        </a>
+                        <a href="{{ route('set.locale', 'en') }}" class="lang-dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}">
+                            <span class="flag-icon-tag"><i class="fa-solid fa-flag" style="color: #3b82f6;"></i></span>
+                            <span>🇬🇧 {{ __('messages.lang_en') }}</span>
+                        </a>
+                        <a href="{{ route('set.locale', 'ar') }}" class="lang-dropdown-item {{ app()->getLocale() === 'ar' ? 'active' : '' }}">
+                            <span class="flag-icon-tag"><i class="fa-solid fa-flag" style="color: #10b981;"></i></span>
+                            <span>🇸🇦 {{ __('messages.lang_ar') }}</span>
+                        </a>
+                        <a href="{{ route('set.locale', 'zh') }}" class="lang-dropdown-item {{ app()->getLocale() === 'zh' ? 'active' : '' }}">
+                            <span class="flag-icon-tag"><i class="fa-solid fa-flag" style="color: #f59e0b;"></i></span>
+                            <span>🇨🇳 {{ __('messages.lang_zh') }}</span>
+                        </a>
+                    </div>
+                </li>
+
                 <li>
                     <button id="themeToggle" class="theme-toggle-btn" onclick="toggleTheme()">
                         🌙 {{ __('messages.dark_mode') }}
@@ -501,6 +626,22 @@
         document.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('exam_theme') || 'light';
             applyTheme(saved);
+        });
+
+        // Language Dropdown Handler
+        function toggleLangDropdown(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('langDropdownMenu');
+            if (menu) {
+                menu.classList.toggle('show');
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('langDropdownMenu');
+            if (menu && !e.target.closest('.lang-dropdown')) {
+                menu.classList.remove('show');
+            }
         });
 
         // Global Glassmorphic Toast Engine (Zero External Dependencies)

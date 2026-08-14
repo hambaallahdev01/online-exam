@@ -44,6 +44,13 @@ class SetLocaleFromIp
 
         $sessionKey = 'visitor_geo_locale';
 
+        if ($request->has('lang') && in_array($request->query('lang'), $this->supportedLocales)) {
+            $locale = $request->query('lang');
+            Session::put($sessionKey, $locale);
+            App::setLocale($locale);
+            return $next($request);
+        }
+
         if (Session::has($sessionKey)) {
             $locale = Session::get($sessionKey);
             if (in_array($locale, $this->supportedLocales)) {

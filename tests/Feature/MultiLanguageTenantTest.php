@@ -151,4 +151,16 @@ class MultiLanguageTenantTest extends TestCase
         $school->refresh();
         $this->assertEquals('en', $school->locale);
     }
+
+    /**
+     * Test guest visitor can switch locale manually via set-locale route.
+     */
+    public function test_visitor_can_manually_switch_locale(): void
+    {
+        $response = $this->get('/set-locale/ar');
+        $response->assertSessionHas('visitor_geo_locale', 'ar');
+
+        $this->get('/')->assertOk();
+        $this->assertEquals('ar', App::getLocale());
+    }
 }
