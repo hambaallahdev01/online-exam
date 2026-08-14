@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \App\Http\Middleware\RestoreCloudflareRealIp::class,
+            \App\Http\Middleware\SetLocaleFromIp::class,
+            \App\Http\Middleware\SetTenantLocale::class,
             \App\Http\Middleware\SecurityHeaders::class,
         ]);
     })

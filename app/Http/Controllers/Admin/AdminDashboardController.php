@@ -90,10 +90,11 @@ class AdminDashboardController extends Controller
             'email' => 'required|email|max:255|unique:schools,email,' . $school->id,
             'phone' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:500',
+            'locale' => 'required|string|in:id,en,ar,zh',
         ]);
 
         $school->update($validated);
 
-        return back()->with('success', 'School identity profile updated successfully!');
+        return back()->with('success', __('messages.success_update_profile'));
     }
 }

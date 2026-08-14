@@ -1,0 +1,67 @@
+<?php
+
+return [
+    // Header & Navigation
+    'brand_name' => 'أجينونو V2',
+    'legacy_version' => 'النسخة القديمة V1',
+    'dashboard' => 'لوحة التحكم',
+    'exam_portal' => 'بوابة الاختبار',
+    'login' => 'تسجيل الدخول',
+    'register_school' => 'تسجيل مدرسة',
+    'logout' => 'تسجيل الخروج',
+    'dark_mode' => 'داكن',
+    'light_mode' => 'فاتح',
+
+    // Landing Page
+    'bismillah' => 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم',
+    'shalawat' => 'اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ',
+    'jargon' => 'في خدمة المجتمع',
+    'hero_title' => 'منصة الامتحانات الإلكترونية المفتوحة',
+    'hero_subtitle' => 'نظام اختبارات رقمي عالي السرعة، آمن وسهل الوصول. صُمم لخدمة التعليم والمنفعة العامة.',
+    'enter_portal' => 'الدخول إلى البوابة',
+    'register_school_btn' => 'تسجيل مدرسة جديدة',
+    
+    // Feature Cards
+    'feature_1_title' => 'أداء فائق السرعة',
+    'feature_1_desc' => 'مُحسّن لمئات الطلاب في نفس الوقت دون تأخير، متوافق تماماً مع الاستضافات المشتركة.',
+    'feature_2_title' => '7 أنواع من الأسئلة',
+    'feature_2_desc' => 'يدعم الاختيار من متعدد، المتعدد المعقد، المقالي، صح/خطأ، حقيقة/رأي، المطابقة، والترتيب.',
+    'feature_3_title' => 'آمن ومستقل',
+    'feature_3_desc' => 'بدون أي تبعيات خارجية لـ CDN. يعمل محلياً بالكامل لتقليل مخاطر الانقطاع.',
+    'feature_4_title' => 'نظام متعدد الأدوار',
+    'feature_4_desc' => 'نظام متكامل لمديري المدارس، المعلمين، والطلاب في منصة موحدة.',
+
+    // Admin Dashboard
+    'school_overview' => 'نظرة عامة على المدرسة',
+    'manage_overview_desc' => 'إدارة السجلات الأكاديمية والمعلمين والطلاب.',
+    'total_teachers' => 'إجمالي المعلمين',
+    'total_students' => 'إجمالي الطلاب',
+    'classrooms' => 'الفصول الدراسية',
+    'subjects' => 'المواد الدراسية',
+    'quick_actions' => 'إجراءات سريعة',
+    'manage_teachers' => 'إدارة المعلمين',
+    'manage_students' => 'إدارة الطلاب',
+    'school_identity' => 'معلومات هوية المدرسة',
+    'edit_profile' => 'تعديل الملف التعريفي',
+    'school_name' => 'اسم المدرسة',
+    'school_code' => 'رمز المدرسة',
+    'email' => 'البريد الإلكتروني',
+    'phone' => 'رقم الهاتف',
+    'address' => 'العنوان',
+    'language_setting' => 'لغة النظام / لوحة التحكم',
+    'not_specified' => 'غير محدد',
+    'update_school_profile' => 'تحديث ملف المدرسة',
+    'cancel' => 'إلغاء',
+    'save_changes' => 'حفظ التغييرات',
+    'select_language' => 'اختر اللغة',
+
+    // Languages
+    'lang_id' => 'Bahasa Indonesia (ID)',
+    'lang_en' => 'English (GB)',
+    'lang_ar' => 'العربية (Arabic)',
+    'lang_zh' => '中文 (Chinese)',
+
+    // Common / Notifications
+    'success_update_profile' => 'تم تحديث معلومات المدرسة بنجاح!',
+    'footer_text' => 'منصة الامتحانات الإلكترونية مفتوحة المصدر. صُنعت بكل حب لخدمة التعليم.',
+];

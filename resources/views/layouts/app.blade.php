@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ in_array(app()->getLocale(), ['ar']) ? 'rtl' : 'ltr' }}" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
     <!-- SEO Meta Tags -->
     <meta name="description" content="@yield('meta_description', 'Platform Ujian Online Terbuka berkecepatan tinggi, aman, dan mudah diakses. Dibangun demi kemaslahatan umat terkhusus pendidikan.')">
     <meta name="keywords" content="ujian online, cbt, computer based test, aplikasi ujian sekolah, open source, laravel, pendidikan, kemaslahatan umat">
-    <meta name="author" content="Achmad An'im">
+    <meta name="author" content="Hamba Allah">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph / Facebook -->
@@ -427,35 +427,35 @@
         <div class="navbar">
             <div class="brand-wrapper" style="display: flex; align-items: center; gap: 0.6rem;">
                 <a href="{{ url('/') }}" class="brand">
-                    <i class="fa-solid fa-graduation-cap"></i> <span>Ajenono V2</span>
+                    <i class="fa-solid fa-graduation-cap"></i> <span>{{ __('messages.brand_name') }}</span>
                 </a>
                 <a href="http://ajenono.wongcjdw.com" target="_blank" rel="noopener noreferrer" class="v1-legacy-btn" style="font-size: 0.75rem; color: var(--text-muted); text-decoration: underline; background: rgba(99, 102, 241, 0.1); padding: 0.2rem 0.5rem; border-radius: 0.3rem;" title="Open Ajenono V1 Legacy">
-                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.65rem;"></i> V1 Legacy
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.65rem;"></i> {{ __('messages.legacy_version') }}
                 </a>
             </div>
             <ul class="nav-links">
                 @auth
                     @if(Auth::user()->role === 'admin')
-                        <li><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                        <li><a href="{{ route('admin.dashboard') }}">{{ __('messages.dashboard') }}</a></li>
                     @elseif(Auth::user()->role === 'teacher')
-                        <li><a href="{{ route('teacher.dashboard') }}">Dashboard</a></li>
+                        <li><a href="{{ route('teacher.dashboard') }}">{{ __('messages.dashboard') }}</a></li>
                     @elseif(Auth::user()->role === 'student')
-                        <li><a href="{{ route('student.dashboard') }}">Exam Portal</a></li>
+                        <li><a href="{{ route('student.dashboard') }}">{{ __('messages.exam_portal') }}</a></li>
                     @endif
                     <li>
                         <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                             @csrf
-                            <button type="submit" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Logout ({{ Auth::user()->name }})</button>
+                            <button type="submit" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">{{ __('messages.logout') }} ({{ Auth::user()->name }})</button>
                         </form>
                     </li>
                 @else
-                    <li><a href="{{ route('login') }}">Login</a></li>
-                    <li><a href="{{ route('register.school') }}" class="btn btn-primary">Register School</a></li>
+                    <li><a href="{{ route('login') }}">{{ __('messages.login') }}</a></li>
+                    <li><a href="{{ route('register.school') }}" class="btn btn-primary">{{ __('messages.register_school') }}</a></li>
                 @endauth
                 
                 <li>
                     <button id="themeToggle" class="theme-toggle-btn" onclick="toggleTheme()">
-                        🌙 Dark
+                        🌙 {{ __('messages.dark_mode') }}
                     </button>
                 </li>
             </ul>
@@ -479,7 +479,7 @@
     </div>
 
     <footer>
-        <p>&copy; {{ date('Y') }} Open Source Online Exam Platform. Made with <i class="fa-solid fa-heart" style="color: #ef4444;"></i> by <a href="https://github.com/animfahmy" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Achmad An'im</a> &bull; Inspired by <a href="https://wongcjdw.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Pak Wong</a> (Big thanks!).</p>
+        <p>&copy; {{ date('Y') }} Open Source Online Exam Platform. Made with <i class="fa-solid fa-heart" style="color: #ef4444;"></i> by <a href="https://github.com/hambaallahdev01" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Hamba Allah</a> &bull; Inspired by <a href="https://wongcjdw.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Pak Wong</a> (Big thanks!).</p>
     </footer>
 
     <script>

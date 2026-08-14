@@ -1,19 +1,11 @@
 # Modern Open Source Online Exam Platform
 
-<div dir="rtl" align="center">
-
-### بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
-### اَللَّهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ
-### اللَّهُمَّ انْصُرْ وَاحْفَظْ وَأَيِّدْ جَاكَا د صَلَوَات فِي الْعَالَمِينَ بِحَقِّ سَيِّدِنَا مُحَمَّدٍ صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ
-
-</div>
-
 <p align="center">
   <a href="https://ajenonov2.wongcjdw.com/"><img src="https://img.shields.io/badge/Live_Demo-ajenonov2.wongcjdw.com-00C7B7?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Live Demo" /></a>
-  <a href="https://github.com/animfahmy/ujian-online/issues"><img src="https://img.shields.io/github/issues/animfahmy/ujian-online?style=for-the-badge&color=orange&logo=github" alt="GitHub Issues" /></a>
-  <a href="https://github.com/animfahmy/ujian-online/stargazers"><img src="https://img.shields.io/github/stars/animfahmy/ujian-online?style=for-the-badge&color=yellow&logo=github" alt="GitHub Stars" /></a>
-  <a href="https://github.com/animfahmy/ujian-online/network/members"><img src="https://img.shields.io/github/forks/animfahmy/ujian-online?style=for-the-badge&color=blue&logo=github" alt="GitHub Forks" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/animfahmy/ujian-online?style=for-the-badge&color=green" alt="MIT License" /></a>
+  <a href="https://github.com/hambaallahdev01/ujian-online/issues"><img src="https://img.shields.io/github/issues/hambaallahdev01/ujian-online?style=for-the-badge&color=orange&logo=github" alt="GitHub Issues" /></a>
+  <a href="https://github.com/hambaallahdev01/ujian-online/stargazers"><img src="https://img.shields.io/github/stars/hambaallahdev01/ujian-online?style=for-the-badge&color=yellow&logo=github" alt="GitHub Stars" /></a>
+  <a href="https://github.com/hambaallahdev01/ujian-online/network/members"><img src="https://img.shields.io/github/forks/hambaallahdev01/ujian-online?style=for-the-badge&color=blue&logo=github" alt="GitHub Forks" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/hambaallahdev01/ujian-online?style=for-the-badge&color=green" alt="MIT License" /></a>
   <br>
   <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 13" /></a>
   <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.2+" /></a>
@@ -358,8 +350,8 @@ php artisan test
 
 Kami menyambut baik masukan, laporan kendala, maupun ide fitur baru untuk pengembangan platform ini:
 
-- 🐛 **Lapor Bug / Kendala**: Jika Anda menemukan bug atau error, silakan buat laporan detail di [GitHub Issues](https://github.com/animfahmy/ujian-online/issues).
-- 💡 **Request Fitur Baru**: Memiliki ide fitur baru atau peningkatan UX? Ajukan di [GitHub Issues](https://github.com/animfahmy/ujian-online/issues).
+- 🐛 **Lapor Bug / Kendala**: Jika Anda menemukan bug atau error, silakan buat laporan detail di [GitHub Issues](https://github.com/hambaallahdev01/ujian-online/issues).
+- 💡 **Request Fitur Baru**: Memiliki ide fitur baru atau peningkatan UX? Ajukan di [GitHub Issues](https://github.com/hambaallahdev01/ujian-online/issues).
 - 🔀 **Contribute**: Pull request selalu terbuka untuk perbaikan dan pengembangan bersama.
 
 ---
@@ -368,5 +360,5 @@ Kami menyambut baik masukan, laporan kendala, maupun ide fitur baru untuk pengem
 
 This open-source platform is released under the [MIT License](LICENSE).
 
-Made with ❤️ by [Achmad An'im](https://github.com/animfahmy) &bull; Inspired by [Pak Wong](https://wongcjdw.com) (Big thanks!). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!
+Made with ❤️ by [Hamba Allah](https://github.com/hambaallahdev01) &bull; Inspired by [Pak Wong](https://wongcjdw.com) (Big thanks!). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!
 

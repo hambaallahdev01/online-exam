@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Ajenono - Aplikasi Ujian Elektronik Online V2')
+@section('title', __('messages.hero_title') . ' - ' . __('messages.brand_name'))
 
 @section('styles')
 <style>
@@ -115,42 +115,42 @@
 
 @section('content')
 <div class="hero-section">
-    <div class="arabic-text">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم</div>
-    <div class="arabic-text" style="font-size: 1.4rem; margin-bottom: 1.5rem;">اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ</div>
+    <div class="arabic-text">{{ __('messages.bismillah') }}</div>
+    <div class="arabic-text" style="font-size: 1.4rem; margin-bottom: 1.5rem;">{{ __('messages.shalawat') }}</div>
     
-    <div class="jargon-badge"><i class="fa-solid fa-hand-holding-heart"></i> Berkhidmat untuk Umat</div>
+    <div class="jargon-badge"><i class="fa-solid fa-hand-holding-heart"></i> {{ __('messages.jargon') }}</div>
     
-    <h1 class="hero-title">Platform Ujian Online Terbuka</h1>
+    <h1 class="hero-title">{{ __('messages.hero_title') }}</h1>
     <p class="hero-subtitle">
-        Sistem ujian digital berkecepatan tinggi, aman, dan mudah diakses. Dibangun demi kemaslahatan umat terkhusus pendidikan.
+        {{ __('messages.hero_subtitle') }}
     </p>
     
     <div class="hero-actions">
-        <a href="{{ route('login') }}" class="btn btn-primary"><i class="fa-solid fa-right-to-bracket" style="margin-right: 0.5rem;"></i> Masuk ke Portal</a>
-        <a href="{{ route('register.school') }}" class="btn btn-secondary"><i class="fa-solid fa-school" style="margin-right: 0.5rem;"></i> Daftarkan Sekolah</a>
+        <a href="{{ route('login') }}" class="btn btn-primary"><i class="fa-solid fa-right-to-bracket" style="margin-right: 0.5rem;"></i> {{ __('messages.enter_portal') }}</a>
+        <a href="{{ route('register.school') }}" class="btn btn-secondary"><i class="fa-solid fa-school" style="margin-right: 0.5rem;"></i> {{ __('messages.register_school_btn') }}</a>
     </div>
 </div>
 
 <div class="features-grid">
     <div class="feature-card">
         <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
-        <h3 class="feature-title">Performa Tinggi</h3>
-        <p class="feature-desc">Dioptimalkan untuk ratusan peserta ujian secara bersamaan tanpa kendala, bersahabat dengan <i>shared hosting</i>.</p>
+        <h3 class="feature-title">{{ __('messages.feature_1_title') }}</h3>
+        <p class="feature-desc">{{ __('messages.feature_1_desc') }}</p>
     </div>
     <div class="feature-card">
         <div class="feature-icon"><i class="fa-solid fa-list-check"></i></div>
-        <h3 class="feature-title">7 Tipe Soal</h3>
-        <p class="feature-desc">Mendukung pilihan ganda, ganda kompleks, esai, benar-salah, fakta-opini, menjodohkan, hingga mengurutkan.</p>
+        <h3 class="feature-title">{{ __('messages.feature_2_title') }}</h3>
+        <p class="feature-desc">{{ __('messages.feature_2_desc') }}</p>
     </div>
     <div class="feature-card">
         <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
-        <h3 class="feature-title">Aman & Mandiri</h3>
-        <p class="feature-desc">Tanpa dependensi CDN eksternal. Sepenuhnya berjalan lokal untuk meminimalisir gangguan suplai pihak ketiga.</p>
+        <h3 class="feature-title">{{ __('messages.feature_3_title') }}</h3>
+        <p class="feature-desc">{{ __('messages.feature_3_desc') }}</p>
     </div>
     <div class="feature-card">
         <div class="feature-icon"><i class="fa-solid fa-users-gear"></i></div>
-        <h3 class="feature-title">Multi-Peran</h3>
-        <p class="feature-desc">Sistem terintegrasi untuk Administrator Sekolah, Guru pengampu, hingga Siswa peserta ujian dalam satu atap.</p>
+        <h3 class="feature-title">{{ __('messages.feature_4_title') }}</h3>
+        <p class="feature-desc">{{ __('messages.feature_4_desc') }}</p>
     </div>
 </div>
 @endsection

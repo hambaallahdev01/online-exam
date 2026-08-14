@@ -16,6 +16,7 @@ class School extends Model
         'email',
         'address',
         'phone',
+        'locale',
     ];
 
     public function users(): HasMany
