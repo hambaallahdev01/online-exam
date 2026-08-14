@@ -64,4 +64,9 @@ return [
     // Common / Notifications
     'success_update_profile' => 'School identity profile updated successfully!',
     'footer_text' => 'Open Source Online Exam Platform. Made with love for educational advancement.',
+
+    // SEO Meta Tags
+    'meta_title' => 'Ajenono V2 - Open Source Online Exam Platform, Fast and Secure',
+    'meta_description' => 'High-speed, secure, multi-tenant digital examination system for schools, colleges, and educational institutions.',
+    'meta_keywords' => 'online exam, cbt, computer based test, school exam application, open source, laravel, education, student assessment',
 ];

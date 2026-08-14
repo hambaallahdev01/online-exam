@@ -64,4 +64,9 @@ return [
     // Common / Notifications
     'success_update_profile' => 'Profil identitas sekolah berhasil diperbarui!',
     'footer_text' => 'Open Source Online Exam Platform. Dibuat dengan cinta untuk kemaslahatan pendidikan.',
+
+    // SEO Meta Tags
+    'meta_title' => 'Ajenono V2 - Platform Ujian Online Terbuka, Cepat, dan Aman',
+    'meta_description' => 'Platform ujian digital online berkecepatan tinggi, aman, multi-tenant, dan mudah diakses untuk sekolah dan madrasah.',
+    'meta_keywords' => 'ujian online, cbt, computer based test, aplikasi ujian sekolah, open source, laravel, pendidikan, kemaslahatan umat',
 ];

@@ -5,29 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="@yield('meta_description', 'Platform Ujian Online Terbuka berkecepatan tinggi, aman, dan mudah diakses. Dibangun demi kemaslahatan umat terkhusus pendidikan.')">
-    <meta name="keywords" content="ujian online, cbt, computer based test, aplikasi ujian sekolah, open source, laravel, pendidikan, kemaslahatan umat">
+    <!-- Multilingual SEO & Canonical Meta Tags -->
+    @php
+        $currentLocale = app()->getLocale();
+        $seoLocales = [
+            'id' => 'id_ID',
+            'en' => 'en_GB',
+            'ar' => 'ar_SA',
+            'zh' => 'zh_CN',
+        ];
+        $ogLocale = $seoLocales[$currentLocale] ?? 'id_ID';
+        $canonicalUrl = url()->current();
+    @endphp
+
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+
+    <!-- Multi-Language Alternate Hreflang Tags for Search Engines (Google, Bing, Yandex, Baidu) -->
+    <link rel="alternate" hreflang="id" href="{{ $canonicalUrl }}?lang=id">
+    <link rel="alternate" hreflang="en" href="{{ $canonicalUrl }}?lang=en">
+    <link rel="alternate" hreflang="ar" href="{{ $canonicalUrl }}?lang=ar">
+    <link rel="alternate" hreflang="zh" href="{{ $canonicalUrl }}?lang=zh">
+    <link rel="alternate" hreflang="x-default" href="{{ $canonicalUrl }}">
+
+    <!-- Regional & Search Engine Compatibility Tags -->
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <meta name="description" content="@yield('meta_description', __('messages.meta_description'))">
+    <meta name="keywords" content="@yield('meta_keywords', __('messages.meta_keywords'))">
     <meta name="author" content="Hamba Allah">
     <meta name="robots" content="index, follow">
 
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="@yield('title', 'Beranda') - Open Source Online Exam Platform">
-    <meta property="og:description" content="@yield('meta_description', 'Platform Ujian Online Terbuka berkecepatan tinggi, aman, dan mudah diakses. Dibangun demi kemaslahatan umat terkhusus pendidikan.')">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:locale" content="{{ $ogLocale }}">
+    @php
+        foreach($seoLocales as $locCode => $ogCode) {
+            if ($locCode !== $currentLocale) {
+                echo '    <meta property="og:locale:alternate" content="' . e($ogCode) . '">' . PHP_EOL;
+            }
+        }
+    @endphp
+    <meta property="og:title" content="@yield('title', __('messages.meta_title'))">
+    <meta property="og:description" content="@yield('meta_description', __('messages.meta_description'))">
     <meta property="og:image" content="{{ asset('favicon.svg') }}">
 
-    <!-- Twitter -->
+    <!-- Twitter Card -->
     <meta property="twitter:card" content="summary">
-    <meta property="twitter:url" content="{{ url()->current() }}">
-    <meta property="twitter:title" content="@yield('title', 'Beranda') - Open Source Online Exam Platform">
-    <meta property="twitter:description" content="@yield('meta_description', 'Platform Ujian Online Terbuka berkecepatan tinggi, aman, dan mudah diakses. Dibangun demi kemaslahatan umat terkhusus pendidikan.')">
+    <meta property="twitter:url" content="{{ $canonicalUrl }}">
+    <meta property="twitter:title" content="@yield('title', __('messages.meta_title'))">
+    <meta property="twitter:description" content="@yield('meta_description', __('messages.meta_description'))">
     <meta property="twitter:image" content="{{ asset('favicon.svg') }}">
+
+    <!-- JSON-LD Structured Data for Multilingual Search Engines -->
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'WebApplication',
+        'name' => __('messages.brand_name'),
+        'url' => url('/'),
+        'inLanguage' => ['id', 'en', 'ar', 'zh'],
+        'description' => __('messages.meta_description'),
+        'applicationCategory' => 'EducationalApplication',
+        'operatingSystem' => 'All',
+        'offers' => [
+            '@type' => 'Offer',
+            'price' => '0',
+            'priceCurrency' => 'IDR',
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
+
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
-    <title>@yield('title', 'Exam System') - Open Source Online Exam Platform</title>
+    <title>@yield('title', __('messages.meta_title'))</title>
     <style>
         @font-face {
             font-family: 'KFGQPC Uthman Taha Naskh';
@@ -549,11 +602,17 @@
                     <button type="button" class="lang-dropdown-btn" id="langDropdownTrigger" onclick="toggleLangDropdown(event)" title="{{ __('messages.select_language') }}">
                         <i class="fa-solid fa-flag" style="color: var(--accent);"></i>
                         <span style="font-weight: 600;">
-                            @if(app()->getLocale() === 'id') 🇮🇩 ID
-                            @elseif(app()->getLocale() === 'en') 🇬🇧 EN
-                            @elseif(app()->getLocale() === 'ar') 🇸🇦 AR
-                            @elseif(app()->getLocale() === 'zh') 🇨🇳 ZH
-                            @else {{ strtoupper(app()->getLocale()) }}
+                            @php $curr = app()->getLocale(); @endphp
+                            @if($curr === 'id')
+                                🇮🇩 ID
+                            @elseif($curr === 'en')
+                                🇬🇧 EN
+                            @elseif($curr === 'ar')
+                                🇸🇦 AR
+                            @elseif($curr === 'zh')
+                                🇨🇳 ZH
+                            @else
+                                {{ strtoupper($curr) }}
                             @endif
                         </span>
                         <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i>
@@ -593,7 +652,9 @@
         @endif
         @if(session('error') || $errors->any())
             <div class="alert alert-danger">
-                @if(session('error')) {{ session('error') }} @endif
+                @if(session('error'))
+                    <div>{{ session('error') }}</div>
+                @endif
                 @foreach($errors->all() as $error)
                     <div>• {{ $error }}</div>
                 @endforeach

@@ -63,6 +63,7 @@ class SetLocaleFromIp
         $locale = 'id'; // Primary default locale
 
         // Check if IP is not localhost / private subnet
+        $resolvedFromIp = false;
         if ($ip && !in_array($ip, ['127.0.0.1', '::1']) && !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
             try {
                 $position = class_exists(Location::class) ? Location::get($ip) : null;
@@ -79,11 +80,20 @@ class SetLocaleFromIp
                         // English (GB/International) for all other countries
                         $locale = 'en';
                     }
+                    $resolvedFromIp = true;
                 }
             } catch (\Throwable $e) {
                 // Fail gracefully and use default Indonesian locale
                 Log::warning('GeoIP locale resolution failed: ' . $e->getMessage());
                 $locale = 'id';
+            }
+        }
+
+        // If IP could not be resolved (e.g. search engine bots or local network), check HTTP Accept-Language
+        if (!$resolvedFromIp && $request->server('HTTP_ACCEPT_LANGUAGE')) {
+            $preferred = $request->getPreferredLanguage($this->supportedLocales);
+            if ($preferred && in_array($preferred, $this->supportedLocales)) {
+                $locale = $preferred;
             }
         }
 

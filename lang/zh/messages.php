@@ -64,4 +64,9 @@ return [
     // Common / Notifications
     'success_update_profile' => '学校信息更新成功！',
     'footer_text' => '开源在线考试平台。用爱为教育进步赋能。',
+
+    // SEO Meta Tags
+    'meta_title' => 'Ajenono V2 - 开源在线考试平台，极速且安全',
+    'meta_description' => '专为各类学校与教育机构打造的高速、安全、支持多租户的数字化在线考试系统。',
+    'meta_keywords' => '在线考试, 电子考试, CBT考试系统, 开源在线考试系统, Laravel, 教育信息化, 学生测评',
 ];

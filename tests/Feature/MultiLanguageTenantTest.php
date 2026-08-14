@@ -103,7 +103,7 @@ class MultiLanguageTenantTest extends TestCase
     }
 
     /**
-     * Test IP-based locale detection middleware with mock IPs.
+     * Test IP-based locale detection middleware with mock IPs / default Indonesian.
      */
     public function test_guest_landing_page_defaults_to_indonesian(): void
     {
@@ -111,6 +111,7 @@ class MultiLanguageTenantTest extends TestCase
 
         $request = Request::create('/', 'GET', [], [], [], [
             'REMOTE_ADDR' => '127.0.0.1',
+            'HTTP_ACCEPT_LANGUAGE' => 'id-ID,id;q=0.9',
         ]);
 
         $middleware = new SetLocaleFromIp();
@@ -118,7 +119,27 @@ class MultiLanguageTenantTest extends TestCase
             return response('OK');
         });
 
-        $this->assertEquals('id', App::getLocale(), 'Default locale for localhost/fallback should be Indonesian (id)');
+        $this->assertEquals('id', App::getLocale(), 'Default locale should be Indonesian (id)');
+    }
+
+    /**
+     * Test search engine crawler / visitor with Accept-Language header is respected.
+     */
+    public function test_guest_landing_page_respects_crawler_accept_language(): void
+    {
+        Session::flush();
+
+        $request = Request::create('/', 'GET', [], [], [], [
+            'REMOTE_ADDR' => '127.0.0.1',
+            'HTTP_ACCEPT_LANGUAGE' => 'zh-CN,zh;q=0.9',
+        ]);
+
+        $middleware = new SetLocaleFromIp();
+        $middleware->handle($request, function () {
+            return response('OK');
+        });
+
+        $this->assertEquals('zh', App::getLocale(), 'Crawler with Chinese Accept-Language should get Chinese locale');
     }
 
     /**
