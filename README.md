@@ -2,13 +2,13 @@
 
 <p align="center">
   <a href="https://ajenonov2.wongcjdw.com/"><img src="https://img.shields.io/badge/Live_Demo-ajenonov2.wongcjdw.com-00C7B7?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Live Demo" /></a>
-  <a href="https://github.com/hambaallahdev01/ujian-online/issues"><img src="https://img.shields.io/github/issues/hambaallahdev01/ujian-online?style=for-the-badge&color=orange&logo=github" alt="GitHub Issues" /></a>
-  <a href="https://github.com/hambaallahdev01/ujian-online/stargazers"><img src="https://img.shields.io/github/stars/hambaallahdev01/ujian-online?style=for-the-badge&color=yellow&logo=github" alt="GitHub Stars" /></a>
-  <a href="https://github.com/hambaallahdev01/ujian-online/network/members"><img src="https://img.shields.io/github/forks/hambaallahdev01/ujian-online?style=for-the-badge&color=blue&logo=github" alt="GitHub Forks" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/hambaallahdev01/ujian-online?style=for-the-badge&color=green" alt="MIT License" /></a>
+  <a href="https://github.com/hambaallahdev01/online-exam/issues"><img src="https://img.shields.io/github/issues/hambaallahdev01/online-exam?style=for-the-badge&color=orange&logo=github" alt="GitHub Issues" /></a>
+  <a href="https://github.com/hambaallahdev01/online-exam/stargazers"><img src="https://img.shields.io/github/stars/hambaallahdev01/online-exam?style=for-the-badge&color=yellow&logo=github" alt="GitHub Stars" /></a>
+  <a href="https://github.com/hambaallahdev01/online-exam/network/members"><img src="https://img.shields.io/github/forks/hambaallahdev01/online-exam?style=for-the-badge&color=blue&logo=github" alt="GitHub Forks" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/hambaallahdev01/online-exam?style=for-the-badge&color=green" alt="MIT License" /></a>
   <br>
   <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 13" /></a>
-  <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.2+" /></a>
+  <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.5+" /></a>
 </p>
 
 ---
@@ -168,7 +168,7 @@ For simultaneous examination of thousands of students across multiple classrooms
 
 OpenLiteSpeed provides high event-driven performance with minimal memory consumption on VPS servers:
 
-1. **Document Root**: Point your Virtual Host document root to `/path/to/ujian-online/public`.
+1. **Document Root**: Point your Virtual Host document root to `/path/to/online-exam/public`.
 2. **PHP Upload Limits in OLS / CyberPanel**:
    Set `upload_max_filesize = 64M` and `post_max_size = 64M` in CyberPanel PHP Config or `.user.ini` in `public/`.
 3. **Rewrite Rules** (`.htaccess` inside `public/`):
@@ -203,13 +203,13 @@ OpenLiteSpeed provides high event-driven performance with minimal memory consump
 
 Easily deploy on standard cPanel/DirectAdmin shared web hosting without root access, Redis, or Octane:
 
-1. **Upload Code**: Upload the project directory to your hosting account (e.g. `/home/user/ujian-online`).
+1. **Upload Code**: Upload the project directory to your hosting account (e.g. `/home/user/online-exam`).
 2. **Setup Document Root / Symlink**:
-   - Option A: Point your domain/subdomain document root directly to `/home/user/ujian-online/public`.
+   - Option A: Point your domain/subdomain document root directly to `/home/user/online-exam/public`.
    - Option B: Copy files inside `public/` to `public_html/` and update `index.php` paths:
      ```php
-     require __DIR__.'/../ujian-online/vendor/autoload.php';
-     $app = require_once __DIR__.'/../ujian-online/bootstrap/app.php';
+     require __DIR__.'/../online-exam/vendor/autoload.php';
+     $app = require_once __DIR__.'/../online-exam/bootstrap/app.php';
      ```
 3. **Configure `.env` for Shared Hosting**:
    ```env
@@ -350,8 +350,8 @@ php artisan test
 
 Kami menyambut baik masukan, laporan kendala, maupun ide fitur baru untuk pengembangan platform ini:
 
-- 🐛 **Lapor Bug / Kendala**: Jika Anda menemukan bug atau error, silakan buat laporan detail di [GitHub Issues](https://github.com/hambaallahdev01/ujian-online/issues).
-- 💡 **Request Fitur Baru**: Memiliki ide fitur baru atau peningkatan UX? Ajukan di [GitHub Issues](https://github.com/hambaallahdev01/ujian-online/issues).
+- 🐛 **Lapor Bug / Kendala**: Jika Anda menemukan bug atau error, silakan buat laporan detail di [GitHub Issues](https://github.com/hambaallahdev01/online-exam/issues).
+- 💡 **Request Fitur Baru**: Memiliki ide fitur baru atau peningkatan UX? Ajukan di [GitHub Issues](https://github.com/hambaallahdev01/online-exam/issues).
 - 🔀 **Contribute**: Pull request selalu terbuka untuk perbaikan dan pengembangan bersama.
 
 ---
