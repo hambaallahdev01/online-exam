@@ -33,6 +33,7 @@ class MultiLanguageTenantTest extends TestCase
             $this->assertArrayHasKey('hero_title', $translations);
             $this->assertArrayHasKey('school_identity', $translations);
             $this->assertArrayHasKey('language_setting', $translations);
+            $this->assertArrayHasKey('timezone_setting', $translations);
         }
     }
 
@@ -61,7 +62,7 @@ class MultiLanguageTenantTest extends TestCase
         $request = Request::create('/teacher/dashboard', 'GET');
         $request->setUserResolver(fn () => $userAr);
 
-        $middleware = new SetTenantLocale();
+        $middleware = new SetTenantLocale;
         $middleware->handle($request, function () {
             return response('OK');
         });
@@ -94,7 +95,7 @@ class MultiLanguageTenantTest extends TestCase
         $request = Request::create('/student/dashboard', 'GET');
         $request->setUserResolver(fn () => $userZh);
 
-        $middleware = new SetTenantLocale();
+        $middleware = new SetTenantLocale;
         $middleware->handle($request, function () {
             return response('OK');
         });
@@ -114,7 +115,7 @@ class MultiLanguageTenantTest extends TestCase
             'HTTP_ACCEPT_LANGUAGE' => 'id-ID,id;q=0.9',
         ]);
 
-        $middleware = new SetLocaleFromIp();
+        $middleware = new SetLocaleFromIp;
         $middleware->handle($request, function () {
             return response('OK');
         });
@@ -134,7 +135,7 @@ class MultiLanguageTenantTest extends TestCase
             'HTTP_ACCEPT_LANGUAGE' => 'zh-CN,zh;q=0.9',
         ]);
 
-        $middleware = new SetLocaleFromIp();
+        $middleware = new SetLocaleFromIp;
         $middleware->handle($request, function () {
             return response('OK');
         });
@@ -166,11 +167,13 @@ class MultiLanguageTenantTest extends TestCase
             'name' => 'Global School Updated',
             'email' => 'admin@globalschool.com',
             'locale' => 'en',
+            'timezone' => 'Europe/London',
         ]);
 
         $response->assertSessionHasNoErrors();
         $school->refresh();
         $this->assertEquals('en', $school->locale);
+        $this->assertEquals('Europe/London', $school->timezone);
     }
 
     /**

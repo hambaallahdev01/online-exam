@@ -5,18 +5,18 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamResult;
+use App\Services\TenantDateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class StudentDashboardController extends Controller
 {
-    public function index()
+    public function index(TenantDateTime $tenantDateTime)
     {
         $student = Auth::user();
+        $utcNow = now('UTC');
         $availableExams = Exam::where('school_id', $student->school_id)
-            ->where('is_active', true)
-            ->where('starts_at', '<=', now())
-            ->where('ends_at', '>=', now())
+            ->availableAt($utcNow)
             ->with('questionGroup')
             ->get();
 
@@ -24,8 +24,12 @@ class StudentDashboardController extends Controller
             ->with('exam')
             ->latest()
             ->get();
+        $resultDates = $myResults->mapWithKeys(fn (ExamResult $result): array => [
+            $result->id => $tenantDateTime->format($result->created_at, $student->school),
+        ]);
+        $schoolTimezone = $tenantDateTime->timezoneFor($student->school);
 
-        return view('student.dashboard', compact('availableExams', 'myResults'));
+        return view('student.dashboard', compact('availableExams', 'myResults', 'resultDates', 'schoolTimezone'));
     }
 
     public function enterToken(Request $request)
@@ -37,9 +41,7 @@ class StudentDashboardController extends Controller
         $token = strtoupper(trim($request->token));
         $exam = Exam::where('school_id', Auth::user()->school_id)
             ->where('token', $token)
-            ->where('is_active', true)
-            ->where('starts_at', '<=', now())
-            ->where('ends_at', '>=', now())
+            ->availableAt(now('UTC'))
             ->first();
 
         if (! $exam) {
@@ -57,7 +59,7 @@ class StudentDashboardController extends Controller
 
         abort_unless($exam->school_id === $student->school_id, 403, 'This exam belongs to another school.');
         abort_unless(
-            $exam->is_active && $exam->starts_at->lte(now()) && $exam->ends_at->gte(now()),
+            $exam->isAvailableAt(now('UTC')),
             403,
             'This exam is not currently available.'
         );
@@ -80,7 +82,7 @@ class StudentDashboardController extends Controller
                 'exam_id' => $exam->id,
                 'student_id' => $student->id,
                 'status' => 'in_progress',
-                'started_at' => now(),
+                'started_at' => now('UTC'),
                 'time_remaining_seconds' => $exam->duration_minutes * 60,
                 'answers_json' => [],
             ]

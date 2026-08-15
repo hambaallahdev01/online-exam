@@ -49,6 +49,8 @@ class ExamManagementTest extends TestCase
             'token' => 'TOKEN2',
             'duration_minutes' => 90,
             'is_active' => 0,
+            'starts_at' => '2026-08-17T09:00',
+            'ends_at' => '2026-08-17T12:00',
         ]);
 
         $response->assertRedirect();
@@ -58,6 +60,8 @@ class ExamManagementTest extends TestCase
             'token' => 'TOKEN2',
             'duration_minutes' => 90,
             'is_active' => false,
+            'starts_at' => '2026-08-17 02:00:00',
+            'ends_at' => '2026-08-17 05:00:00',
         ]);
 
         // Delete exam

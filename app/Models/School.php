@@ -17,7 +17,15 @@ class School extends Model
         'address',
         'phone',
         'locale',
+        'timezone',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (School $school): void {
+            $school->timezone ??= config('tenancy.default_timezone', 'Asia/Jakarta');
+        });
+    }
 
     public function users(): HasMany
     {

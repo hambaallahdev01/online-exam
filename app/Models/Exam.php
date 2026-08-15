@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,6 +37,25 @@ class Exam extends Model
         'randomize_options' => 'boolean',
         'show_explanation_after_submit' => 'boolean',
     ];
+
+    public function scopeAvailableAt(Builder $query, CarbonInterface $instant): Builder
+    {
+        $utcInstant = CarbonImmutable::instance($instant)->utc();
+
+        return $query
+            ->where('is_active', true)
+            ->where('starts_at', '<=', $utcInstant)
+            ->where('ends_at', '>=', $utcInstant);
+    }
+
+    public function isAvailableAt(CarbonInterface $instant): bool
+    {
+        $utcInstant = CarbonImmutable::instance($instant)->utc();
+
+        return $this->is_active
+            && $this->starts_at->lte($utcInstant)
+            && $this->ends_at->gte($utcInstant);
+    }
 
     public function school(): BelongsTo
     {

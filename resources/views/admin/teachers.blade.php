@@ -52,7 +52,7 @@
                         <td><strong>{{ $teacher->name }}</strong></td>
                         <td>{{ $teacher->email }}</td>
                         <td>{{ $teacher->identity_number ?? '-' }}</td>
-                        <td>{{ $teacher->created_at->format('d M Y') }}</td>
+                        <td>{{ $registeredDates[$teacher->id] }}</td>
                     </tr>
                 @empty
                     <tr>

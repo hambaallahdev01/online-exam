@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Classroom;
 use App\Models\Subject;
 use App\Models\User;
+use App\Services\TenantDateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AdminDashboardController extends Controller
 {
-    public function index()
+    public function index(TenantDateTime $tenantDateTime)
     {
         $school = Auth::user()->school;
         $teachersCount = User::where('school_id', $school->id)->where('role', 'teacher')->count();
@@ -20,15 +21,29 @@ class AdminDashboardController extends Controller
         $classroomsCount = Classroom::where('school_id', $school->id)->count();
         $subjectsCount = Subject::where('school_id', $school->id)->count();
 
-        return view('admin.dashboard', compact('school', 'teachersCount', 'studentsCount', 'classroomsCount', 'subjectsCount'));
+        $timezoneOptions = $tenantDateTime->timezoneOptions();
+        $schoolTimezone = $tenantDateTime->timezoneFor($school);
+
+        return view('admin.dashboard', compact(
+            'school',
+            'teachersCount',
+            'studentsCount',
+            'classroomsCount',
+            'subjectsCount',
+            'timezoneOptions',
+            'schoolTimezone',
+        ));
     }
 
-    public function teachers()
+    public function teachers(TenantDateTime $tenantDateTime)
     {
-        $schoolId = Auth::user()->school_id;
-        $teachers = User::where('school_id', $schoolId)->where('role', 'teacher')->get();
+        $school = Auth::user()->school;
+        $teachers = User::where('school_id', $school->id)->where('role', 'teacher')->get();
+        $registeredDates = $teachers->mapWithKeys(fn (User $teacher): array => [
+            $teacher->id => $tenantDateTime->format($teacher->created_at, $school, 'd M Y'),
+        ]);
 
-        return view('admin.teachers', compact('teachers'));
+        return view('admin.teachers', compact('teachers', 'registeredDates'));
     }
 
     public function storeTeacher(Request $request)
@@ -52,12 +67,15 @@ class AdminDashboardController extends Controller
         return back()->with('success', 'Teacher registered successfully!');
     }
 
-    public function students()
+    public function students(TenantDateTime $tenantDateTime)
     {
-        $schoolId = Auth::user()->school_id;
-        $students = User::where('school_id', $schoolId)->where('role', 'student')->get();
+        $school = Auth::user()->school;
+        $students = User::where('school_id', $school->id)->where('role', 'student')->get();
+        $registeredDates = $students->mapWithKeys(fn (User $student): array => [
+            $student->id => $tenantDateTime->format($student->created_at, $school, 'd M Y'),
+        ]);
 
-        return view('admin.students', compact('students'));
+        return view('admin.students', compact('students', 'registeredDates'));
     }
 
     public function storeStudent(Request $request)
@@ -91,6 +109,7 @@ class AdminDashboardController extends Controller
             'phone' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:500',
             'locale' => 'required|string|in:id,en,ar,zh',
+            'timezone' => 'required|timezone:all',
         ]);
 
         $school->update($validated);

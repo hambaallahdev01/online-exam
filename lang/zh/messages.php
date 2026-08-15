@@ -20,7 +20,7 @@ return [
     'hero_subtitle' => '高速、安全、易用的数字化考试系统。致力于推动教育发展与社会福祉。',
     'enter_portal' => '进入平台',
     'register_school_btn' => '注册学校',
-    
+
     // Feature Cards
     'feature_1_title' => '卓越性能',
     'feature_1_desc' => '专为数百名考生并发设计，流畅无卡顿，完美适配共享主机环境。',
@@ -49,6 +49,16 @@ return [
     'phone' => '联系电话',
     'address' => '学校地址',
     'language_setting' => '系统 / 控制台语言',
+    'timezone_setting' => '学校时区',
+    'timezone_registration_help' => '考试安排将使用此学校时区，请确认它与学校所在地一致。',
+    'timezone_change_help' => '更改时区只会改变时间的显示方式，不会移动已保存的考试时间点。',
+    'school_time' => '学校时间',
+    'exam_schedule' => '考试安排',
+    'exam_starts_at' => '开始时间',
+    'exam_ends_at' => '结束时间',
+    'invalid_local_datetime' => '该本地时间在学校时区中无效或存在歧义。',
+    'end_after_start' => '结束时间必须晚于开始时间。',
+    'duration_exceeds_window' => '考试时长不得超过计划时间范围。',
     'not_specified' => '未填写',
     'update_school_profile' => '更新学校资料',
     'cancel' => '取消',

@@ -62,6 +62,12 @@
                     @endif
                 </span>
             </p>
+            <p>
+                <strong>{{ __('messages.timezone_setting') }}:</strong>
+                <span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; padding: 0.25rem 0.6rem; border-radius: 0.4rem; font-weight: 600;">
+                    {{ $schoolTimezone }}
+                </span>
+            </p>
         </div>
 
         <!-- Edit Form Collapsible -->
@@ -95,6 +101,17 @@
                     </select>
                     <small style="display: block; color: var(--text-muted); margin-top: 0.3rem; font-size: 0.8rem;">
                         Pengaturan ini akan otomatis diterapkan ke seluruh akun Guru dan Siswa pada sekolah/instansi ini saat berada di dalam sistem ujian.
+                    </small>
+                </div>
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label style="display: block; margin-bottom: 0.3rem; font-weight: 500;">{{ __('messages.timezone_setting') }}</label>
+                    <select name="timezone" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: 0.4rem; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main);" required>
+                        @foreach($timezoneOptions as $identifier => $label)
+                            <option value="{{ $identifier }}" {{ old('timezone', $schoolTimezone) === $identifier ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <small style="display: block; color: var(--text-muted); margin-top: 0.3rem; font-size: 0.8rem;">
+                        {{ __('messages.timezone_change_help') }}
                     </small>
                 </div>
                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">

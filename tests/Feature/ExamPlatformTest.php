@@ -22,6 +22,7 @@ class ExamPlatformTest extends TestCase
             'school_name' => 'St. Jude Academy',
             'school_code' => 'STJUDE',
             'school_email' => 'contact@stjude.org',
+            'timezone' => 'Europe/London',
             'admin_name' => 'Father Francis',
             'admin_email' => 'francis@stjude.org',
             'password' => 'password123',
@@ -29,7 +30,7 @@ class ExamPlatformTest extends TestCase
         ]);
 
         $response->assertRedirect(route('login'));
-        $this->assertDatabaseHas('schools', ['code' => 'STJUDE']);
+        $this->assertDatabaseHas('schools', ['code' => 'STJUDE', 'timezone' => 'Europe/London']);
         $this->assertDatabaseHas('users', ['email' => 'francis@stjude.org', 'role' => 'admin']);
     }
 

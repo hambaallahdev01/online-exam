@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@demo-school.org',
             'address' => '123 Education Street, Suite 100',
             'phone' => '+62 812-3456-7890',
+            'timezone' => 'Asia/Jakarta',
         ]);
 
         // 2. School Admin User

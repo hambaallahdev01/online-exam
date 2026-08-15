@@ -6,18 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\Question;
 use App\Models\QuestionGroup;
+use App\Models\School;
 use App\Models\Subject;
 use App\Services\HtmlSanitizerService;
 use App\Services\MediaUploadService;
+use App\Services\TenantDateTime;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 class TeacherDashboardController extends Controller
 {
-    public function index()
+    public function index(TenantDateTime $tenantDateTime)
     {
         $teacher = Auth::user();
         $groupsCount = QuestionGroup::where('school_id', $teacher->school_id)
@@ -40,7 +44,36 @@ class TeacherDashboardController extends Controller
             ->latest()
             ->get();
 
-        return view('teacher.dashboard', compact('groupsCount', 'examsCount', 'subjects', 'questionGroups', 'exams'));
+        $school = $teacher->school;
+        $schoolTimezone = $tenantDateTime->timezoneFor($school);
+        $defaultStart = now('UTC')->addMinute()->startOfMinute();
+        $defaultExamStartsAt = $tenantDateTime->toInputValue($defaultStart, $school);
+        $defaultExamEndsAt = $tenantDateTime->toInputValue($defaultStart->addDays(7), $school);
+        $examSchedules = $exams->mapWithKeys(fn (Exam $exam): array => [
+            $exam->id => [
+                'id' => $exam->id,
+                'title' => $exam->title,
+                'token' => $exam->token,
+                'duration_minutes' => $exam->duration_minutes,
+                'is_active' => $exam->is_active,
+                'starts_at_local' => $tenantDateTime->toInputValue($exam->starts_at, $school),
+                'ends_at_local' => $tenantDateTime->toInputValue($exam->ends_at, $school),
+                'starts_at_display' => $tenantDateTime->format($exam->starts_at, $school),
+                'ends_at_display' => $tenantDateTime->format($exam->ends_at, $school),
+            ],
+        ]);
+
+        return view('teacher.dashboard', compact(
+            'groupsCount',
+            'examsCount',
+            'subjects',
+            'questionGroups',
+            'exams',
+            'examSchedules',
+            'schoolTimezone',
+            'defaultExamStartsAt',
+            'defaultExamEndsAt',
+        ));
     }
 
     public function createQuestionGroup(Request $request)
@@ -194,7 +227,7 @@ class TeacherDashboardController extends Controller
         return back()->with('success', 'Question added successfully!');
     }
 
-    public function storeExam(Request $request)
+    public function storeExam(Request $request, TenantDateTime $tenantDateTime)
     {
         $teacher = Auth::user();
 
@@ -215,15 +248,18 @@ class TeacherDashboardController extends Controller
                 Rule::unique('exams', 'token')->where(fn ($query) => $query->where('school_id', $teacher->school_id)),
             ],
             'duration_minutes' => 'required|integer|min:1',
+            'starts_at' => 'required|date_format:'.TenantDateTime::INPUT_FORMAT,
+            'ends_at' => 'required|date_format:'.TenantDateTime::INPUT_FORMAT,
         ]);
+        $schedule = $this->normalizeExamSchedule($validated, $tenantDateTime, $teacher->school);
 
         Exam::create([
             'school_id' => $teacher->school_id,
             'question_group_id' => $validated['question_group_id'],
             'title' => $validated['title'],
             'token' => strtoupper($validated['token']),
-            'starts_at' => now(),
-            'ends_at' => now()->addDays(7),
+            'starts_at' => $schedule['starts_at'],
+            'ends_at' => $schedule['ends_at'],
             'duration_minutes' => $validated['duration_minutes'],
             'is_active' => true,
         ]);
@@ -431,7 +467,7 @@ class TeacherDashboardController extends Controller
         return array_unique(array_filter($urls));
     }
 
-    public function updateExam(Request $request, Exam $exam)
+    public function updateExam(Request $request, Exam $exam, TenantDateTime $tenantDateTime)
     {
         $this->assertOwnedExam($exam);
 
@@ -449,13 +485,18 @@ class TeacherDashboardController extends Controller
             ],
             'duration_minutes' => 'required|integer|min:1',
             'is_active' => 'required|boolean',
+            'starts_at' => 'required|date_format:'.TenantDateTime::INPUT_FORMAT,
+            'ends_at' => 'required|date_format:'.TenantDateTime::INPUT_FORMAT,
         ]);
+        $schedule = $this->normalizeExamSchedule($validated, $tenantDateTime, $teacher->school);
 
         $exam->update([
             'title' => $validated['title'],
             'token' => strtoupper($validated['token']),
             'duration_minutes' => $validated['duration_minutes'],
             'is_active' => $validated['is_active'],
+            'starts_at' => $schedule['starts_at'],
+            'ends_at' => $schedule['ends_at'],
         ]);
 
         return back()->with('success', 'Published exam updated successfully!');
@@ -478,6 +519,49 @@ class TeacherDashboardController extends Controller
             403,
             'Unauthorized action.'
         );
+    }
+
+    /**
+     * Parse a school-local exam window and normalize it to UTC for persistence.
+     *
+     * @param  array<string, mixed>  $validated
+     * @return array{starts_at: CarbonImmutable, ends_at: CarbonImmutable}
+     */
+    private function normalizeExamSchedule(array $validated, TenantDateTime $tenantDateTime, School $school): array
+    {
+        try {
+            $startsAt = $tenantDateTime->toUtc($validated['starts_at'], $school);
+        } catch (InvalidArgumentException) {
+            throw ValidationException::withMessages([
+                'starts_at' => __('messages.invalid_local_datetime'),
+            ]);
+        }
+
+        try {
+            $endsAt = $tenantDateTime->toUtc($validated['ends_at'], $school);
+        } catch (InvalidArgumentException) {
+            throw ValidationException::withMessages([
+                'ends_at' => __('messages.invalid_local_datetime'),
+            ]);
+        }
+
+        if ($endsAt->lte($startsAt)) {
+            throw ValidationException::withMessages([
+                'ends_at' => __('messages.end_after_start'),
+            ]);
+        }
+
+        $windowSeconds = $endsAt->getTimestamp() - $startsAt->getTimestamp();
+        if (((int) $validated['duration_minutes']) * 60 > $windowSeconds) {
+            throw ValidationException::withMessages([
+                'duration_minutes' => __('messages.duration_exceeds_window'),
+            ]);
+        }
+
+        return [
+            'starts_at' => $startsAt,
+            'ends_at' => $endsAt,
+        ];
     }
 
     private function assertOwnedQuestion(Question $question): void

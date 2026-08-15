@@ -20,7 +20,7 @@ return [
     'hero_subtitle' => 'High-speed, secure, and accessible digital exam system. Built for the advancement of education and public benefit.',
     'enter_portal' => 'Enter Portal',
     'register_school_btn' => 'Register School',
-    
+
     // Feature Cards
     'feature_1_title' => 'High Performance',
     'feature_1_desc' => 'Optimized for hundreds of concurrent exam participants without lag, friendly with shared hosting.',
@@ -49,6 +49,16 @@ return [
     'phone' => 'Phone Number',
     'address' => 'Address',
     'language_setting' => 'System / Dashboard Language',
+    'timezone_setting' => 'School Timezone',
+    'timezone_registration_help' => 'Exam schedules will use this school timezone. Make sure it matches the school location.',
+    'timezone_change_help' => 'Changing the timezone only changes how times are displayed; existing schedule instants will not move.',
+    'school_time' => 'School time',
+    'exam_schedule' => 'Schedule',
+    'exam_starts_at' => 'Starts at',
+    'exam_ends_at' => 'Ends at',
+    'invalid_local_datetime' => 'The local time is invalid or ambiguous in the school timezone.',
+    'end_after_start' => 'The end time must be after the start time.',
+    'duration_exceeds_window' => 'The exam duration may not exceed the scheduled window.',
     'not_specified' => 'Not specified',
     'update_school_profile' => 'Update School Profile',
     'cancel' => 'Cancel',

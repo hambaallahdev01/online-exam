@@ -82,6 +82,7 @@
                     <th>Bank Soal</th>
                     <th>Token</th>
                     <th>Durasi</th>
+                    <th>{{ __('messages.exam_schedule') }}</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -94,6 +95,11 @@
                         <td>{{ $ex->questionGroup->name ?? 'N/A' }}</td>
                         <td><code style="background: rgba(99, 102, 241, 0.1); color: var(--accent); padding: 0.2rem 0.5rem; border-radius: 0.3rem; font-weight: 700;">{{ $ex->token }}</code></td>
                         <td>{{ $ex->duration_minutes }} Menit</td>
+                        <td style="min-width: 220px;">
+                            <div><strong>{{ __('messages.exam_starts_at') }}:</strong> {{ $examSchedules[$ex->id]['starts_at_display'] }}</div>
+                            <div><strong>{{ __('messages.exam_ends_at') }}:</strong> {{ $examSchedules[$ex->id]['ends_at_display'] }}</div>
+                            <small style="color: var(--text-muted);">{{ $schoolTimezone }}</small>
+                        </td>
                         <td>
                             @if($ex->is_active)
                                 <span style="background: rgba(22, 163, 74, 0.1); color: var(--status-answered); padding: 0.2rem 0.6rem; border-radius: 0.4rem; font-weight: 600; font-size: 0.8rem;">Aktif</span>
@@ -103,7 +109,7 @@
                         </td>
                         <td>
                             <div style="display: flex; gap: 0.4rem;">
-                                <button class="btn btn-secondary" onclick="openEditExamModal({{ json_encode($ex) }})" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: var(--primary);" title="Edit Ujian">
+                                <button class="btn btn-secondary" onclick="openEditExamModal({{ $ex->id }})" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: var(--primary);" title="Edit Ujian">
                                     <i class="fa-solid fa-pen-to-square"></i> Edit
                                 </button>
                                 <form action="{{ route('teacher.exams.destroy', $ex->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus publikasi ujian ini?');" style="display: inline;">
@@ -118,7 +124,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="text-align: center; color: var(--text-muted);">Belum ada ujian yang dipublikasikan.</td>
+                        <td colspan="8" style="text-align: center; color: var(--text-muted);">Belum ada ujian yang dipublikasikan.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -155,8 +161,21 @@
             </div>
             <div class="form-group">
                 <label for="duration_minutes">Duration (Minutes)</label>
-                <input type="number" name="duration_minutes" class="form-control" value="60" min="5" required>
+                <input type="number" name="duration_minutes" class="form-control" value="{{ old('duration_minutes', 60) }}" min="1" required>
             </div>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem;">
+                <div class="form-group">
+                    <label for="starts_at">{{ __('messages.exam_starts_at') }}</label>
+                    <input type="datetime-local" name="starts_at" id="starts_at" class="form-control" value="{{ old('starts_at', $defaultExamStartsAt) }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="ends_at">{{ __('messages.exam_ends_at') }}</label>
+                    <input type="datetime-local" name="ends_at" id="ends_at" class="form-control" value="{{ old('ends_at', $defaultExamEndsAt) }}" required>
+                </div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.82rem; margin: -0.25rem 0 1rem;">
+                <i class="fa-solid fa-clock"></i> {{ __('messages.school_time') }}: <strong>{{ $schoolTimezone }}</strong>
+            </p>
             <button type="submit" class="btn btn-accent" style="width: 100%;">Publish Exam</button>
         </form>
     </div>
@@ -217,6 +236,15 @@
                 <input type="number" name="duration_minutes" id="edit_duration_minutes" class="form-control" min="1" required>
             </div>
             <div class="form-group">
+                <label for="edit_starts_at">{{ __('messages.exam_starts_at') }}</label>
+                <input type="datetime-local" name="starts_at" id="edit_starts_at" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="edit_ends_at">{{ __('messages.exam_ends_at') }}</label>
+                <input type="datetime-local" name="ends_at" id="edit_ends_at" class="form-control" required>
+                <small style="display: block; color: var(--text-muted); margin-top: 0.3rem;">{{ __('messages.school_time') }}: {{ $schoolTimezone }}</small>
+            </div>
+            <div class="form-group">
                 <label for="edit_is_active">Status Ujian</label>
                 <select name="is_active" id="edit_is_active" class="form-control">
                     <option value="1">Aktif (Peserta Bisa Akses)</option>
@@ -231,19 +259,27 @@
 
 @section('scripts')
 <script>
-function openEditExamModal(exam) {
+const examSchedules = {{ Illuminate\Support\Js::from($examSchedules) }};
+const examUpdateUrlTemplate = {{ Illuminate\Support\Js::from(route('teacher.exams.update', ['exam' => '__EXAM_ID__'])) }};
+
+function openEditExamModal(examId) {
+    const exam = examSchedules[examId];
     const modal = document.getElementById('modalEditExam');
     const form = document.getElementById('editExamForm');
     const titleInput = document.getElementById('edit_title');
     const tokenInput = document.getElementById('edit_token');
     const durationInput = document.getElementById('edit_duration_minutes');
     const activeSelect = document.getElementById('edit_is_active');
+    const startsAtInput = document.getElementById('edit_starts_at');
+    const endsAtInput = document.getElementById('edit_ends_at');
 
-    form.action = `/teacher/exams/${exam.id}`;
+    form.action = examUpdateUrlTemplate.replace('__EXAM_ID__', exam.id);
     titleInput.value = exam.title || '';
     tokenInput.value = exam.token || '';
     durationInput.value = exam.duration_minutes || 60;
     activeSelect.value = exam.is_active ? '1' : '0';
+    startsAtInput.value = exam.starts_at_local;
+    endsAtInput.value = exam.ends_at_local;
 
     modal.style.display = 'flex';
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\School;
 use App\Models\User;
 use App\Rules\TurnstileRule;
+use App\Services\TenantDateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -59,9 +60,12 @@ class AuthController extends Controller
         ]);
     }
 
-    public function showRegisterSchool()
+    public function showRegisterSchool(TenantDateTime $tenantDateTime)
     {
-        return view('auth.register-school');
+        return view('auth.register-school', [
+            'timezoneOptions' => $tenantDateTime->timezoneOptions(),
+            'defaultTimezone' => $tenantDateTime->timezoneFor(config('tenancy.default_timezone', 'Asia/Jakarta')),
+        ]);
     }
 
     public function registerSchool(Request $request)
@@ -70,6 +74,7 @@ class AuthController extends Controller
             'school_name' => ['required', 'string', 'max:255'],
             'school_code' => ['nullable', 'string', 'max:50', 'unique:schools,code'],
             'school_email' => ['required', 'email', 'max:255', 'unique:schools,email'],
+            'timezone' => ['required', 'timezone:all'],
             'admin_name' => ['required', 'string', 'max:255'],
             'admin_email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -80,6 +85,7 @@ class AuthController extends Controller
             'name' => $validated['school_name'],
             'code' => $validated['school_code'] ?? strtoupper(substr(md5(uniqid()), 0, 6)),
             'email' => $validated['school_email'],
+            'timezone' => $validated['timezone'],
         ]);
 
         $user = User::create([

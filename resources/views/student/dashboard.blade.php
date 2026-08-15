@@ -42,7 +42,7 @@
                 @forelse($myResults as $res)
                     <tr>
                         <td><strong>{{ $res->exam->title }}</strong></td>
-                        <td>{{ $res->created_at->format('d M Y, H:i') }}</td>
+                        <td>{{ $resultDates[$res->id] }} <small style="color: var(--text-muted);">({{ $schoolTimezone }})</small></td>
                         <td>
                             @if($res->status === 'graded' || $res->status === 'submitted')
                                 <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem;">Submitted</span>

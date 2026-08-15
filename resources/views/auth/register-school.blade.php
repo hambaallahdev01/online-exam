@@ -23,6 +23,17 @@
                 <label for="school_email">School Email</label>
                 <input type="email" id="school_email" name="school_email" class="form-control" placeholder="info@school.sch.id" value="{{ old('school_email') }}" required>
             </div>
+            <div class="form-group">
+                <label for="timezone">{{ __('messages.timezone_setting') }}</label>
+                <select id="timezone" name="timezone" class="form-control" required>
+                    @foreach($timezoneOptions as $identifier => $label)
+                        <option value="{{ $identifier }}" {{ old('timezone', $defaultTimezone) === $identifier ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <small style="display: block; color: var(--text-muted); margin-top: 0.3rem; font-size: 0.8rem;">
+                    {{ __('messages.timezone_registration_help') }}
+                </small>
+            </div>
 
             <h3 style="font-size: 1rem; color: var(--primary); margin: 1.5rem 0 1rem;">2. Administrator Account</h3>
             <div class="form-group">
@@ -53,4 +64,17 @@
         </form>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+@if(! old('timezone'))
+<script>
+const timezoneSelect = document.getElementById('timezone');
+const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+if (browserTimezone && Array.from(timezoneSelect.options).some((option) => option.value === browserTimezone)) {
+    timezoneSelect.value = browserTimezone;
+}
+</script>
+@endif
 @endsection

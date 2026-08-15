@@ -8,7 +8,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/hambaallahdev01/online-exam?style=for-the-badge&color=green" alt="MIT License" /></a>
   <br>
   <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 13" /></a>
-  <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.5+" /></a>
+  <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.5%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.5+" /></a>
 </p>
 
 ---
@@ -57,8 +57,9 @@ The platform natively supports 7 comprehensive question formats:
 - **Full Question & Exam Lifecycle Management (CRUD & Auto S3 Purge)**:
   - Create, view, edit, and delete questions and question groups.
   - Eloquent `deleting` model event hook to automatically purge all attached S3/Storage media files from HTML/JSON content when a question is deleted or updated.
-  - Published Exams Management Table on Teacher Dashboard with Edit Modal (title, token, duration, active/inactive toggle status) and Delete actions.
-- **Multi-Role & Multi-Tenant Onboarding**: School registration wizard, academic year setup, classrooms, subjects, teacher-subject mapping, and student enrollment.
+  - Published Exams Management Table on Teacher Dashboard with Edit Modal (title, token, duration, tenant-local schedule, active/inactive toggle status) and Delete actions.
+- **Multi-Role & Multi-Tenant Onboarding**: School registration wizard, IANA timezone selection, academic year setup, classrooms, subjects, teacher-subject mapping, and student enrollment.
+- **Tenant-Aware Exam Scheduling**: Teachers enter and view schedules in the school's timezone while all timestamps, availability checks, and countdown deadlines remain UTC internally.
 - **High-Resilience Student Exam Engine**:
   - Pure Vanilla JS frontend execution with **zero external CDN dependencies** for supply-chain security.
   - Background REST API autosave every 15 seconds and on option selection.
@@ -93,6 +94,7 @@ The platform natively supports 7 comprehensive question formats:
    copy .env.example .env
    php artisan key:generate
    ```
+   Set `TENANT_DEFAULT_TIMEZONE` to the IANA timezone used as the default for new schools (for example, `Asia/Jakarta`).
 
 3. **Database Migration & Seeding**:
    ```bash
@@ -216,8 +218,10 @@ Easily deploy on standard cPanel/DirectAdmin shared web hosting without root acc
    APP_ENV=production
    APP_DEBUG=false
    APP_URL=https://your-school-domain.org
+   TENANT_DEFAULT_TIMEZONE=Asia/Jakarta
 
    DB_CONNECTION=mysql
+   DB_TIMEZONE=+00:00
    DB_HOST=127.0.0.1
    DB_PORT=3306
    DB_DATABASE=cpanel_exam_db
@@ -310,7 +314,7 @@ To minimize storage space and save bandwidth:
 
 - **Cloudflare Real IP Restoration**: [`RestoreCloudflareRealIp`](/app/Http/Middleware/RestoreCloudflareRealIp.php) accepts `CF-Connecting-IP` only when `REMOTE_ADDR` matches a CIDR configured in `CLOUDFLARE_TRUSTED_PROXIES`. Populate it from [Cloudflare's published IP ranges](https://www.cloudflare.com/ips/) and keep it current.
 - **Role and Tenant Authorization**: Admin, teacher, and student routes are role-gated; question banks, exams, subjects, results, and media operations are scoped to their school and owner.
-- **Exam Integrity**: Opening an exam requires a successful token entry, an active schedule, and the same school. Remaining time is calculated server-side and answer IDs are restricted to the selected exam.
+- **Exam Integrity**: Opening an exam requires a successful token entry, an active UTC-normalized schedule, and the same school. Teachers and students see the schedule in their tenant's IANA timezone; remaining time is calculated server-side and answer IDs are restricted to the selected exam.
 - **Stored-XSS Defense**: Rich question HTML is sanitized with an allowlist before storage and again before rendering; executable attributes, unsafe URLs, and untrusted embeds are removed.
 - **Application-Level Anti-DDoS & Throttle Rate Limiting**:
   - Login Endpoint: Max 5 failed login attempts per minute per IP (`throttle:login`).

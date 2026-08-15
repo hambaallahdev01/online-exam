@@ -20,7 +20,7 @@ return [
     'hero_subtitle' => 'Sistem ujian digital berkecepatan tinggi, aman, dan mudah diakses. Dibangun demi kemaslahatan umat terkhusus pendidikan.',
     'enter_portal' => 'Masuk ke Portal',
     'register_school_btn' => 'Daftarkan Sekolah',
-    
+
     // Feature Cards
     'feature_1_title' => 'Performa Tinggi',
     'feature_1_desc' => 'Dioptimalkan untuk ratusan peserta ujian secara bersamaan tanpa kendala, bersahabat dengan shared hosting.',
@@ -49,6 +49,16 @@ return [
     'phone' => 'Nomor Telepon',
     'address' => 'Alamat',
     'language_setting' => 'Bahasa Sistem / Dashboard',
+    'timezone_setting' => 'Zona Waktu Sekolah',
+    'timezone_registration_help' => 'Jadwal ujian akan mengikuti zona waktu sekolah ini. Pastikan pilihan sesuai lokasi sekolah.',
+    'timezone_change_help' => 'Mengubah zona waktu hanya mengubah tampilan waktu; jadwal yang sudah tersimpan tidak akan digeser.',
+    'school_time' => 'Waktu sekolah',
+    'exam_schedule' => 'Jadwal',
+    'exam_starts_at' => 'Mulai',
+    'exam_ends_at' => 'Selesai',
+    'invalid_local_datetime' => 'Waktu lokal tersebut tidak valid atau ambigu pada zona waktu sekolah.',
+    'end_after_start' => 'Waktu selesai harus setelah waktu mulai.',
+    'duration_exceeds_window' => 'Durasi ujian tidak boleh melebihi rentang jadwal ujian.',
     'not_specified' => 'Belum ditentukan',
     'update_school_profile' => 'Perbarui Profil Sekolah',
     'cancel' => 'Batal',

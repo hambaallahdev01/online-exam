@@ -180,7 +180,7 @@ class ExamSessionApiController extends Controller
             'score' => $finalPercentage,
             'status' => $requiresManualGrading ? 'submitted' : 'graded',
             'time_remaining_seconds' => 0,
-            'submitted_at' => now(),
+            'submitted_at' => now('UTC'),
         ]);
 
         return response()->json([
@@ -193,11 +193,12 @@ class ExamSessionApiController extends Controller
 
     private function remainingSeconds(ExamResult $result, Exam $exam): int
     {
-        $startedAt = $result->started_at ?? now();
+        $utcNow = now('UTC');
+        $startedAt = $result->started_at ?? $utcNow;
         $personalDeadline = $startedAt->copy()->addMinutes($exam->duration_minutes);
         $deadline = $exam->ends_at->lt($personalDeadline) ? $exam->ends_at : $personalDeadline;
 
-        return max(0, $deadline->getTimestamp() - now()->getTimestamp());
+        return max(0, $deadline->getTimestamp() - $utcNow->getTimestamp());
     }
 
     private function filterAnswers(Exam $exam, array $answers): array
