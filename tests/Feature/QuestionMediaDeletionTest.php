@@ -36,14 +36,16 @@ class QuestionMediaDeletionTest extends TestCase
             'name' => 'Sample Group',
         ]);
 
-        // Put fake files on storage
-        Storage::disk('public')->put('questions/img_content.jpg', 'fake content image');
-        Storage::disk('public')->put('questions/img_option_a.jpg', 'fake option A image');
-        Storage::disk('public')->put('questions/pdf_doc.pdf', 'fake pdf doc');
+        $mediaPrefix = "questions/{$school->id}/{$teacher->id}";
 
-        $url1 = Storage::disk('public')->url('questions/img_content.jpg');
-        $url2 = Storage::disk('public')->url('questions/img_option_a.jpg');
-        $url3 = Storage::disk('public')->url('questions/pdf_doc.pdf');
+        // Put fake files in this teacher's isolated namespace.
+        Storage::disk('public')->put("{$mediaPrefix}/img_content.jpg", 'fake content image');
+        Storage::disk('public')->put("{$mediaPrefix}/img_option_a.jpg", 'fake option A image');
+        Storage::disk('public')->put("{$mediaPrefix}/pdf_doc.pdf", 'fake pdf doc');
+
+        $url1 = Storage::disk('public')->url("{$mediaPrefix}/img_content.jpg");
+        $url2 = Storage::disk('public')->url("{$mediaPrefix}/img_option_a.jpg");
+        $url3 = Storage::disk('public')->url("{$mediaPrefix}/pdf_doc.pdf");
 
         $question = Question::create([
             'school_id' => $school->id,
@@ -52,15 +54,15 @@ class QuestionMediaDeletionTest extends TestCase
             'content' => "<p>Question text</p><img src=\"{$url1}\"><a href=\"{$url3}\" class=\"pdf-attachment-badge\">PDF</a>",
             'options_json' => [
                 ['id' => 'A', 'text' => "<p>Option A</p><img src=\"{$url2}\">"],
-                ['id' => 'B', 'text' => "Option B"],
+                ['id' => 'B', 'text' => 'Option B'],
             ],
             'correct_answers_json' => ['A'],
             'weight' => 10,
         ]);
 
-        Storage::disk('public')->assertExists('questions/img_content.jpg');
-        Storage::disk('public')->assertExists('questions/img_option_a.jpg');
-        Storage::disk('public')->assertExists('questions/pdf_doc.pdf');
+        Storage::disk('public')->assertExists("{$mediaPrefix}/img_content.jpg");
+        Storage::disk('public')->assertExists("{$mediaPrefix}/img_option_a.jpg");
+        Storage::disk('public')->assertExists("{$mediaPrefix}/pdf_doc.pdf");
 
         // Delete question
         $response = $this->actingAs($teacher)->delete(route('teacher.questions.destroy', $question->id));
@@ -70,8 +72,8 @@ class QuestionMediaDeletionTest extends TestCase
         $this->assertDatabaseMissing('questions', ['id' => $question->id]);
 
         // Assert media files automatically purged from storage
-        Storage::disk('public')->assertMissing('questions/img_content.jpg');
-        Storage::disk('public')->assertMissing('questions/img_option_a.jpg');
-        Storage::disk('public')->assertMissing('questions/pdf_doc.pdf');
+        Storage::disk('public')->assertMissing("{$mediaPrefix}/img_content.jpg");
+        Storage::disk('public')->assertMissing("{$mediaPrefix}/img_option_a.jpg");
+        Storage::disk('public')->assertMissing("{$mediaPrefix}/pdf_doc.pdf");
     }
 }

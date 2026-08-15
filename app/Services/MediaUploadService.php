@@ -14,50 +14,65 @@ class MediaUploadService
      * Upload file with automatic proportional image resizing (max 1024x1024)
      * and strict PDF size limit (max 5MB). Direct video file uploads are prohibited.
      *
-     * @param UploadedFile $file
-     * @param string $folder
-     * @param int $maxWidth
-     * @param int $maxHeight
      * @return string Public URL of the uploaded file
+     *
      * @throws InvalidArgumentException
      */
     public static function upload(UploadedFile $file, string $folder = 'uploads', int $maxWidth = 1024, int $maxHeight = 1024): string
     {
-        $extension = strtolower($file->getClientOriginalExtension());
-        $mime = class_exists('finfo') ? $file->getMimeType() : ($file->getClientMimeType() ?: match($extension) {
-            'jpg', 'jpeg' => 'image/jpeg',
-            'png' => 'image/png',
-            'webp' => 'image/webp',
-            'gif' => 'image/gif',
-            'pdf' => 'application/pdf',
-            default => 'application/octet-stream',
-        });
+        $clientExtension = strtolower($file->getClientOriginalExtension());
+        $mime = (string) $file->getMimeType();
         $sizeInKb = $file->getSize() / 1024;
 
-        // Prohibit direct video file uploads to save bandwidth & S3 storage
-        if (str_starts_with($mime, 'video/') || in_array($extension, ['mp4', 'avi', 'mov', 'mkv', 'webm', '3gp', 'flv'])) {
+        if (str_starts_with($mime, 'video/') || in_array($clientExtension, ['mp4', 'avi', 'mov', 'mkv', 'webm', '3gp', 'flv'], true)) {
             throw new InvalidArgumentException('Direct video file uploads are disabled to preserve storage and bandwidth. Please embed YouTube video URLs instead.');
         }
 
-        // PDF size restriction: Max 5MB (5120 KB)
-        if ($extension === 'pdf' || $mime === 'application/pdf') {
-            if ($sizeInKb > 5120) {
-                throw new InvalidArgumentException('PDF document size exceeds the maximum limit of 5MB.');
-            }
+        $allowedTypes = [
+            'image/jpeg' => ['extensions' => ['jpg', 'jpeg'], 'stored_extension' => 'jpg'],
+            'image/png' => ['extensions' => ['png'], 'stored_extension' => 'png'],
+            'image/webp' => ['extensions' => ['webp'], 'stored_extension' => 'webp'],
+            'application/pdf' => ['extensions' => ['pdf'], 'stored_extension' => 'pdf'],
+        ];
+
+        if (! isset($allowedTypes[$mime]) || ! in_array($clientExtension, $allowedTypes[$mime]['extensions'], true)) {
+            throw new InvalidArgumentException('Only verified JPEG, PNG, WebP, and PDF files are allowed.');
         }
 
-        $filename = Str::random(20) . '.' . $extension;
-        $path = rtrim($folder, '/') . '/' . $filename;
+        if ($sizeInKb > 5120) {
+            $message = $mime === 'application/pdf' || $clientExtension === 'pdf'
+                ? 'PDF document size exceeds the maximum limit of 5MB.'
+                : 'File size exceeds the maximum limit of 5MB.';
 
-        // Check if file is an image (JPEG, PNG, WEBP, GIF)
-        if (str_starts_with($mime, 'image/') && extension_loaded('gd') && in_array($extension, ['jpg', 'jpeg', 'png', 'webp'])) {
+            throw new InvalidArgumentException($message);
+        }
+
+        $folder = trim(str_replace('\\', '/', $folder), '/');
+        $segments = explode('/', $folder);
+        if ($folder === '' || ! preg_match('/\A[a-zA-Z0-9_\/-]+\z/', $folder) || array_intersect($segments, ['.', '..'])) {
+            throw new InvalidArgumentException('Invalid upload folder.');
+        }
+
+        $extension = $allowedTypes[$mime]['stored_extension'];
+
+        if (str_starts_with($mime, 'image/') && ! extension_loaded('gd')) {
+            throw new InvalidArgumentException('Image processing is unavailable on this server.');
+        }
+
+        $filename = Str::random(20).'.'.$extension;
+        $path = rtrim($folder, '/').'/'.$filename;
+
+        // Decode and re-encode images so disguised/polyglot files are not stored verbatim.
+        if (str_starts_with($mime, 'image/')) {
             $resizedBinary = static::resizeImageProportional($file->getRealPath(), $mime, $maxWidth, $maxHeight);
-            if ($resizedBinary !== null) {
-                return static::saveToDisk($path, $resizedBinary, $file, $folder, $filename);
+            if ($resizedBinary === null) {
+                throw new InvalidArgumentException('The uploaded image could not be decoded safely.');
             }
+
+            return static::saveToDisk($path, $resizedBinary, $file, $folder, $filename);
         }
 
-        // Store PDF or fallback
+        // Store a verified PDF.
         return static::saveToDisk($path, null, $file, $folder, $filename);
     }
 
@@ -71,6 +86,7 @@ class MediaUploadService
         try {
             if ($binary !== null) {
                 Storage::disk($defaultDisk)->put($path, $binary, 'public');
+
                 return Storage::disk($defaultDisk)->url($path);
             }
 
@@ -81,7 +97,7 @@ class MediaUploadService
 
             return Storage::disk($defaultDisk)->url($storedPath);
         } catch (\Throwable $e) {
-            Log::error("S3 Upload Failed for disk [{$defaultDisk}]: " . $e->getMessage(), [
+            Log::error("S3 Upload Failed for disk [{$defaultDisk}]: ".$e->getMessage(), [
                 'path' => $path,
                 'exception' => $e->getTraceAsString(),
             ]);
@@ -90,12 +106,14 @@ class MediaUploadService
             if ($defaultDisk !== 'public') {
                 if ($binary !== null) {
                     Storage::disk('public')->put($path, $binary, 'public');
+
                     return Storage::disk('public')->url($path);
                 }
                 $storedPath = $file->storeAs($folder, $filename, [
                     'disk' => 'public',
                     'visibility' => 'public',
                 ]);
+
                 return Storage::disk('public')->url($storedPath);
             }
             throw $e;
@@ -107,8 +125,8 @@ class MediaUploadService
      */
     protected static function resizeImageProportional(string $filePath, string $mime, int $maxWidth, int $maxHeight): ?string
     {
-        list($origWidth, $origHeight) = @getimagesize($filePath);
-        if (!$origWidth || !$origHeight) {
+        [$origWidth, $origHeight] = @getimagesize($filePath);
+        if (! $origWidth || ! $origHeight) {
             return null;
         }
 
@@ -132,7 +150,7 @@ class MediaUploadService
             default => null,
         };
 
-        if (!$srcImg) {
+        if (! $srcImg) {
             return null;
         }
 
@@ -176,7 +194,7 @@ class MediaUploadService
     /**
      * Delete uploaded file from S3 / Local storage by URL.
      */
-    public static function deleteFile(string $url): bool
+    public static function deleteFile(string $url, ?string $requiredPrefix = null): bool
     {
         if (empty($url)) {
             return false;
@@ -184,14 +202,27 @@ class MediaUploadService
 
         // Parse path relative to storage, e.g. "questions/abc.jpg"
         $parsedUrl = parse_url($url, PHP_URL_PATH);
-        if (!$parsedUrl) {
+        if (! $parsedUrl) {
             return false;
         }
 
-        // Strip leading slash or 'storage/' prefix if present
-        $path = ltrim($parsedUrl, '/');
+        // Decode and normalize a storage-relative path without allowing traversal.
+        $path = str_replace('\\', '/', rawurldecode($parsedUrl));
+        $path = ltrim($path, '/');
         if (str_starts_with($path, 'storage/')) {
             $path = substr($path, 8);
+        }
+
+        $segments = explode('/', $path);
+        if ($path === '' || str_contains($path, "\0") || array_intersect($segments, ['', '.', '..'])) {
+            return false;
+        }
+
+        if ($requiredPrefix !== null) {
+            $requiredPrefix = trim(str_replace('\\', '/', $requiredPrefix), '/');
+            if ($requiredPrefix === '' || ! str_starts_with($path, $requiredPrefix.'/')) {
+                return false;
+            }
         }
 
         $defaultDisk = config('filesystems.default', 'public');
@@ -202,7 +233,7 @@ class MediaUploadService
                 $deleted = Storage::disk($defaultDisk)->delete($path);
             }
         } catch (\Throwable $e) {
-            Log::error("Failed to delete media from disk [{$defaultDisk}]: " . $e->getMessage());
+            Log::error("Failed to delete media from disk [{$defaultDisk}]: ".$e->getMessage());
         }
 
         // Also check fallback 'public' disk if default disk is not public
@@ -223,31 +254,31 @@ class MediaUploadService
     /**
      * Extract all image/PDF URLs from HTML content or option JSON array and delete them from storage.
      */
-    public static function deleteMediaFromContent(mixed $content): void
+    public static function deleteMediaFromContent(mixed $content, ?string $requiredPrefix = null): void
     {
         if (empty($content)) {
             return;
         }
 
         $urls = [];
-        $text = is_array($content) || is_object($content) ? json_encode($content, JSON_UNESCAPED_SLASHES) : (string)$content;
+        $text = is_array($content) || is_object($content) ? json_encode($content, JSON_UNESCAPED_SLASHES) : (string) $content;
         $text = stripslashes($text);
 
         // 1. Match full http(s) URLs
         preg_match_all('/https?:\/\/[^\s"\'<>]+/i', $text, $matches1);
-        if (!empty($matches1[0])) {
+        if (! empty($matches1[0])) {
             $urls = array_merge($urls, $matches1[0]);
         }
 
         // 2. Match relative src/href paths (e.g. /storage/questions/xyz.jpg or questions/xyz.jpg)
         preg_match_all('/(?:src|href)=["\']([^"\']+)["\']/i', $text, $matches2);
-        if (!empty($matches2[1])) {
+        if (! empty($matches2[1])) {
             $urls = array_merge($urls, $matches2[1]);
         }
 
         foreach (array_unique($urls) as $url) {
             $cleanUrl = trim(str_replace(['\\', '"', "'"], '', $url));
-            static::deleteFile($cleanUrl);
+            static::deleteFile($cleanUrl, $requiredPrefix);
         }
     }
 }

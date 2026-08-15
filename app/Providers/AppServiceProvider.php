@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,21 +28,25 @@ class AppServiceProvider extends ServiceProvider
 
         // Rate Limiter: Login (Anti-Bruteforce & Anti-DDoS)
         RateLimiter::for('login', function (Request $request) {
-            $ip = $request->header('CF-Connecting-IP', $request->ip());
-            return Limit::perMinute(5)->by($ip . '|' . $request->input('email'));
+            $ip = $request->ip();
+            $email = Str::lower(trim((string) $request->input('email')));
+
+            return Limit::perMinute(5)->by($ip.'|'.$email);
         });
 
         // Rate Limiter: School Registration
         RateLimiter::for('register-school', function (Request $request) {
-            $ip = $request->header('CF-Connecting-IP', $request->ip());
+            $ip = $request->ip();
+
             return Limit::perHour(5)->by($ip);
         });
 
         // Rate Limiter: Student Exam API (Autosave & Payload)
         RateLimiter::for('api-exam', function (Request $request) {
-            $ip = $request->header('CF-Connecting-IP', $request->ip());
+            $ip = $request->ip();
             $userId = optional($request->user())->id ?? 'guest';
-            return Limit::perMinute(60)->by($userId . '|' . $ip);
+
+            return Limit::perMinute(60)->by($userId.'|'.$ip);
         });
     }
 }

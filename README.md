@@ -290,7 +290,7 @@ For cloud deployments or shared storage across multiple web servers, configure L
    AWS_ENDPOINT=https://ap-south-1.linodeobjects.com
    AWS_URL=https://nawaitu.ap-south-1.linodeobjects.com
    AWS_USE_PATH_STYLE_ENDPOINT=false
-   AWS_VERIFY_SSL=false
+   AWS_VERIFY_SSL=true
    ```
 
 ---
@@ -300,15 +300,18 @@ For cloud deployments or shared storage across multiple web servers, configure L
 To minimize storage space and save bandwidth:
 
 - **Proportional Image Resizing**: All uploaded images (JPEG, PNG, WebP) are processed by [`MediaUploadService`](/app/Services/MediaUploadService.php) using native PHP GD library to automatically resize to **maximum 1024x1024 pixels** while preserving original aspect ratio and applying **95% high quality optimization**.
-- **Automated S3 Storage Purging**: Deleting a question or removing an image during editing automatically purges all associated media files from Linode S3 / Storage to prevent orphaned garbage files.
-- **Strict PDF Limit**: PDF document uploads are strictly limited to a **maximum size of 5MB** (5,120 KB).
+- **Tenant-Scoped S3 Storage Purging**: Media is stored under `questions/{school_id}/{teacher_id}`. Deleting a question or removing an upload can purge only files owned by that teacher.
+- **Strict Upload Allowlist**: Only content-verified JPEG, PNG, WebP, and PDF files are accepted, with a **maximum size of 5MB** (5,120 KB). Images are decoded and re-encoded before storage.
 - **YouTube Video Policy**: Direct video file uploads (MP4, AVI, MOV) are prohibited to save storage and bandwidth. Videos are embedded via responsive YouTube iframes.
 
 ---
 
 ## Security, Supply Chain Integrity & Email Deliverability
 
-- **Cloudflare Real IP Restoration**: Native middleware [`RestoreCloudflareRealIp`](/app/Http/Middleware/RestoreCloudflareRealIp.php) extracts genuine student client IPs from `CF-Connecting-IP` headers to prevent proxy spoofing.
+- **Cloudflare Real IP Restoration**: [`RestoreCloudflareRealIp`](/app/Http/Middleware/RestoreCloudflareRealIp.php) accepts `CF-Connecting-IP` only when `REMOTE_ADDR` matches a CIDR configured in `CLOUDFLARE_TRUSTED_PROXIES`. Populate it from [Cloudflare's published IP ranges](https://www.cloudflare.com/ips/) and keep it current.
+- **Role and Tenant Authorization**: Admin, teacher, and student routes are role-gated; question banks, exams, subjects, results, and media operations are scoped to their school and owner.
+- **Exam Integrity**: Opening an exam requires a successful token entry, an active schedule, and the same school. Remaining time is calculated server-side and answer IDs are restricted to the selected exam.
+- **Stored-XSS Defense**: Rich question HTML is sanitized with an allowlist before storage and again before rendering; executable attributes, unsafe URLs, and untrusted embeds are removed.
 - **Application-Level Anti-DDoS & Throttle Rate Limiting**:
   - Login Endpoint: Max 5 failed login attempts per minute per IP (`throttle:login`).
   - Student Exam REST API: Max 60 requests per minute (`throttle:api-exam`).
@@ -317,7 +320,7 @@ To minimize storage space and save bandwidth:
 - **HTML Email Delivery (Brevo SMTP Integration)**: Integrated HTML Mailables (`resources/views/emails/`) for email verification and password reset to ensure high inbox deliverability and prevent rSPAM classification by mail relays.
 - **HTTP Security Headers**: Global middleware [`SecurityHeaders`](/app/Http/Middleware/SecurityHeaders.php) automatically injects `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, and `X-XSS-Protection`.
 - **Zero External CDN Dependencies**: All CSS, JavaScript, icons (FontAwesome 6 Free), and layout utilities are served locally from `public/vendor/`. This prevents potential third-party script injection or CDN outage disruptions during exam sessions.
-- **Password Reset & Email Verification**: Integrated password recovery workflow (`/forgot-password` & `/reset-password`) and email verification via secure SMTP delivery.
+- **Password Reset & Email Verification**: Reset tokens enforce expiration and revoke existing sessions; verification links require a valid temporary URL signature.
 
 ### SMTP Mail Setup (`.env`)
 ```env
@@ -333,6 +336,9 @@ MAIL_FROM_NAME="${APP_NAME}"
 # Cloudflare Turnstile CAPTCHA (Optional)
 TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 TURNSTILE_SECRET_KEY=your_cloudflare_turnstile_secret_key
+
+# Public Cloudflare IPv4/IPv6 CIDRs (review https://www.cloudflare.com/ips/ periodically).
+CLOUDFLARE_TRUSTED_PROXIES="173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/13,104.24.0.0/14,172.64.0.0/13,131.0.72.0/22,2400:cb00::/32,2606:4700::/32,2803:f800::/32,2405:b500::/32,2405:8100::/32,2a06:98c0::/29,2c0f:f248::/32"
 ```
 
 ---
@@ -361,4 +367,3 @@ Kami menyambut baik masukan, laporan kendala, maupun ide fitur baru untuk pengem
 This open-source platform is released under the [MIT License](LICENSE).
 
 Made with ❤️ by [Hamba Allah](https://github.com/hambaallahdev01) &bull; Inspired by [Pak Wong](https://wongcjdw.com) (Big thanks!). Feel free to adapt, modify, and contribute to benefit schools and educational institutions worldwide!
-

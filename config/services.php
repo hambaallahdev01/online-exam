@@ -40,4 +40,12 @@ return [
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    'cloudflare' => [
+        // Comma-separated IP/CIDR list of proxies allowed to set CF-Connecting-IP.
+        'trusted_proxies' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('CLOUDFLARE_TRUSTED_PROXIES', ''))
+        ))),
+    ],
+
 ];

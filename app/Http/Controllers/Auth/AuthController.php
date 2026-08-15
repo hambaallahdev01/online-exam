@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\School;
 use App\Models\User;
+use App\Rules\TurnstileRule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -30,13 +33,13 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
-            'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
+            'cf-turnstile-response' => [new TurnstileRule],
         ]);
 
         if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $request->boolean('remember'))) {
             $user = Auth::user();
 
-            if (!$user->hasVerifiedEmail()) {
+            if (! $user->hasVerifiedEmail()) {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
@@ -47,6 +50,7 @@ class AuthController extends Controller
             }
 
             $request->session()->regenerate();
+
             return $this->redirectUser($user);
         }
 
@@ -69,7 +73,7 @@ class AuthController extends Controller
             'admin_name' => ['required', 'string', 'max:255'],
             'admin_email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
+            'cf-turnstile-response' => [new TurnstileRule],
         ]);
 
         $school = School::create([
@@ -87,7 +91,7 @@ class AuthController extends Controller
         ]);
 
         // Send verification email
-        $verifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+        $verifyUrl = URL::temporarySignedRoute(
             'verification.verify',
             now()->addMinutes(60),
             ['id' => $user->id, 'hash' => sha1($user->getEmailForVerification())]
@@ -99,14 +103,15 @@ class AuthController extends Controller
             });
             Log::info("SMTP Dispatch SUCCESS [registerSchool]: Verification email sent to {$user->email}");
         } catch (\Throwable $e) {
-            Log::error("SMTP Dispatch FAILURE [registerSchool]: " . $e->getMessage(), [
+            Log::error('SMTP Dispatch FAILURE [registerSchool]: '.$e->getMessage(), [
                 'recipient' => $user->email,
                 'exception' => $e->getTraceAsString(),
             ]);
-            return redirect()->route('login')->with('warning', 'School account created, but SMTP failed to send verification email: ' . $e->getMessage() . '. Check storage/logs/laravel.log for details.');
+
+            return redirect()->route('login')->with('warning', 'School account created, but the verification email could not be sent. Please try resending it later.');
         }
 
-        return redirect()->route('login')->with('success', 'School account registered successfully! A verification email has been sent to ' . $user->email . '. Please verify your email before logging in.');
+        return redirect()->route('login')->with('success', 'School account registered successfully! A verification email has been sent to '.$user->email.'. Please verify your email before logging in.');
     }
 
     public function showForgotPassword()
@@ -118,19 +123,20 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
+            'cf-turnstile-response' => [new TurnstileRule],
         ]);
 
         $user = User::where('email', $request->email)->first();
-        if (!$user) {
+        if (! $user) {
             $school = School::where('email', $request->email)->first();
             if ($school) {
                 $user = User::where('school_id', $school->id)->where('role', 'admin')->first();
             }
         }
 
-        if (!$user) {
-            return back()->withErrors(['email' => 'The selected email is not registered in our records.']);
+        if (! $user) {
+            // Keep the response indistinguishable to prevent account enumeration.
+            return back()->with('success', 'If the address is registered, a password reset link has been sent.');
         }
 
         $token = Str::random(60);
@@ -148,14 +154,15 @@ class AuthController extends Controller
             });
             Log::info("SMTP Dispatch SUCCESS [sendResetLink]: Reset link email sent to {$user->email}");
         } catch (\Throwable $e) {
-            Log::error("SMTP Dispatch FAILURE [sendResetLink]: " . $e->getMessage(), [
+            Log::error('SMTP Dispatch FAILURE [sendResetLink]: '.$e->getMessage(), [
                 'recipient' => $user->email,
                 'exception' => $e->getTraceAsString(),
             ]);
-            return back()->withErrors(['email' => 'Failed to send reset link email: ' . $e->getMessage()]);
+
+            return back()->withErrors(['email' => 'The reset email could not be sent. Please try again later.']);
         }
 
-        return back()->with('success', 'We have emailed your password reset link!');
+        return back()->with('success', 'If the address is registered, a password reset link has been sent.');
     }
 
     public function showResetPassword($token)
@@ -173,14 +180,29 @@ class AuthController extends Controller
 
         $record = DB::table('password_reset_tokens')->where('email', $request->email)->first();
 
-        if (!$record || !Hash::check($request->token, $record->token)) {
+        $expiresAt = $record?->created_at
+            ? Carbon::parse($record->created_at)
+                ->addMinutes((int) config('auth.passwords.users.expire', 60))
+            : null;
+
+        if (! $record || ! $expiresAt || $expiresAt->isPast() || ! Hash::check($request->token, $record->token)) {
+            if ($record && (! $expiresAt || $expiresAt->isPast())) {
+                DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            }
+
             return back()->withErrors(['email' => 'Invalid or expired password reset token.']);
         }
 
         $user = User::where('email', $request->email)->first();
-        $user->update(['password' => Hash::make($request->password)]);
+        DB::transaction(function () use ($request, $user) {
+            $user->forceFill([
+                'password' => Hash::make($request->password),
+                'remember_token' => Str::random(60),
+            ])->save();
 
-        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+        });
 
         return redirect()->route('login')->with('success', 'Password has been reset successfully! Please sign in with your new password.');
     }
@@ -189,11 +211,11 @@ class AuthController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if (sha1($user->getEmailForVerification()) !== $hash) {
+        if (! hash_equals(sha1($user->getEmailForVerification()), (string) $hash)) {
             return redirect()->route('login')->with('error', 'Invalid verification link.');
         }
 
-        if (!$user->hasVerifiedEmail()) {
+        if (! $user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
         }
 
@@ -209,26 +231,26 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
+            'cf-turnstile-response' => [new TurnstileRule],
         ]);
 
         $user = User::where('email', $request->email)->first();
-        if (!$user) {
+        if (! $user) {
             $school = School::where('email', $request->email)->first();
             if ($school) {
                 $user = User::where('school_id', $school->id)->where('role', 'admin')->first();
             }
         }
 
-        if (!$user) {
-            return back()->withErrors(['email' => 'The selected email is not registered in our records.']);
+        if (! $user) {
+            return back()->with('success', 'If the account exists and is unverified, a verification email has been sent.');
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->route('login')->with('info', 'Your email address is already verified. Please sign in.');
+            return back()->with('success', 'If the account exists and is unverified, a verification email has been sent.');
         }
 
-        $verifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+        $verifyUrl = URL::temporarySignedRoute(
             'verification.verify',
             now()->addMinutes(60),
             ['id' => $user->id, 'hash' => sha1($user->getEmailForVerification())]
@@ -240,14 +262,15 @@ class AuthController extends Controller
             });
             Log::info("SMTP Dispatch SUCCESS [resendVerification]: Verification link sent to {$user->email}");
         } catch (\Throwable $e) {
-            Log::error("SMTP Dispatch FAILURE [resendVerification]: " . $e->getMessage(), [
+            Log::error('SMTP Dispatch FAILURE [resendVerification]: '.$e->getMessage(), [
                 'recipient' => $user->email,
                 'exception' => $e->getTraceAsString(),
             ]);
-            return back()->withErrors(['email' => 'Failed to send verification email: ' . $e->getMessage()]);
+
+            return back()->withErrors(['email' => 'The verification email could not be sent. Please try again later.']);
         }
 
-        return back()->with('success', 'A new verification link has been sent to your email address (' . $user->email . ').');
+        return back()->with('success', 'If the account exists and is unverified, a verification email has been sent.');
     }
 
     public function changeUnverifiedEmailAndResend(Request $request)
@@ -255,35 +278,39 @@ class AuthController extends Controller
         $request->validate([
             'old_email' => 'required|email',
             'password' => 'required|string',
-            'new_email' => 'required|email|max:255|unique:users,email',
-            'cf-turnstile-response' => [new \App\Rules\TurnstileRule],
+            'new_email' => 'required|email|max:255',
+            'cf-turnstile-response' => [new TurnstileRule],
         ]);
 
         $user = User::where('email', $request->old_email)->first();
-        if (!$user) {
+        if (! $user) {
             $school = School::where('email', $request->old_email)->first();
             if ($school) {
                 $user = User::where('school_id', $school->id)->where('role', 'admin')->first();
             }
         }
 
-        if (!$user) {
-            return back()->withErrors(['old_email' => 'The selected email is not registered in our records.']);
+        if (! $user) {
+            return back()->withErrors(['old_email' => 'The account details could not be verified.']);
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->route('login')->with('info', 'Your email address is already verified. Please sign in.');
+            return back()->withErrors(['old_email' => 'The account details could not be verified.']);
         }
 
-        if (!Hash::check($request->password, $user->password)) {
-            return back()->withErrors(['password' => 'Incorrect password provided for account email change.']);
+        if (! Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['old_email' => 'The account details could not be verified.']);
+        }
+
+        if (User::where('email', $request->new_email)->exists()) {
+            return back()->withErrors(['new_email' => 'This email address is already in use.']);
         }
 
         // Update email to new email address
         $user->update(['email' => $request->new_email]);
 
         // Send verification email to new address
-        $verifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+        $verifyUrl = URL::temporarySignedRoute(
             'verification.verify',
             now()->addMinutes(60),
             ['id' => $user->id, 'hash' => sha1($user->getEmailForVerification())]
@@ -295,14 +322,15 @@ class AuthController extends Controller
             });
             Log::info("SMTP Dispatch SUCCESS [changeUnverifiedEmailAndResend]: Updated email verification sent to {$user->email}");
         } catch (\Throwable $e) {
-            Log::error("SMTP Dispatch FAILURE [changeUnverifiedEmailAndResend]: " . $e->getMessage(), [
+            Log::error('SMTP Dispatch FAILURE [changeUnverifiedEmailAndResend]: '.$e->getMessage(), [
                 'recipient' => $user->email,
                 'exception' => $e->getTraceAsString(),
             ]);
-            return back()->withErrors(['new_email' => 'Email updated, but SMTP failed to send verification email: ' . $e->getMessage()]);
+
+            return back()->withErrors(['new_email' => 'Email updated, but the verification message could not be sent. Please try resending it later.']);
         }
 
-        return redirect()->route('login')->with('success', 'Email address updated successfully! A new verification link has been sent to ' . $user->email . '. Please verify your email before logging in.');
+        return redirect()->route('login')->with('success', 'Email address updated successfully! A new verification link has been sent to '.$user->email.'. Please verify your email before logging in.');
     }
 
     public function logout(Request $request)

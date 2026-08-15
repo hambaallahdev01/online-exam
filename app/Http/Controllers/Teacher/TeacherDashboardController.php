@@ -7,8 +7,13 @@ use App\Models\Exam;
 use App\Models\Question;
 use App\Models\QuestionGroup;
 use App\Models\Subject;
+use App\Services\HtmlSanitizerService;
+use App\Services\MediaUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 
 class TeacherDashboardController extends Controller
 {
@@ -18,7 +23,9 @@ class TeacherDashboardController extends Controller
         $groupsCount = QuestionGroup::where('school_id', $teacher->school_id)
             ->where('teacher_id', $teacher->id)
             ->count();
-        $examsCount = Exam::where('school_id', $teacher->school_id)->count();
+        $examsCount = Exam::where('school_id', $teacher->school_id)
+            ->whereHas('questionGroup', fn ($query) => $query->where('teacher_id', $teacher->id))
+            ->count();
 
         $subjects = Subject::where('school_id', $teacher->school_id)->get();
 
@@ -28,6 +35,7 @@ class TeacherDashboardController extends Controller
             ->get();
 
         $exams = Exam::where('school_id', $teacher->school_id)
+            ->whereHas('questionGroup', fn ($query) => $query->where('teacher_id', $teacher->id))
             ->with('questionGroup')
             ->latest()
             ->get();
@@ -37,19 +45,22 @@ class TeacherDashboardController extends Controller
 
     public function createQuestionGroup(Request $request)
     {
+        $teacher = Auth::user();
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'subject_id' => 'nullable|exists:subjects,id',
+            'subject_id' => [
+                'nullable',
+                Rule::exists('subjects', 'id')->where(fn ($query) => $query->where('school_id', $teacher->school_id)),
+            ],
             'description' => 'nullable|string',
         ]);
-
-        $teacher = Auth::user();
 
         if ($request->filled('subject_id')) {
             $subjectId = $request->subject_id;
         } else {
             $subject = Subject::where('school_id', $teacher->school_id)->first();
-            if (!$subject) {
+            if (! $subject) {
                 $subject = Subject::create([
                     'school_id' => $teacher->school_id,
                     'name' => 'Umum / General',
@@ -72,7 +83,13 @@ class TeacherDashboardController extends Controller
 
     public function showQuestionGroup(QuestionGroup $group)
     {
+        $this->assertOwnedGroup($group);
         $group->load('questions');
+        foreach ($group->questions as $question) {
+            $question->content = HtmlSanitizerService::sanitize($question->content);
+            $question->options_json = $this->sanitizeOptions($question->options_json, $question->question_type);
+        }
+
         return view('teacher.questions', compact('group'));
     }
 
@@ -89,6 +106,8 @@ class TeacherDashboardController extends Controller
 
     public function storeQuestion(Request $request, QuestionGroup $group)
     {
+        $this->assertOwnedGroup($group);
+
         $validated = $request->validate([
             'question_type' => 'required|in:single_choice,multiple_choice,true_false,essay,fact_opinion,matching,sorting',
             'content' => 'required|string',
@@ -104,14 +123,14 @@ class TeacherDashboardController extends Controller
         ]);
 
         $options = null;
-        $correctAnswers = !empty($validated['correct_answer']) ? [$validated['correct_answer']] : [];
+        $correctAnswers = ! empty($validated['correct_answer']) ? [$validated['correct_answer']] : [];
 
         if ($validated['question_type'] === 'single_choice' || $validated['question_type'] === 'multiple_choice') {
-            if (!empty($request->options) && is_array($request->options)) {
+            if (! empty($request->options) && is_array($request->options)) {
                 $options = [];
                 $labels = range('A', 'Z');
                 foreach (array_values($request->options) as $i => $text) {
-                    $letter = $labels[$i] ?? ('P' . ($i + 1));
+                    $letter = $labels[$i] ?? ('P'.($i + 1));
                     $options[] = [
                         'id' => $letter,
                         'text' => $text,
@@ -123,7 +142,7 @@ class TeacherDashboardController extends Controller
                     ['id' => 'B', 'text' => $request->option_b],
                     ['id' => 'C', 'text' => $request->option_c],
                     ['id' => 'D', 'text' => $request->option_d],
-                ], fn($opt) => !empty($opt['text'])));
+                ], fn ($opt) => ! empty($opt['text'])));
             }
 
             if ($validated['question_type'] === 'multiple_choice') {
@@ -146,8 +165,8 @@ class TeacherDashboardController extends Controller
                 $left = [];
                 $right = [];
                 foreach ($pairs as $k => $v) {
-                    $left[] = ['id' => (string)$k, 'text' => (string)$k];
-                    $right[] = ['id' => (string)$v, 'text' => (string)$v];
+                    $left[] = ['id' => (string) $k, 'text' => (string) $k];
+                    $right[] = ['id' => (string) $v, 'text' => (string) $v];
                 }
                 $options = ['left' => $left, 'right' => $right];
                 $correctAnswers = $pairs;
@@ -159,14 +178,16 @@ class TeacherDashboardController extends Controller
             $correctAnswers = $items;
         }
 
+        $options = $this->sanitizeOptions($options, $validated['question_type']);
+
         Question::create([
             'school_id' => Auth::user()->school_id,
             'question_group_id' => $group->id,
             'question_type' => $validated['question_type'],
-            'content' => $validated['content'],
+            'content' => HtmlSanitizerService::sanitize($validated['content']),
             'options_json' => $options,
             'correct_answers_json' => $correctAnswers,
-            'explanation' => $validated['explanation'],
+            'explanation' => $validated['explanation'] ?? null,
             'weight' => $validated['weight'],
         ]);
 
@@ -175,15 +196,29 @@ class TeacherDashboardController extends Controller
 
     public function storeExam(Request $request)
     {
+        $teacher = Auth::user();
+
         $validated = $request->validate([
-            'question_group_id' => 'required|exists:question_groups,id',
+            'question_group_id' => [
+                'required',
+                Rule::exists('question_groups', 'id')->where(
+                    fn ($query) => $query
+                        ->where('school_id', $teacher->school_id)
+                        ->where('teacher_id', $teacher->id)
+                ),
+            ],
             'title' => 'required|string|max:255',
-            'token' => 'required|string|max:10',
+            'token' => [
+                'required',
+                'string',
+                'max:10',
+                Rule::unique('exams', 'token')->where(fn ($query) => $query->where('school_id', $teacher->school_id)),
+            ],
             'duration_minutes' => 'required|integer|min:1',
         ]);
 
         Exam::create([
-            'school_id' => Auth::user()->school_id,
+            'school_id' => $teacher->school_id,
             'question_group_id' => $validated['question_group_id'],
             'title' => $validated['title'],
             'token' => strtoupper($validated['token']),
@@ -198,7 +233,7 @@ class TeacherDashboardController extends Controller
 
     public function uploadMedia(Request $request)
     {
-        if (!$request->hasFile('file')) {
+        if (! $request->hasFile('file')) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'No file received or file size exceeds upload_max_filesize in php.ini.',
@@ -207,15 +242,17 @@ class TeacherDashboardController extends Controller
 
         $file = $request->file('file');
 
-        if (!$file->isValid()) {
+        if (! $file->isValid()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'File upload error: ' . $file->getErrorMessage() . '. Check upload_max_filesize & post_max_size in php.ini.',
+                'message' => 'File upload error: '.$file->getErrorMessage().'. Check upload_max_filesize & post_max_size in php.ini.',
             ], 422);
         }
 
         try {
-            $url = \App\Services\MediaUploadService::upload($file, 'questions');
+            $teacher = Auth::user();
+            $folder = "questions/{$teacher->school_id}/{$teacher->id}";
+            $url = MediaUploadService::upload($file, $folder);
             $extension = strtolower($file->getClientOriginalExtension());
             $isPdf = $extension === 'pdf';
 
@@ -225,11 +262,18 @@ class TeacherDashboardController extends Controller
                 'is_pdf' => $isPdf,
                 'original_name' => $file->getClientOriginalName(),
             ]);
-        } catch (\Throwable $e) {
+        } catch (InvalidArgumentException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage(),
             ], 422);
+        } catch (\Throwable $e) {
+            Log::error('Media upload failed.', ['exception' => $e]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The media file could not be stored. Please try again later.',
+            ], 500);
         }
     }
 
@@ -240,25 +284,27 @@ class TeacherDashboardController extends Controller
         ]);
 
         try {
-            $deleted = \App\Services\MediaUploadService::deleteFile($request->url);
+            $teacher = Auth::user();
+            $requiredPrefix = "questions/{$teacher->school_id}/{$teacher->id}";
+            $deleted = MediaUploadService::deleteFile($request->url, $requiredPrefix);
 
             return response()->json([
                 'status' => $deleted ? 'success' : 'info',
                 'message' => $deleted ? 'Media file deleted from storage successfully.' : 'Media file not found or already removed.',
             ]);
         } catch (\Throwable $e) {
+            Log::error('Media deletion failed.', ['exception' => $e]);
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to delete media: ' . $e->getMessage(),
-            ], 422);
+                'message' => 'The media file could not be deleted. Please try again later.',
+            ], 500);
         }
     }
 
     public function destroyQuestion(Question $question)
     {
-        if ($question->school_id !== Auth::user()->school_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->assertOwnedQuestion($question);
 
         $question->delete();
 
@@ -267,9 +313,7 @@ class TeacherDashboardController extends Controller
 
     public function updateQuestion(Request $request, Question $question)
     {
-        if ($question->school_id !== Auth::user()->school_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->assertOwnedQuestion($question);
 
         $validated = $request->validate([
             'question_type' => 'required|in:single_choice,multiple_choice,true_false,essay,fact_opinion,matching,sorting',
@@ -286,14 +330,14 @@ class TeacherDashboardController extends Controller
         ]);
 
         $options = null;
-        $correctAnswers = !empty($validated['correct_answer']) ? [$validated['correct_answer']] : [];
+        $correctAnswers = ! empty($validated['correct_answer']) ? [$validated['correct_answer']] : [];
 
         if ($validated['question_type'] === 'single_choice' || $validated['question_type'] === 'multiple_choice') {
-            if (!empty($request->options) && is_array($request->options)) {
+            if (! empty($request->options) && is_array($request->options)) {
                 $options = [];
                 $labels = range('A', 'Z');
                 foreach (array_values($request->options) as $i => $text) {
-                    $letter = $labels[$i] ?? ('P' . ($i + 1));
+                    $letter = $labels[$i] ?? ('P'.($i + 1));
                     $options[] = [
                         'id' => $letter,
                         'text' => $text,
@@ -305,7 +349,7 @@ class TeacherDashboardController extends Controller
                     ['id' => 'B', 'text' => $request->option_b],
                     ['id' => 'C', 'text' => $request->option_c],
                     ['id' => 'D', 'text' => $request->option_d],
-                ], fn($opt) => !empty($opt['text'])));
+                ], fn ($opt) => ! empty($opt['text'])));
             }
 
             if ($validated['question_type'] === 'multiple_choice') {
@@ -327,8 +371,8 @@ class TeacherDashboardController extends Controller
                 $left = [];
                 $right = [];
                 foreach ($pairs as $k => $v) {
-                    $left[] = ['id' => (string)$k, 'text' => (string)$k];
-                    $right[] = ['id' => (string)$v, 'text' => (string)$v];
+                    $left[] = ['id' => (string) $k, 'text' => (string) $k];
+                    $right[] = ['id' => (string) $v, 'text' => (string) $v];
                 }
                 $options = ['left' => $left, 'right' => $right];
                 $correctAnswers = $pairs;
@@ -339,11 +383,13 @@ class TeacherDashboardController extends Controller
             $correctAnswers = $items;
         }
 
+        $options = $this->sanitizeOptions($options, $validated['question_type']);
+
         $oldUrls = $this->extractMediaUrlsFromQuestion($question);
 
         $question->update([
             'question_type' => $validated['question_type'],
-            'content' => $validated['content'],
+            'content' => HtmlSanitizerService::sanitize($validated['content']),
             'options_json' => $options,
             'correct_answers_json' => $correctAnswers,
             'explanation' => $validated['explanation'] ?? null,
@@ -354,7 +400,11 @@ class TeacherDashboardController extends Controller
         $removedUrls = array_diff($oldUrls, $newUrls);
 
         foreach ($removedUrls as $removedUrl) {
-            \App\Services\MediaUploadService::deleteFile($removedUrl);
+            $teacher = Auth::user();
+            MediaUploadService::deleteFile(
+                $removedUrl,
+                "questions/{$teacher->school_id}/{$teacher->id}"
+            );
         }
 
         return back()->with('success', 'Question updated successfully!');
@@ -365,26 +415,38 @@ class TeacherDashboardController extends Controller
         $urls = [];
         $contents = [$question->content, $question->explanation, json_encode($question->options_json, JSON_UNESCAPED_SLASHES)];
         foreach ($contents as $text) {
-            if (!empty($text)) {
-                preg_match_all('/https?:\/\/[^\s"\'<>]+/i', (string)$text, $matches1);
-                if (!empty($matches1[0])) $urls = array_merge($urls, $matches1[0]);
+            if (! empty($text)) {
+                preg_match_all('/https?:\/\/[^\s"\'<>]+/i', (string) $text, $matches1);
+                if (! empty($matches1[0])) {
+                    $urls = array_merge($urls, $matches1[0]);
+                }
 
-                preg_match_all('/(?:src|href)=["\']([^"\']+)["\']/i', (string)$text, $matches2);
-                if (!empty($matches2[1])) $urls = array_merge($urls, $matches2[1]);
+                preg_match_all('/(?:src|href)=["\']([^"\']+)["\']/i', (string) $text, $matches2);
+                if (! empty($matches2[1])) {
+                    $urls = array_merge($urls, $matches2[1]);
+                }
             }
         }
+
         return array_unique(array_filter($urls));
     }
 
     public function updateExam(Request $request, Exam $exam)
     {
-        if ($exam->school_id !== Auth::user()->school_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->assertOwnedExam($exam);
+
+        $teacher = Auth::user();
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'token' => 'required|string|max:10',
+            'token' => [
+                'required',
+                'string',
+                'max:10',
+                Rule::unique('exams', 'token')
+                    ->ignore($exam->id)
+                    ->where(fn ($query) => $query->where('school_id', $teacher->school_id)),
+            ],
             'duration_minutes' => 'required|integer|min:1',
             'is_active' => 'required|boolean',
         ]);
@@ -401,12 +463,79 @@ class TeacherDashboardController extends Controller
 
     public function destroyExam(Exam $exam)
     {
-        if ($exam->school_id !== Auth::user()->school_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->assertOwnedExam($exam);
 
         $exam->delete();
 
         return back()->with('success', 'Published exam deleted successfully!');
+    }
+
+    private function assertOwnedGroup(QuestionGroup $group): void
+    {
+        $teacher = Auth::user();
+        abort_unless(
+            $group->school_id === $teacher->school_id && $group->teacher_id === $teacher->id,
+            403,
+            'Unauthorized action.'
+        );
+    }
+
+    private function assertOwnedQuestion(Question $question): void
+    {
+        $question->loadMissing('questionGroup');
+        $teacher = Auth::user();
+        abort_unless(
+            $question->school_id === $teacher->school_id
+                && $question->questionGroup
+                && $question->questionGroup->teacher_id === $teacher->id,
+            403,
+            'Unauthorized action.'
+        );
+    }
+
+    private function assertOwnedExam(Exam $exam): void
+    {
+        $exam->loadMissing('questionGroup');
+        $teacher = Auth::user();
+        abort_unless(
+            $exam->school_id === $teacher->school_id
+                && $exam->questionGroup
+                && $exam->questionGroup->teacher_id === $teacher->id,
+            403,
+            'Unauthorized action.'
+        );
+    }
+
+    private function sanitizeOptions(?array $options, string $questionType): ?array
+    {
+        if ($options === null) {
+            return null;
+        }
+
+        if (in_array($questionType, ['single_choice', 'multiple_choice'], true)) {
+            return array_map(function ($option) {
+                if (! is_array($option)) {
+                    return HtmlSanitizerService::sanitize((string) $option);
+                }
+                $option['text'] = HtmlSanitizerService::sanitize((string) ($option['text'] ?? ''));
+
+                return $option;
+            }, $options);
+        }
+
+        return $this->plainTextOptions($options);
+    }
+
+    private function plainTextOptions(array $options): array
+    {
+        foreach ($options as $key => $value) {
+            if (is_array($value)) {
+                $options[$key] = $this->plainTextOptions($value);
+            } elseif (is_string($value)) {
+                $options[$key] = mb_substr(trim(strip_tags($value)), 0, 1000);
+            }
+        }
+
+        return $options;
     }
 }

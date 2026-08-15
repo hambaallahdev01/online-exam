@@ -264,7 +264,7 @@
                         <span style="font-weight: 700; color: var(--primary);">#{{ $index + 1 }} ({{ strtoupper(str_replace('_', ' ', $q->question_type)) }})</span>
                         <div style="display: flex; align-items: center; gap: 0.6rem;">
                             <span style="color: var(--accent); font-weight: 600; font-size: 0.9rem; margin-right: 0.5rem;">Bobot: {{ $q->weight }}</span>
-                            <button type="button" class="btn btn-secondary" onclick="editQuestion({{ json_encode($q) }})" style="padding: 0.25rem 0.6rem; font-size: 0.8rem; color: var(--primary); border-color: var(--primary);" title="Edit Soal">
+                            <button type="button" class="btn btn-secondary" onclick="editQuestionById({{ $q->id }})" style="padding: 0.25rem 0.6rem; font-size: 0.8rem; color: var(--primary); border-color: var(--primary);" title="Edit Soal">
                                 <i class="fa-solid fa-pen-to-square"></i> Edit
                             </button>
                             <form action="{{ route('teacher.questions.destroy', $q->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus soal ini beserta seluruh gambar/file S3 di dalamnya?');" style="display: inline;">
@@ -279,7 +279,7 @@
 
                     <!-- Rich HTML Rendered Question Content -->
                     <div style="margin-bottom: 1rem; line-height: 1.7; font-size: 1rem; color: var(--text-main);" dir="auto">
-                        {!! $q->content !!}
+                        {!! \App\Services\HtmlSanitizerService::sanitize($q->content) !!}
                     </div>
 
                     @if($q->options_json)
@@ -291,9 +291,9 @@
                             <ul style="list-style: none; padding-left: 1rem; color: var(--text-muted); font-size: 0.9rem;">
                                 @foreach($q->options_json as $opt)
                                     @if(is_array($opt))
-                                        <li style="margin-bottom: 0.4rem;"><strong>{{ $opt['id'] ?? '' }}.</strong> {!! $opt['text'] ?? '' !!}</li>
+                                        <li style="margin-bottom: 0.4rem;"><strong>{{ $opt['id'] ?? '' }}.</strong> {!! \App\Services\HtmlSanitizerService::sanitize($opt['text'] ?? '') !!}</li>
                                     @else
-                                        <li style="margin-bottom: 0.4rem;">• {!! $opt !!}</li>
+                                        <li style="margin-bottom: 0.4rem;">• {{ $opt }}</li>
                                     @endif
                                 @endforeach
                             </ul>
@@ -331,6 +331,7 @@ let currentUploadTargetId = 'editorContent';
 let selectedImg = null;
 let optionCount = 0;
 const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
+const QUESTIONS_BY_ID = {{ Illuminate\Support\Js::from($group->questions->keyBy('id')) }};
 
 function execCmd(command, value = null) {
     document.execCommand(command, false, value);
@@ -438,7 +439,10 @@ function updateOptionLabelsAndButtons() {
     });
 }
 
-function editQuestion(q) {
+function editQuestionById(questionId) {
+    const q = QUESTIONS_BY_ID[questionId];
+    if (!q) return;
+
     const cardHeader = document.getElementById('formCardHeader');
     const form = document.getElementById('createQuestionForm');
     const submitBtn = document.getElementById('formSubmitBtn');
@@ -661,7 +665,8 @@ function handleMediaUpload(file) {
         hideUploadLoading();
         if (data.status === 'success') {
             if (data.is_pdf) {
-                const pdfHtml = `<p><a href="${data.url}" target="_blank" class="pdf-attachment-badge"><i class="fa-solid fa-file-pdf"></i> Unduh Lampiran PDF (${data.original_name})</a></p><p><br></p>`;
+                const safeName = escapeHtml(data.original_name);
+                const pdfHtml = `<p><a href="${data.url}" target="_blank" class="pdf-attachment-badge"><i class="fa-solid fa-file-pdf"></i> Unduh Lampiran PDF (${safeName})</a></p><p><br></p>`;
                 document.execCommand('insertHTML', false, pdfHtml);
             } else {
                 const imgHtml = `<p><img src="${data.url}" alt="Gambar Pilihan" style="max-width: 100%; height: auto; border-radius: 0.5rem; margin: 0.5rem 0;"></p><p><br></p>`;
@@ -678,6 +683,12 @@ function handleMediaUpload(file) {
     .finally(() => {
         document.getElementById('mediaFileInput').value = '';
     });
+}
+
+function escapeHtml(value) {
+    const element = document.createElement('span');
+    element.textContent = String(value ?? '');
+    return element.innerHTML;
 }
 
 function insertYoutubeVideo(targetId = 'editorContent') {

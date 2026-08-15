@@ -16,6 +16,7 @@ class SecurityAndRateLimitingTest extends TestCase
         $response->assertHeader('X-Frame-Options', 'SAMEORIGIN');
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
         $response->assertHeader('X-XSS-Protection', '1; mode=block');
+        $response->assertHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     }
 
     public function test_cloudflare_real_ip_is_restored()

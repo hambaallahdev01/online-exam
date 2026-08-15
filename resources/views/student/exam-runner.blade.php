@@ -252,19 +252,28 @@ function renderQuestion(index) {
         leftItems.forEach(item => {
             const row = document.createElement('div');
             row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: var(--bg-body); padding: 0.85rem 1.25rem; border-radius: 0.5rem; border: 1px solid var(--border-color);';
-            
-            let optionsHtml = `<option value="">-- Match item --</option>`;
-            rightItems.forEach(r => {
-                const selected = currentPairAns[item.id] === r.id ? 'selected' : '';
-                optionsHtml += `<option value="${r.id}" ${selected}>${r.text}</option>`;
-            });
 
-            row.innerHTML = `
-                <span style="font-weight: 600;">${item.text}</span>
-                <select class="form-control" style="width: 220px;" onchange="handleMatchingSelect('${q.id}', '${item.id}', this.value)">
-                    ${optionsHtml}
-                </select>
-            `;
+            const itemLabel = document.createElement('span');
+            itemLabel.style.fontWeight = '600';
+            itemLabel.textContent = String(item.text ?? '');
+
+            const select = document.createElement('select');
+            select.className = 'form-control';
+            select.style.width = '220px';
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = '-- Match item --';
+            select.appendChild(placeholder);
+
+            rightItems.forEach(r => {
+                const option = document.createElement('option');
+                option.value = String(r.id ?? '');
+                option.textContent = String(r.text ?? '');
+                option.selected = currentPairAns[item.id] === r.id;
+                select.appendChild(option);
+            });
+            select.addEventListener('change', () => handleMatchingSelect(String(q.id), String(item.id), select.value));
+            row.append(itemLabel, select);
             matchingBox.appendChild(row);
         });
 
@@ -281,7 +290,7 @@ function renderQuestion(index) {
             row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: var(--bg-body); padding: 0.85rem 1.25rem; border-radius: 0.5rem; border: 1px solid var(--border-color);';
 
             row.innerHTML = `
-                <span><strong>${idx + 1}.</strong> ${itemText}</span>
+                <span><strong>${idx + 1}.</strong> ${escapeHtml(String(itemText ?? ''))}</span>
                 <div style="display: flex; gap: 0.4rem;">
                     <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem;" onclick="moveSortItem('${q.id}', ${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲ Up</button>
                     <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem;" onclick="moveSortItem('${q.id}', ${idx}, 1)" ${idx === items.length - 1 ? 'disabled' : ''}>▼ Down</button>
@@ -305,6 +314,12 @@ function toggleFlagCurrentQuestion(isFlagged) {
         delete flaggedQuestions[q.id];
     }
     renderPalette();
+}
+
+function escapeHtml(value) {
+    const element = document.createElement('span');
+    element.textContent = value;
+    return element.innerHTML;
 }
 
 function handleSingleSelect(questionId, val) {

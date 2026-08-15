@@ -19,6 +19,11 @@ class SecurityHeaders
             $response->header('X-Content-Type-Options', 'nosniff');
             $response->header('X-XSS-Protection', '1; mode=block');
             $response->header('Referrer-Policy', 'strict-origin-when-cross-origin');
+            $response->header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
+            if (app()->isProduction() && $request->isSecure()) {
+                $response->header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+            }
         }
 
         return $response;

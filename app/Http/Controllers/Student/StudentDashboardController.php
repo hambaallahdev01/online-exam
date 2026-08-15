@@ -15,6 +15,8 @@ class StudentDashboardController extends Controller
         $student = Auth::user();
         $availableExams = Exam::where('school_id', $student->school_id)
             ->where('is_active', true)
+            ->where('starts_at', '<=', now())
+            ->where('ends_at', '>=', now())
             ->with('questionGroup')
             ->get();
 
@@ -36,11 +38,15 @@ class StudentDashboardController extends Controller
         $exam = Exam::where('school_id', Auth::user()->school_id)
             ->where('token', $token)
             ->where('is_active', true)
+            ->where('starts_at', '<=', now())
+            ->where('ends_at', '>=', now())
             ->first();
 
-        if (!$exam) {
+        if (! $exam) {
             return back()->withErrors(['token' => 'Invalid exam token or exam is inactive.']);
         }
+
+        $request->session()->put("exam_access.{$exam->id}", true);
 
         return redirect()->route('student.exam.run', $exam->id);
     }
@@ -49,14 +55,30 @@ class StudentDashboardController extends Controller
     {
         $student = Auth::user();
 
+        abort_unless($exam->school_id === $student->school_id, 403, 'This exam belongs to another school.');
+        abort_unless(
+            $exam->is_active && $exam->starts_at->lte(now()) && $exam->ends_at->gte(now()),
+            403,
+            'This exam is not currently available.'
+        );
+
+        $existingResult = ExamResult::where('exam_id', $exam->id)
+            ->where('school_id', $student->school_id)
+            ->where('student_id', $student->id)
+            ->first();
+
+        abort_unless(
+            $existingResult || session()->pull("exam_access.{$exam->id}", false),
+            403,
+            'Enter the exam token before opening the exam.'
+        );
+
         // Check or create exam result record
-        $result = ExamResult::firstOrCreate(
+        $result = $existingResult ?: ExamResult::create(
             [
                 'school_id' => $student->school_id,
                 'exam_id' => $exam->id,
                 'student_id' => $student->id,
-            ],
-            [
                 'status' => 'in_progress',
                 'started_at' => now(),
                 'time_remaining_seconds' => $exam->duration_minutes * 60,

@@ -3,12 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\Exam;
-use App\Models\ExamResult;
 use App\Models\Question;
 use App\Models\QuestionGroup;
 use App\Models\School;
+use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class ExamPlatformTest extends TestCase
@@ -41,7 +42,7 @@ class ExamPlatformTest extends TestCase
             'email' => 'admin@test.org',
             'role' => 'admin',
             'email_verified_at' => now(),
-            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'password' => Hash::make('password123'),
         ]);
 
         $response = $this->post('/', [
@@ -62,7 +63,7 @@ class ExamPlatformTest extends TestCase
             'email' => 'unverified@test.org',
             'role' => 'admin',
             'email_verified_at' => null,
-            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'password' => Hash::make('password123'),
         ]);
 
         $response = $this->post('/', [
@@ -80,7 +81,7 @@ class ExamPlatformTest extends TestCase
         $teacher = User::create(['school_id' => $school->id, 'name' => 'Teacher', 'email' => 't@school.org', 'password' => 'pass', 'role' => 'teacher']);
         $student = User::create(['school_id' => $school->id, 'name' => 'Student', 'email' => 's@school.org', 'password' => 'pass', 'role' => 'student']);
 
-        $subject = \App\Models\Subject::create(['school_id' => $school->id, 'name' => 'Math', 'code' => 'MTH']);
+        $subject = Subject::create(['school_id' => $school->id, 'name' => 'Math', 'code' => 'MTH']);
 
         $group = QuestionGroup::create([
             'school_id' => $school->id,
@@ -113,6 +114,9 @@ class ExamPlatformTest extends TestCase
         // Student logins and enters token
         $this->actingAs($student);
 
+        $this->post(route('student.enter-token'), ['token' => $exam->token])
+            ->assertRedirect(route('student.exam.run', $exam->id));
+
         $response = $this->get(route('student.exam.run', $exam->id));
         $response->assertStatus(200);
 
@@ -122,7 +126,7 @@ class ExamPlatformTest extends TestCase
 
         // Submit Answer
         $submitResp = $this->postJson(route('student.exam.api.submit', $exam->id), [
-            'answers' => [$q->id => 'B']
+            'answers' => [$q->id => 'B'],
         ]);
 
         $submitResp->assertStatus(200)->assertJson(['status' => 'success', 'score' => 100]);
@@ -130,7 +134,7 @@ class ExamPlatformTest extends TestCase
             'student_id' => $student->id,
             'exam_id' => $exam->id,
             'score' => 100,
-            'status' => 'graded'
+            'status' => 'graded',
         ]);
     }
 }

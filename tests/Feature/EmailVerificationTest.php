@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
@@ -30,7 +31,7 @@ class EmailVerificationTest extends TestCase
             'email' => 'unverified@test.org',
             'role' => 'admin',
             'email_verified_at' => null,
-            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'password' => Hash::make('password123'),
         ]);
 
         $response = $this->post(route('verification.resend'), [
@@ -40,7 +41,7 @@ class EmailVerificationTest extends TestCase
         $response->assertSessionHas('success');
     }
 
-    public function test_verified_user_requesting_resend_is_informed()
+    public function test_verified_user_requesting_resend_gets_non_enumerating_response()
     {
         $school = School::create(['name' => 'Demo', 'email' => 'demo@school.org']);
         $user = User::create([
@@ -49,15 +50,14 @@ class EmailVerificationTest extends TestCase
             'email' => 'verified@test.org',
             'role' => 'admin',
             'email_verified_at' => now(),
-            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'password' => Hash::make('password123'),
         ]);
 
         $response = $this->post(route('verification.resend'), [
             'email' => 'verified@test.org',
         ]);
 
-        $response->assertRedirect(route('login'));
-        $response->assertSessionHas('info');
+        $response->assertSessionHas('success');
     }
 
     public function test_clicking_valid_verification_link_verifies_email()
@@ -69,7 +69,7 @@ class EmailVerificationTest extends TestCase
             'email' => 'user@test.org',
             'role' => 'admin',
             'email_verified_at' => null,
-            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'password' => Hash::make('password123'),
         ]);
 
         $url = URL::temporarySignedRoute(
@@ -95,7 +95,7 @@ class EmailVerificationTest extends TestCase
             'email' => 'user@yahoo.co.id',
             'role' => 'admin',
             'email_verified_at' => null,
-            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'password' => Hash::make('password123'),
         ]);
 
         $response = $this->post(route('verification.change.resend'), [

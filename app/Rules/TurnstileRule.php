@@ -5,15 +5,14 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Translation\PotentiallyTranslatedString;
 
 class TurnstileRule implements ValidationRule
 {
     /**
      * Run the validation rule for Cloudflare Turnstile CAPTCHA.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -26,6 +25,7 @@ class TurnstileRule implements ValidationRule
 
         if (empty($value)) {
             $fail('Please complete the Cloudflare Turnstile security check.');
+
             return;
         }
 
@@ -33,10 +33,10 @@ class TurnstileRule implements ValidationRule
             $response = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
                 'secret' => $secretKey,
                 'response' => $value,
-                'remoteip' => request()->header('CF-Connecting-IP', request()->ip()),
+                'remoteip' => request()->ip(),
             ]);
 
-            if (!$response->successful() || !($response->json('success') ?? false)) {
+            if (! $response->successful() || ! ($response->json('success') ?? false)) {
                 $fail('Cloudflare Turnstile security verification failed. Please try again.');
             }
         } catch (\Throwable $e) {

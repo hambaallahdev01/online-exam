@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AcademicYear;
 use App\Models\Classroom;
-use App\Models\QuestionGroup;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -29,6 +27,7 @@ class AdminDashboardController extends Controller
     {
         $schoolId = Auth::user()->school_id;
         $teachers = User::where('school_id', $schoolId)->where('role', 'teacher')->get();
+
         return view('admin.teachers', compact('teachers'));
     }
 
@@ -38,7 +37,7 @@ class AdminDashboardController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'identity_number' => 'nullable|string|max:100',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
         ]);
 
         User::create([
@@ -57,6 +56,7 @@ class AdminDashboardController extends Controller
     {
         $schoolId = Auth::user()->school_id;
         $students = User::where('school_id', $schoolId)->where('role', 'student')->get();
+
         return view('admin.students', compact('students'));
     }
 
@@ -66,7 +66,7 @@ class AdminDashboardController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'identity_number' => 'nullable|string|max:100',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
         ]);
 
         User::create([
@@ -87,7 +87,7 @@ class AdminDashboardController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:schools,email,' . $school->id,
+            'email' => 'required|email|max:255|unique:schools,email,'.$school->id,
             'phone' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:500',
             'locale' => 'required|string|in:id,en,ar,zh',

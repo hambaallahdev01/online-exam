@@ -724,7 +724,10 @@
                 if (type === 'error') iconHtml = '<i class="fa-solid fa-circle-xmark" style="color: var(--danger);"></i>';
                 if (type === 'warning') iconHtml = '<i class="fa-solid fa-triangle-exclamation" style="color: var(--warning);"></i>';
 
-                toast.innerHTML = `${iconHtml} <span>${message}</span>`;
+                toast.innerHTML = iconHtml;
+                const messageElement = document.createElement('span');
+                messageElement.textContent = String(message);
+                toast.appendChild(messageElement);
                 container.appendChild(toast);
 
                 setTimeout(() => {
@@ -748,14 +751,17 @@
                 overlay.innerHTML = `
                     <div class="confirm-card">
                         <div style="font-size: 2.5rem; color: var(--warning); margin-bottom: 0.75rem;"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">${title}</h3>
-                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5;">${text}</p>
+                        <h3 class="confirm-title" style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);"></h3>
+                        <p class="confirm-text" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5;"></p>
                         <div style="display: flex; gap: 0.75rem; justify-content: center;">
                             <button class="btn btn-secondary" id="confirmBtnCancel" style="flex: 1;">Batal</button>
-                            <button class="btn btn-danger" id="confirmBtnOk" style="flex: 1;">${confirmBtnText}</button>
+                            <button class="btn btn-danger" id="confirmBtnOk" style="flex: 1;"></button>
                         </div>
                     </div>
                 `;
+                overlay.querySelector('.confirm-title').textContent = String(title);
+                overlay.querySelector('.confirm-text').textContent = String(text);
+                overlay.querySelector('#confirmBtnOk').textContent = String(confirmBtnText);
                 document.body.appendChild(overlay);
 
                 overlay.querySelector('#confirmBtnCancel').onclick = () => {

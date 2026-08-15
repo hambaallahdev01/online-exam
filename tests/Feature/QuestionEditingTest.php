@@ -35,12 +35,14 @@ class QuestionEditingTest extends TestCase
             'name' => 'Algebra',
         ]);
 
-        // Create 2 fake media files
-        Storage::disk('public')->put('questions/old_img.jpg', 'old image');
-        Storage::disk('public')->put('questions/keep_img.jpg', 'keep image');
+        $mediaPrefix = "questions/{$school->id}/{$teacher->id}";
 
-        $urlOld = Storage::disk('public')->url('questions/old_img.jpg');
-        $urlKeep = Storage::disk('public')->url('questions/keep_img.jpg');
+        // Create 2 fake media files in this teacher's isolated namespace.
+        Storage::disk('public')->put("{$mediaPrefix}/old_img.jpg", 'old image');
+        Storage::disk('public')->put("{$mediaPrefix}/keep_img.jpg", 'keep image');
+
+        $urlOld = Storage::disk('public')->url("{$mediaPrefix}/old_img.jpg");
+        $urlKeep = Storage::disk('public')->url("{$mediaPrefix}/keep_img.jpg");
 
         $question = Question::create([
             'school_id' => $school->id,
@@ -55,8 +57,8 @@ class QuestionEditingTest extends TestCase
             'weight' => 10,
         ]);
 
-        Storage::disk('public')->assertExists('questions/old_img.jpg');
-        Storage::disk('public')->assertExists('questions/keep_img.jpg');
+        Storage::disk('public')->assertExists("{$mediaPrefix}/old_img.jpg");
+        Storage::disk('public')->assertExists("{$mediaPrefix}/keep_img.jpg");
 
         // Edit question: remove old_img.jpg and keep keep_img.jpg
         $response = $this->actingAs($teacher)->put(route('teacher.questions.update', $question->id), [
@@ -76,7 +78,7 @@ class QuestionEditingTest extends TestCase
         ]);
 
         // Assert old removed image is deleted from storage, and kept image remains
-        Storage::disk('public')->assertMissing('questions/old_img.jpg');
-        Storage::disk('public')->assertExists('questions/keep_img.jpg');
+        Storage::disk('public')->assertMissing("{$mediaPrefix}/old_img.jpg");
+        Storage::disk('public')->assertExists("{$mediaPrefix}/keep_img.jpg");
     }
 }
