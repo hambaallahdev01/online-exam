@@ -5,12 +5,18 @@ namespace App\Http\Controllers\Student\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamResult;
-use App\Services\HtmlSanitizerService;
+use App\Services\ExamDraftStore;
+use App\Services\ExamQuestionPayload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ExamSessionApiController extends Controller
 {
+    public function __construct(
+        private readonly ExamQuestionPayload $questionPayload,
+        private readonly ExamDraftStore $drafts,
+    ) {}
+
     public function getPayload(Exam $exam)
     {
         $student = Auth::user();
@@ -22,30 +28,9 @@ class ExamSessionApiController extends Controller
 
         abort_unless($exam->school_id === $student->school_id, 403);
 
-        $group = $exam->questionGroup()->with('questions')->firstOrFail();
-        $questions = $group->questions;
-
-        if ($exam->randomize_questions) {
-            $questions = $questions->shuffle();
-        }
-
-        $formattedQuestions = $questions->map(function ($q) use ($exam) {
-            $options = $this->sanitizeOptionsForStudent($q->options_json, $q->question_type);
-            if (is_array($options) && $exam->randomize_options && in_array($q->question_type, ['single_choice', 'multiple_choice'])) {
-                shuffle($options);
-            }
-
-            return [
-                'id' => $q->id,
-                'type' => $q->question_type,
-                'content' => HtmlSanitizerService::sanitize($q->content),
-                'options' => $options,
-                'weight' => $q->weight,
-            ];
-        });
+        $formattedQuestions = $this->questionPayload->forResult($exam, $result);
 
         $remainingSeconds = $this->remainingSeconds($result, $exam);
-        $result->update(['time_remaining_seconds' => $remainingSeconds]);
 
         return response()->json([
             'status' => 'success',
@@ -57,7 +42,7 @@ class ExamSessionApiController extends Controller
             'result' => [
                 'id' => $result->id,
                 'time_remaining_seconds' => $remainingSeconds,
-                'answers' => $result->answers_json ?? (object) [],
+                'answers' => $this->drafts->answersFor($result) ?: (object) [],
             ],
             'questions' => $formattedQuestions,
         ])->header('Cache-Control', 'no-store, private');
@@ -88,10 +73,7 @@ class ExamSessionApiController extends Controller
 
         $answers = $this->filterAnswers($exam, $validated['answers'] ?? []);
 
-        $result->update([
-            'answers_json' => $answers,
-            'time_remaining_seconds' => $timeRemaining,
-        ]);
+        $this->drafts->save($result, $answers, $timeRemaining);
 
         return response()->json([
             'status' => 'success',
@@ -118,8 +100,8 @@ class ExamSessionApiController extends Controller
         ]);
         $expired = $this->remainingSeconds($result, $exam) <= 0;
         $answers = $expired
-            ? ($result->answers_json ?? [])
-            : $this->filterAnswers($exam, $validated['answers'] ?? ($result->answers_json ?? []));
+            ? $this->drafts->answersFor($result)
+            : $this->filterAnswers($exam, $validated['answers'] ?? $this->drafts->answersFor($result));
         $questions = $exam->questionGroup->questions;
 
         $totalScore = 0;
@@ -182,6 +164,7 @@ class ExamSessionApiController extends Controller
             'time_remaining_seconds' => 0,
             'submitted_at' => now('UTC'),
         ]);
+        $this->drafts->forget($result);
 
         return response()->json([
             'status' => 'success',
@@ -203,10 +186,7 @@ class ExamSessionApiController extends Controller
 
     private function filterAnswers(Exam $exam, array $answers): array
     {
-        $allowedQuestionIds = $exam->questionGroup->questions()
-            ->pluck('id')
-            ->mapWithKeys(fn ($id) => [(string) $id => true])
-            ->all();
+        $allowedQuestionIds = $this->questionPayload->allowedQuestionIds($exam);
         $filtered = [];
 
         foreach ($answers as $questionId => $answer) {
@@ -240,39 +220,5 @@ class ExamSessionApiController extends Controller
         return is_bool($answer) || is_int($answer) || is_float($answer) || $answer === null
             ? $answer
             : null;
-    }
-
-    private function sanitizeOptionsForStudent(mixed $options, string $questionType): mixed
-    {
-        if (! is_array($options)) {
-            return $options;
-        }
-
-        if (in_array($questionType, ['single_choice', 'multiple_choice'], true)) {
-            return array_map(function ($option) {
-                if (! is_array($option)) {
-                    return HtmlSanitizerService::sanitize((string) $option);
-                }
-                $option['id'] = mb_substr((string) ($option['id'] ?? ''), 0, 20);
-                $option['text'] = HtmlSanitizerService::sanitize((string) ($option['text'] ?? ''));
-
-                return $option;
-            }, $options);
-        }
-
-        return $this->plainTextOptions($options);
-    }
-
-    private function plainTextOptions(array $options): array
-    {
-        foreach ($options as $key => $value) {
-            if (is_array($value)) {
-                $options[$key] = $this->plainTextOptions($value);
-            } elseif (is_string($value)) {
-                $options[$key] = mb_substr(trim(strip_tags($value)), 0, 1000);
-            }
-        }
-
-        return $options;
     }
 }

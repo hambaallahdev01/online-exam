@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ExamQuestionPayload;
 use App\Services\MediaUploadService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +31,10 @@ class Question extends Model
 
     protected static function booted(): void
     {
+        static::saved(function (Question $question) {
+            app(ExamQuestionPayload::class)->forgetQuestionGroup($question->question_group_id);
+        });
+
         static::deleting(function (Question $question) {
             $teacherId = $question->questionGroup()->value('teacher_id');
             $requiredPrefix = $teacherId ? "questions/{$question->school_id}/{$teacherId}" : '__invalid_media_owner__';
@@ -37,6 +42,10 @@ class Question extends Model
             MediaUploadService::deleteMediaFromContent($question->content, $requiredPrefix);
             MediaUploadService::deleteMediaFromContent($question->options_json, $requiredPrefix);
             MediaUploadService::deleteMediaFromContent($question->explanation, $requiredPrefix);
+        });
+
+        static::deleted(function (Question $question) {
+            app(ExamQuestionPayload::class)->forgetQuestionGroup($question->question_group_id);
         });
     }
 

@@ -107,6 +107,12 @@ let flaggedQuestions = {};
 let timeRemaining = 0;
 let timerInterval = null;
 let autosaveInterval = null;
+let autosaveDebounceTimer = null;
+let autosaveInFlight = false;
+let autosaveQueued = false;
+let answersDirty = false;
+
+const AUTOSAVE_DEBOUNCE_MS = 1200;
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchExamPayload();
@@ -132,8 +138,8 @@ async function fetchExamPayload() {
             renderQuestion(0);
             startTimer();
 
-            // Autosave every 15 seconds
-            autosaveInterval = setInterval(autosaveAnswers, 15000);
+            // Recovery/checkpoint interval; actual changes are debounced below.
+            autosaveInterval = setInterval(() => autosaveAnswers(true), 15000);
         } else {
             alert('Failed to load exam data.');
         }
@@ -421,12 +427,27 @@ function renderPalette() {
 }
 
 function triggerAutosaveNotification() {
-    document.getElementById('saveStatus').textContent = 'Status: Saving changes...';
+    answersDirty = true;
+    document.getElementById('saveStatus').textContent = 'Status: Changes waiting to be saved...';
     document.getElementById('saveStatus').style.color = 'var(--warning)';
-    autosaveAnswers();
+
+    clearTimeout(autosaveDebounceTimer);
+    autosaveDebounceTimer = setTimeout(autosaveAnswers, AUTOSAVE_DEBOUNCE_MS);
 }
 
-async function autosaveAnswers() {
+async function autosaveAnswers(forceCheckpoint = false) {
+    if (!answersDirty && !forceCheckpoint) return;
+
+    if (autosaveInFlight) {
+        autosaveQueued = true;
+        return;
+    }
+
+    clearTimeout(autosaveDebounceTimer);
+    autosaveInFlight = true;
+    autosaveQueued = false;
+    answersDirty = false;
+
     try {
         const response = await fetch(`/student/api/exam/${EXAM_ID}/autosave`, {
             method: 'POST',
@@ -436,18 +457,31 @@ async function autosaveAnswers() {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                answers: userAnswers,
-                time_remaining_seconds: timeRemaining
+                answers: userAnswers
             })
         });
         const res = await response.json();
         if (res.status === 'success') {
             document.getElementById('saveStatus').textContent = 'Status: Autosaved successfully';
             document.getElementById('saveStatus').style.color = 'var(--status-answered)';
+        } else if (res.status === 'expired') {
+            document.getElementById('saveStatus').textContent = 'Status: Exam time has expired';
+            document.getElementById('saveStatus').style.color = 'var(--danger)';
+        } else {
+            answersDirty = true;
+            throw new Error(res.message || 'Autosave failed');
         }
     } catch (e) {
-        document.getElementById('saveStatus').textContent = 'Status: Offline mode (saving locally)';
+        answersDirty = true;
+        document.getElementById('saveStatus').textContent = 'Status: Connection interrupted (will retry)';
         document.getElementById('saveStatus').style.color = 'var(--danger)';
+    } finally {
+        autosaveInFlight = false;
+
+        if (autosaveQueued || answersDirty) {
+            clearTimeout(autosaveDebounceTimer);
+            autosaveDebounceTimer = setTimeout(autosaveAnswers, AUTOSAVE_DEBOUNCE_MS);
+        }
     }
 }
 
@@ -465,6 +499,7 @@ async function confirmSubmitExam() {
 async function submitExam(isAutoSubmit = false) {
     clearInterval(timerInterval);
     clearInterval(autosaveInterval);
+    clearTimeout(autosaveDebounceTimer);
 
     if (isAutoSubmit) {
         ExamToast.warning('Waktu Ujian telah habis! Mengirimkan jawaban otomatis...');

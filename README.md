@@ -146,9 +146,9 @@ Siswa (`student@demo.org`) dapat langsung memasukkan salah satu Token Ujian di b
 
 For simultaneous examination of thousands of students across multiple classrooms:
 
-1. **Install Octane & Redis Extensions**:
+1. **Install Octane** (Predis is already included; `phpredis` remains the faster native option):
    ```bash
-   composer require laravel/octane predis/predis
+   composer require laravel/octane
    php artisan octane:install --server=frankenphp # or swoole / roadrunner
    ```
 
@@ -157,6 +157,9 @@ For simultaneous examination of thousands of students across multiple classrooms
    CACHE_STORE=redis
    SESSION_DRIVER=redis
    QUEUE_CONNECTION=redis
+   EXAM_PAYLOAD_CACHE_STORE=redis
+   EXAM_DRAFT_STORE=redis
+   REDIS_CLIENT=predis
    ```
 
 3. **Start Octane Server**:
@@ -198,6 +201,23 @@ OpenLiteSpeed provides high event-driven performance with minimal memory consump
    </IfModule>
    ```
 4. Enable `LSAPI` mode in OpenLiteSpeed WebAdmin for fast PHP execution.
+5. **Enable optional Redis acceleration**. Use `phpredis` when its PHP extension is
+   installed, or `predis` (included in this project) when it is not:
+   ```env
+   CACHE_STORE=redis
+   SESSION_DRIVER=redis
+   EXAM_PAYLOAD_CACHE_STORE=redis
+   EXAM_DRAFT_STORE=redis
+   REDIS_CLIENT=predis
+   REDIS_HOST=127.0.0.1
+   REDIS_PORT=6379
+   REDIS_DB=0
+   REDIS_CACHE_DB=1
+   ```
+   `EXAM_PAYLOAD_CACHE_STORE` caches the sanitized question package. `EXAM_DRAFT_STORE`
+   keeps frequent answer drafts in Redis and checkpoints them to MySQL every 30 seconds;
+   the final submission is always written to MySQL. After changing `.env`, run
+   `php artisan config:clear` (or rebuild the production config cache).
 
 ---
 
@@ -231,7 +251,11 @@ Easily deploy on standard cPanel/DirectAdmin shared web hosting without root acc
    CACHE_STORE=file
    SESSION_DRIVER=file
    QUEUE_CONNECTION=sync
+   EXAM_PAYLOAD_CACHE_STORE=file
+   EXAM_DRAFT_STORE=database
    ```
+   This mode does not connect to Redis. Question packages use Laravel's file cache,
+   while every accepted answer autosave is written directly to MySQL.
 4. **Run Migrations via Cron Job or SSH**:
    Use cPanel's exact PHP 8 binary path (e.g. `/opt/cpanel/ea-php85/root/usr/bin/php` or `/opt/alt/php85/usr/bin/php`):
    ```bash
