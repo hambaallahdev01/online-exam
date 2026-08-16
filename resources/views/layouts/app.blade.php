@@ -79,7 +79,7 @@
 
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
+    @vite('resources/js/app.js')
     <title>@yield('title', __('messages.meta_title'))</title>
     <style>
         @font-face {
@@ -350,7 +350,12 @@
             justify-content: center;
             width: 1.25rem;
             height: 1.25rem;
-            font-size: 0.9rem;
+            font-size: 1rem;
+        }
+
+        .flag-icon-tag .fi {
+            width: 1.3333em;
+            line-height: 1em;
         }
 
         .container {
@@ -572,10 +577,10 @@
         <div class="navbar">
             <div class="brand-wrapper" style="display: flex; align-items: center; gap: 0.6rem;">
                 <a href="{{ url('/') }}" class="brand">
-                    <i class="fa-solid fa-graduation-cap"></i> <span>{{ __('messages.brand_name') }}</span>
+                    <i data-lucide="graduation-cap"></i> <span>{{ __('messages.brand_name') }}</span>
                 </a>
                 <a href="http://ajenono.wongcjdw.com" target="_blank" rel="noopener noreferrer" class="v1-legacy-btn" style="font-size: 0.75rem; color: var(--text-muted); text-decoration: underline; background: rgba(99, 102, 241, 0.1); padding: 0.2rem 0.5rem; border-radius: 0.3rem;" title="Open Ajenono V1 Legacy">
-                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.65rem;"></i> {{ __('messages.legacy_version') }}
+                    <i data-lucide="external-link" style="font-size: 0.65rem;"></i> {{ __('messages.legacy_version') }}
                 </a>
             </div>
             <ul class="nav-links">
@@ -600,46 +605,46 @@
                 
                 <li class="lang-dropdown">
                     <button type="button" class="lang-dropdown-btn" id="langDropdownTrigger" onclick="toggleLangDropdown(event)" title="{{ __('messages.select_language') }}">
-                        <i class="fa-solid fa-flag" style="color: var(--accent);"></i>
+                        <i data-lucide="languages" style="color: var(--accent);"></i>
                         <span style="font-weight: 600;">
                             @php $curr = app()->getLocale(); @endphp
                             @if($curr === 'id')
-                                🇮🇩 ID
+                                <span class="fi fi-id" aria-hidden="true"></span> ID
                             @elseif($curr === 'en')
-                                🇬🇧 EN
+                                <span class="fi fi-gb" aria-hidden="true"></span> EN
                             @elseif($curr === 'ar')
-                                🇸🇦 AR
+                                <span class="fi fi-sa" aria-hidden="true"></span> AR
                             @elseif($curr === 'zh')
-                                🇨🇳 ZH
+                                <span class="fi fi-cn" aria-hidden="true"></span> ZH
                             @else
                                 {{ strtoupper($curr) }}
                             @endif
                         </span>
-                        <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i>
+                        <i data-lucide="chevron-down" style="font-size: 0.65rem; opacity: 0.7;"></i>
                     </button>
                     <div class="lang-dropdown-menu" id="langDropdownMenu">
                         <a href="{{ route('set.locale', 'id') }}" class="lang-dropdown-item {{ app()->getLocale() === 'id' ? 'active' : '' }}">
-                            <span class="flag-icon-tag"><i class="fa-solid fa-flag" style="color: #ef4444;"></i></span>
-                            <span>🇮🇩 {{ __('messages.lang_id') }}</span>
+                            <span class="flag-icon-tag"><span class="fi fi-id" aria-hidden="true"></span></span>
+                            <span>{{ __('messages.lang_id') }}</span>
                         </a>
                         <a href="{{ route('set.locale', 'en') }}" class="lang-dropdown-item {{ app()->getLocale() === 'en' ? 'active' : '' }}">
-                            <span class="flag-icon-tag"><i class="fa-solid fa-flag" style="color: #3b82f6;"></i></span>
-                            <span>🇬🇧 {{ __('messages.lang_en') }}</span>
+                            <span class="flag-icon-tag"><span class="fi fi-gb" aria-hidden="true"></span></span>
+                            <span>{{ __('messages.lang_en') }}</span>
                         </a>
                         <a href="{{ route('set.locale', 'ar') }}" class="lang-dropdown-item {{ app()->getLocale() === 'ar' ? 'active' : '' }}">
-                            <span class="flag-icon-tag"><i class="fa-solid fa-flag" style="color: #10b981;"></i></span>
-                            <span>🇸🇦 {{ __('messages.lang_ar') }}</span>
+                            <span class="flag-icon-tag"><span class="fi fi-sa" aria-hidden="true"></span></span>
+                            <span>{{ __('messages.lang_ar') }}</span>
                         </a>
                         <a href="{{ route('set.locale', 'zh') }}" class="lang-dropdown-item {{ app()->getLocale() === 'zh' ? 'active' : '' }}">
-                            <span class="flag-icon-tag"><i class="fa-solid fa-flag" style="color: #f59e0b;"></i></span>
-                            <span>🇨🇳 {{ __('messages.lang_zh') }}</span>
+                            <span class="flag-icon-tag"><span class="fi fi-cn" aria-hidden="true"></span></span>
+                            <span>{{ __('messages.lang_zh') }}</span>
                         </a>
                     </div>
                 </li>
 
                 <li>
                     <button id="themeToggle" class="theme-toggle-btn" onclick="toggleTheme()">
-                        🌙 {{ __('messages.dark_mode') }}
+                        <i data-lucide="moon"></i> {{ __('messages.dark_mode') }}
                     </button>
                 </li>
             </ul>
@@ -665,7 +670,7 @@
     </div>
 
     <footer>
-        <p>&copy; {{ date('Y') }} Open Source Online Exam Platform. Made with <i class="fa-solid fa-heart" style="color: #ef4444;"></i> by <a href="https://github.com/hambaallahdev01" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Hamba Allah</a> &bull; Inspired by <a href="https://wongcjdw.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Pak Wong</a> (Big thanks!).</p>
+        <p>&copy; {{ date('Y') }} Open Source Online Exam Platform. Made with <i data-lucide="heart" style="color: #ef4444;"></i> by <a href="https://github.com/hambaallahdev01" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Hamba Allah</a> &bull; Inspired by <a href="https://wongcjdw.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: underline;">Pak Wong</a> (Big thanks!).</p>
     </footer>
 
     <script>
@@ -673,7 +678,7 @@
             document.documentElement.setAttribute('data-theme', theme);
             const btn = document.getElementById('themeToggle');
             if (btn) {
-                btn.innerHTML = theme === 'dark' ? '<i class="fa-solid fa-sun"></i> Light' : '<i class="fa-solid fa-moon"></i> Dark';
+                btn.innerHTML = theme === 'dark' ? '<i data-lucide="sun"></i> Light' : '<i data-lucide="moon"></i> Dark';
             }
             localStorage.setItem('exam_theme', theme);
         }
@@ -719,10 +724,10 @@
                 const toast = document.createElement('div');
                 toast.className = `toast-box ${type}`;
                 
-                let iconHtml = '<i class="fa-solid fa-circle-info" style="color: var(--accent);"></i>';
-                if (type === 'success') iconHtml = '<i class="fa-solid fa-circle-check" style="color: var(--status-answered);"></i>';
-                if (type === 'error') iconHtml = '<i class="fa-solid fa-circle-xmark" style="color: var(--danger);"></i>';
-                if (type === 'warning') iconHtml = '<i class="fa-solid fa-triangle-exclamation" style="color: var(--warning);"></i>';
+                let iconHtml = '<i data-lucide="info" style="color: var(--accent);"></i>';
+                if (type === 'success') iconHtml = '<i data-lucide="circle-check" style="color: var(--status-answered);"></i>';
+                if (type === 'error') iconHtml = '<i data-lucide="circle-x" style="color: var(--danger);"></i>';
+                if (type === 'warning') iconHtml = '<i data-lucide="triangle-alert" style="color: var(--warning);"></i>';
 
                 toast.innerHTML = iconHtml;
                 const messageElement = document.createElement('span');
@@ -750,7 +755,7 @@
                 overlay.className = 'confirm-overlay';
                 overlay.innerHTML = `
                     <div class="confirm-card">
-                        <div style="font-size: 2.5rem; color: var(--warning); margin-bottom: 0.75rem;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div style="font-size: 2.5rem; color: var(--warning); margin-bottom: 0.75rem;"><i data-lucide="triangle-alert"></i></div>
                         <h3 class="confirm-title" style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);"></h3>
                         <p class="confirm-text" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5;"></p>
                         <div style="display: flex; gap: 0.75rem; justify-content: center;">

@@ -12,7 +12,7 @@
     <!-- Enter Exam Token Card -->
     <div class="card" style="border: 1px solid var(--primary);">
         <div class="card-header" style="color: var(--primary);">
-            <i class="fa-solid fa-key"></i> Enter Exam Token
+            <i data-lucide="key-round"></i> Enter Exam Token
         </div>
         <form action="{{ route('student.enter-token') }}" method="POST">
             @csrf
@@ -27,7 +27,7 @@
     <!-- Exam History & Results Card -->
     <div class="card">
         <div class="card-header">
-            <i class="fa-solid fa-chart-column"></i> My Exam Results
+            <i data-lucide="chart-column"></i> My Exam Results
         </div>
         <table>
             <thead>

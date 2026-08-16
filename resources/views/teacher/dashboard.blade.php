@@ -10,7 +10,7 @@
             <p style="color: var(--text-muted); font-size: 0.95rem;">Manage question banks, edit exam settings, and publish active tests.</p>
         </div>
         <button class="btn btn-primary" onclick="document.getElementById('modalGroup').style.display='flex'">
-            <i class="fa-solid fa-plus"></i> New Question Group
+            <i data-lucide="plus"></i> New Question Group
         </button>
     </div>
 
@@ -47,13 +47,13 @@
                         <td>
                             <div style="display: flex; gap: 0.4rem;">
                                 <a href="{{ route('teacher.question-groups.show', $g->id) }}" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
-                                    <i class="fa-solid fa-list-check"></i> Manage Questions
+                                    <i data-lucide="list-checks"></i> Manage Questions
                                 </a>
                                 <form action="{{ route('teacher.question-groups.destroy', $g->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus bank soal ini beserta semua soal di dalamnya?');" style="display: inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger);" title="Hapus Bank Soal">
-                                        <i class="fa-solid fa-trash-can"></i> Hapus
+                                        <i data-lucide="trash-2"></i> Hapus
                                     </button>
                                 </form>
                             </div>
@@ -110,13 +110,13 @@
                         <td>
                             <div style="display: flex; gap: 0.4rem;">
                                 <button class="btn btn-secondary" onclick="openEditExamModal({{ $ex->id }})" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: var(--primary);" title="Edit Ujian">
-                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    <i data-lucide="square-pen"></i> Edit
                                 </button>
                                 <form action="{{ route('teacher.exams.destroy', $ex->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus publikasi ujian ini?');" style="display: inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: var(--danger);" title="Hapus Ujian">
-                                        <i class="fa-solid fa-trash-can"></i> Hapus
+                                        <i data-lucide="trash-2"></i> Hapus
                                     </button>
                                 </form>
                             </div>
@@ -155,7 +155,7 @@
                 <div style="display: flex; gap: 0.5rem;">
                     <input type="text" name="token" id="examTokenInput" class="form-control" placeholder="EXAM26" style="text-transform: uppercase;" required>
                     <button type="button" class="btn btn-secondary" onclick="generateToken()" style="white-space: nowrap;" title="Generate Random Token">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
+                        <i data-lucide="wand-sparkles"></i> Generate
                     </button>
                 </div>
             </div>
@@ -174,7 +174,7 @@
                 </div>
             </div>
             <p style="color: var(--text-muted); font-size: 0.82rem; margin: -0.25rem 0 1rem;">
-                <i class="fa-solid fa-clock"></i> {{ __('messages.school_time') }}: <strong>{{ $schoolTimezone }}</strong>
+                <i data-lucide="clock"></i> {{ __('messages.school_time') }}: <strong>{{ $schoolTimezone }}</strong>
             </p>
             <button type="submit" class="btn btn-accent" style="width: 100%;">Publish Exam</button>
         </form>
@@ -186,7 +186,7 @@
     <div class="card" style="width: 450px; margin: 10% auto;">
         <div class="card-header">
             <span>Create Question Group</span>
-            <button class="btn btn-secondary" onclick="document.getElementById('modalGroup').style.display='none'" style="padding: 0.2rem 0.5rem;">✕</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('modalGroup').style.display='none'" style="padding: 0.2rem 0.5rem;" aria-label="Tutup"><i data-lucide="x"></i></button>
         </div>
         <form action="{{ route('teacher.question-groups.store') }}" method="POST">
             @csrf
@@ -218,7 +218,7 @@
     <div class="card" style="width: 450px; margin: 10% auto;">
         <div class="card-header">
             <span id="editExamModalTitle">Edit Published Exam</span>
-            <button class="btn btn-secondary" onclick="document.getElementById('modalEditExam').style.display='none'" style="padding: 0.2rem 0.5rem;">✕</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('modalEditExam').style.display='none'" style="padding: 0.2rem 0.5rem;" aria-label="Tutup"><i data-lucide="x"></i></button>
         </div>
         <form id="editExamForm" method="POST">
             @csrf

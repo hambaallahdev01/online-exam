@@ -178,13 +178,13 @@
             <h1 style="font-size: 1.6rem; color: var(--primary);">Bank Soal: {{ $group->name }}</h1>
             <p style="color: var(--text-muted); font-size: 0.9rem;">Mata Pelajaran: {{ $group->subject->name }} | Dibuat oleh: {{ $group->teacher->name }}</p>
         </div>
-        <a href="{{ route('teacher.dashboard') }}" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard</a>
+        <a href="{{ route('teacher.dashboard') }}" class="btn btn-secondary"><i data-lucide="arrow-left"></i> Kembali ke Dashboard</a>
     </div>
 
     <!-- Upload Progress Loading Overlay Modal -->
     <div id="uploadLoadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; flex-direction: column;">
         <div style="background: var(--bg-card); padding: 2rem 2.5rem; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.25); border: 1px solid var(--border-color); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.85rem; max-width: 90%;">
-            <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.8rem; color: var(--accent);"></i>
+            <i data-lucide="loader-circle" class="icon-spin" style="font-size: 2.8rem; color: var(--accent);"></i>
             <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin: 0;">Mengunggah Berkas Media...</h3>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;" id="uploadLoadingText">Sedang mengompresi & menyimpan ke S3 Storage. Mohon tunggu sejenak.</p>
         </div>
@@ -194,7 +194,7 @@
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
             <span id="formCardHeader">Tambah Soal Baru</span>
             <button type="button" class="btn btn-secondary" id="cancelEditBtn" onclick="cancelEdit()" style="display: none; padding: 0.25rem 0.65rem; font-size: 0.8rem;">
-                <i class="fa-solid fa-xmark"></i> Batal Edit
+                <i data-lucide="x"></i> Batal Edit
             </button>
         </div>
         <form action="{{ route('teacher.questions.store', $group->id) }}" method="POST" id="createQuestionForm">
@@ -227,27 +227,27 @@
                         <option value="pre">Blok Kode / Teks Tetap</option>
                     </select>
 
-                    <button type="button" class="editor-btn" onclick="execCmd('bold')" title="Tebal (Bold)"><i class="fa-solid fa-bold"></i></button>
-                    <button type="button" class="editor-btn" onclick="execCmd('italic')" title="Miring (Italic)"><i class="fa-solid fa-italic"></i></button>
-                    <button type="button" class="editor-btn" onclick="execCmd('underline')" title="Garis Bawah (Underline)"><i class="fa-solid fa-underline"></i></button>
-                    <button type="button" class="editor-btn" onclick="execCmd('strikeThrough')" title="Coret (Strikethrough)"><i class="fa-solid fa-strikethrough"></i></button>
+                    <button type="button" class="editor-btn" onclick="execCmd('bold')" title="Tebal (Bold)"><i data-lucide="bold"></i></button>
+                    <button type="button" class="editor-btn" onclick="execCmd('italic')" title="Miring (Italic)"><i data-lucide="italic"></i></button>
+                    <button type="button" class="editor-btn" onclick="execCmd('underline')" title="Garis Bawah (Underline)"><i data-lucide="underline"></i></button>
+                    <button type="button" class="editor-btn" onclick="execCmd('strikeThrough')" title="Coret (Strikethrough)"><i data-lucide="strikethrough"></i></button>
                     
-                    <button type="button" class="editor-btn" onclick="execCmd('insertUnorderedList')" title="Daftar Bullet"><i class="fa-solid fa-list-ul"></i></button>
-                    <button type="button" class="editor-btn" onclick="execCmd('insertOrderedList')" title="Daftar Angka"><i class="fa-solid fa-list-ol"></i></button>
+                    <button type="button" class="editor-btn" onclick="execCmd('insertUnorderedList')" title="Daftar Bullet"><i data-lucide="list"></i></button>
+                    <button type="button" class="editor-btn" onclick="execCmd('insertOrderedList')" title="Daftar Angka"><i data-lucide="list-ordered"></i></button>
                     
                     <button type="button" class="editor-btn" onclick="triggerMediaUpload('image', 'editorContent')" title="Upload & Auto-Resize Gambar (Max 1024x1024)">
-                        <i class="fa-solid fa-image" style="color: var(--primary);"></i> Sisipkan Gambar
+                        <i data-lucide="image" style="color: var(--primary);"></i> Sisipkan Gambar
                     </button>
 
                     <button type="button" class="editor-btn" onclick="insertYoutubeVideo('editorContent')" title="Embed Video YouTube">
-                        <i class="fa-brands fa-youtube" style="color: #ef4444;"></i> Embed YouTube
+                        <i data-lucide="video" style="color: #ef4444;"></i> Embed YouTube
                     </button>
 
                     <button type="button" class="editor-btn" onclick="triggerMediaUpload('pdf', 'editorContent')" title="Lampirkan Dokumen PDF (Max 5MB)">
-                        <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i> Dokumen PDF
+                        <i data-lucide="file-text" style="color: #dc2626;"></i> Dokumen PDF
                     </button>
 
-                    <button type="button" class="editor-btn" onclick="execCmd('removeFormat')" title="Hapus Format"><i class="fa-solid fa-eraser"></i></button>
+                    <button type="button" class="editor-btn" onclick="execCmd('removeFormat')" title="Hapus Format"><i data-lucide="eraser"></i></button>
                 </div>
 
                 <div id="editorContent" class="editor-content" contenteditable="true"></div>
@@ -262,7 +262,7 @@
                 <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="resizeSelectedImg('75%')">75%</button>
                 <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="resizeSelectedImg('100%')">100%</button>
                 <span style="border-left: 1px solid var(--border-color); height: 16px; margin: 0 0.25rem;"></span>
-                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem; color: var(--danger);" onclick="deleteSelectedImg()"><i class="fa-solid fa-trash"></i> Hapus</button>
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem; color: var(--danger);" onclick="deleteSelectedImg()"><i data-lucide="trash-2"></i> Hapus</button>
             </div>
 
             <!-- Dynamic Rich WYSIWYG Editors for Options -->
@@ -271,7 +271,7 @@
                     <!-- Option items will be rendered dynamically by JS -->
                 </div>
                 <button type="button" class="btn btn-secondary" onclick="addOptionField()" style="margin-top: 1rem; width: 100%; border-style: dashed;">
-                    <i class="fa-solid fa-plus"></i> Tambah Opsi Jawaban Baru
+                    <i data-lucide="plus"></i> Tambah Opsi Jawaban Baru
                 </button>
             </div>
 
@@ -284,7 +284,7 @@
                 </div>
                 <div id="matchingPairList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
                 <button type="button" class="btn btn-secondary" onclick="addMatchingPair()" style="margin-top: 0.85rem; width: 100%; border-style: dashed;">
-                    <i class="fa-solid fa-plus"></i> Tambah Pasangan
+                    <i data-lucide="plus"></i> Tambah Pasangan
                 </button>
                 <small style="color: var(--text-muted); display: block; margin-top: 0.65rem;">
                     Minimal 2 pasangan. Urutan pilihan jawaban di sisi kanan tidak menentukan kunci; sistem menghubungkannya melalui ID internal.
@@ -325,13 +325,13 @@
                         <div style="display: flex; align-items: center; gap: 0.6rem;">
                             <span style="color: var(--accent); font-weight: 600; font-size: 0.9rem; margin-right: 0.5rem;">Bobot: {{ $q->weight }}</span>
                             <button type="button" class="btn btn-secondary" onclick="editQuestionById({{ $q->id }})" style="padding: 0.25rem 0.6rem; font-size: 0.8rem; color: var(--primary); border-color: var(--primary);" title="Edit Soal">
-                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                                <i data-lucide="square-pen"></i> Edit
                             </button>
                             <form action="{{ route('teacher.questions.destroy', $q->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus soal ini beserta seluruh gambar/file S3 di dalamnya?');" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.8rem; color: var(--danger); border-color: var(--danger);" title="Hapus Soal & Berkas S3">
-                                    <i class="fa-solid fa-trash-can"></i> Hapus
+                                    <i data-lucide="trash-2"></i> Hapus
                                 </button>
                             </form>
                         </div>
@@ -360,7 +360,7 @@
                                     @endphp
                                     <div class="matching-summary-row">
                                         <span>{{ $leftItem['text'] ?? '' }}</span>
-                                        <i class="fa-solid fa-arrow-right" style="color: var(--primary);" aria-hidden="true"></i>
+                                        <i data-lucide="arrow-right" style="color: var(--primary);" aria-hidden="true"></i>
                                         <span>{{ $rightItem['text'] ?? $rightId }}</span>
                                     </div>
                                 @endforeach
@@ -449,23 +449,23 @@ function createOptionHTML(index) {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
                 <label style="margin: 0; font-weight: 600;">Pilihan ${label} (WYSIWYG Editor)</label>
                 <button type="button" class="btn btn-secondary btn-remove-option" onclick="removeOptionField(${index})" style="padding: 0.15rem 0.5rem; font-size: 0.75rem; color: var(--danger); border-color: var(--danger);" title="Hapus Opsi">
-                    <i class="fa-solid fa-trash-can"></i> Hapus Opsi
+                    <i data-lucide="trash-2"></i> Hapus Opsi
                 </button>
             </div>
             <div class="editor-toolbar" style="padding: 0.25rem 0.5rem;">
-                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'bold')"><i class="fa-solid fa-bold"></i></button>
-                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'italic')"><i class="fa-solid fa-italic"></i></button>
-                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'underline')"><i class="fa-solid fa-underline"></i></button>
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'bold')"><i data-lucide="bold"></i></button>
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'italic')"><i data-lucide="italic"></i></button>
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'underline')"><i data-lucide="underline"></i></button>
                 <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="triggerMediaUpload('image', '${editorId}')" title="Sisipkan Gambar">
-                    <i class="fa-solid fa-image" style="color: var(--primary);"></i> Gambar
+                    <i data-lucide="image" style="color: var(--primary);"></i> Gambar
                 </button>
                 <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="insertYoutubeVideo('${editorId}')" title="Embed YouTube">
-                    <i class="fa-brands fa-youtube" style="color: #ef4444;"></i> YouTube
+                    <i data-lucide="video" style="color: #ef4444;"></i> YouTube
                 </button>
                 <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="triggerMediaUpload('pdf', '${editorId}')" title="Dokumen PDF">
-                    <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i> PDF
+                    <i data-lucide="file-text" style="color: #dc2626;"></i> PDF
                 </button>
-                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'removeFormat')"><i class="fa-solid fa-eraser"></i></button>
+                <button type="button" class="editor-btn" style="padding: 0.2rem 0.45rem; font-size: 0.75rem;" onclick="execOptionCmd('${editorId}', 'removeFormat')"><i data-lucide="eraser"></i></button>
             </div>
             <div id="${editorId}" class="option-editor-content" contenteditable="true"></div>
             <input type="hidden" name="options[]" id="hiddenOption_${index}">
@@ -527,13 +527,13 @@ function createMatchingPairHTML(index, leftValue = '', rightValue = '') {
                 <label class="matching-left-label" style="font-size: 0.85rem; font-weight: 600;">Item Kiri</label>
                 <input type="text" name="matching_left[]" class="form-control matching-pair-input" value="${escapeHtml(leftValue)}" maxlength="1000" required placeholder="Contoh: Indonesia">
             </div>
-            <i class="fa-solid fa-arrow-right matching-pair-arrow" aria-hidden="true"></i>
+            <i data-lucide="arrow-right" class="matching-pair-arrow" aria-hidden="true"></i>
             <div>
                 <label class="matching-right-label" style="font-size: 0.85rem; font-weight: 600;">Pasangan Benar</label>
                 <input type="text" name="matching_right[]" class="form-control matching-pair-input" value="${escapeHtml(rightValue)}" maxlength="1000" required placeholder="Contoh: Jakarta">
             </div>
             <button type="button" class="btn btn-secondary btn-remove-matching" onclick="removeMatchingPair(${index})" style="padding: 0.55rem 0.7rem; color: var(--danger); border-color: var(--danger);" title="Hapus pasangan" aria-label="Hapus pasangan">
-                <i class="fa-solid fa-trash-can"></i>
+                <i data-lucide="trash-2"></i>
             </button>
         </div>
     `;
@@ -844,7 +844,7 @@ function handleMediaUpload(file) {
         if (data.status === 'success') {
             if (data.is_pdf) {
                 const safeName = escapeHtml(data.original_name);
-                const pdfHtml = `<p><a href="${data.url}" target="_blank" class="pdf-attachment-badge"><i class="fa-solid fa-file-pdf"></i> Unduh Lampiran PDF (${safeName})</a></p><p><br></p>`;
+                const pdfHtml = `<p><a href="${data.url}" target="_blank" class="pdf-attachment-badge"><i data-lucide="file-text"></i> Unduh Lampiran PDF (${safeName})</a></p><p><br></p>`;
                 document.execCommand('insertHTML', false, pdfHtml);
             } else {
                 const imgHtml = `<p><img src="${data.url}" alt="Gambar Pilihan" style="max-width: 100%; height: auto; border-radius: 0.5rem; margin: 0.5rem 0;"></p><p><br></p>`;

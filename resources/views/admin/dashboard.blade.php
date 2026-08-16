@@ -33,8 +33,8 @@
             <span>{{ __('messages.quick_actions') }}</span>
         </div>
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <a href="{{ route('admin.teachers') }}" class="btn btn-secondary" style="justify-content: flex-start;"><i class="fa-solid fa-chalkboard-user"></i>&nbsp; {{ __('messages.manage_teachers') }}</a>
-            <a href="{{ route('admin.students') }}" class="btn btn-secondary" style="justify-content: flex-start;"><i class="fa-solid fa-user-graduate"></i>&nbsp; {{ __('messages.manage_students') }}</a>
+            <a href="{{ route('admin.teachers') }}" class="btn btn-secondary" style="justify-content: flex-start;"><i data-lucide="presentation"></i>&nbsp; {{ __('messages.manage_teachers') }}</a>
+            <a href="{{ route('admin.students') }}" class="btn btn-secondary" style="justify-content: flex-start;"><i data-lucide="graduation-cap"></i>&nbsp; {{ __('messages.manage_students') }}</a>
         </div>
     </div>
 
@@ -42,7 +42,7 @@
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
             <span>{{ __('messages.school_identity') }}</span>
             <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.85rem;" onclick="document.getElementById('editSchoolProfileForm').style.display = document.getElementById('editSchoolProfileForm').style.display === 'none' ? 'block' : 'none';">
-                <i class="fa-solid fa-pen-to-square"></i> {{ __('messages.edit_profile') }}
+                <i data-lucide="square-pen"></i> {{ __('messages.edit_profile') }}
             </button>
         </div>
         <div style="line-height: 1.8;">
@@ -54,10 +54,10 @@
             <p>
                 <strong>{{ __('messages.language_setting') }}:</strong>
                 <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: var(--primary); padding: 0.25rem 0.6rem; border-radius: 0.4rem; font-weight: 600;">
-                    @if(($school->locale ?? 'id') === 'id') 🇮🇩 {{ __('messages.lang_id') }}
-                    @elseif($school->locale === 'en') 🇬🇧 {{ __('messages.lang_en') }}
-                    @elseif($school->locale === 'ar') 🇸🇦 {{ __('messages.lang_ar') }}
-                    @elseif($school->locale === 'zh') 🇨🇳 {{ __('messages.lang_zh') }}
+                    @if(($school->locale ?? 'id') === 'id') <span class="fi fi-id" aria-hidden="true"></span> {{ __('messages.lang_id') }}
+                    @elseif($school->locale === 'en') <span class="fi fi-gb" aria-hidden="true"></span> {{ __('messages.lang_en') }}
+                    @elseif($school->locale === 'ar') <span class="fi fi-sa" aria-hidden="true"></span> {{ __('messages.lang_ar') }}
+                    @elseif($school->locale === 'zh') <span class="fi fi-cn" aria-hidden="true"></span> {{ __('messages.lang_zh') }}
                     @else {{ $school->locale }}
                     @endif
                 </span>
@@ -93,12 +93,15 @@
                 </div>
                 <div class="form-group" style="margin-bottom: 1.25rem;">
                     <label style="display: block; margin-bottom: 0.3rem; font-weight: 500;">{{ __('messages.language_setting') }}</label>
-                    <select name="locale" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: 0.4rem; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main);" required>
-                        <option value="id" {{ old('locale', $school->locale ?? 'id') === 'id' ? 'selected' : '' }}>🇮🇩 {{ __('messages.lang_id') }}</option>
-                        <option value="en" {{ old('locale', $school->locale ?? '') === 'en' ? 'selected' : '' }}>🇬🇧 {{ __('messages.lang_en') }}</option>
-                        <option value="ar" {{ old('locale', $school->locale ?? '') === 'ar' ? 'selected' : '' }}>🇸🇦 {{ __('messages.lang_ar') }}</option>
-                        <option value="zh" {{ old('locale', $school->locale ?? '') === 'zh' ? 'selected' : '' }}>🇨🇳 {{ __('messages.lang_zh') }}</option>
-                    </select>
+                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                        <span id="schoolLocaleFlag" class="fi fi-{{ ['id' => 'id', 'en' => 'gb', 'ar' => 'sa', 'zh' => 'cn'][old('locale', $school->locale ?? 'id')] ?? 'id' }}" aria-hidden="true"></span>
+                        <select name="locale" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: 0.4rem; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main);" onchange="document.getElementById('schoolLocaleFlag').className = 'fi fi-' + ({ id: 'id', en: 'gb', ar: 'sa', zh: 'cn' }[this.value] || 'id')" required>
+                            <option value="id" {{ old('locale', $school->locale ?? 'id') === 'id' ? 'selected' : '' }}>{{ __('messages.lang_id') }}</option>
+                            <option value="en" {{ old('locale', $school->locale ?? '') === 'en' ? 'selected' : '' }}>{{ __('messages.lang_en') }}</option>
+                            <option value="ar" {{ old('locale', $school->locale ?? '') === 'ar' ? 'selected' : '' }}>{{ __('messages.lang_ar') }}</option>
+                            <option value="zh" {{ old('locale', $school->locale ?? '') === 'zh' ? 'selected' : '' }}>{{ __('messages.lang_zh') }}</option>
+                        </select>
+                    </div>
                     <small style="display: block; color: var(--text-muted); margin-top: 0.3rem; font-size: 0.8rem;">
                         Pengaturan ini akan otomatis diterapkan ke seluruh akun Guru dan Siswa pada sekolah/instansi ini saat berada di dalam sistem ujian.
                     </small>

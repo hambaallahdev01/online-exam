@@ -25,7 +25,7 @@
     <!-- Main Question View -->
     <div class="card" id="questionCard" style="min-height: 420px; display: flex; flex-direction: column; justify-content: space-between;">
         <div id="loadingBox" style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
-            <i class="fa-solid fa-spinner fa-spin"></i> Loading exam questions and restoring session state...
+            <i data-lucide="loader-circle" class="icon-spin"></i> Loading exam questions and restoring session state...
         </div>
 
         <div id="questionContainer" style="display: none;">
@@ -35,7 +35,7 @@
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: var(--warning); cursor: pointer; font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 0.3rem 0.6rem; border-radius: 0.4rem;">
                         <input type="checkbox" id="flagQuestionCheckbox" onchange="toggleFlagCurrentQuestion(this.checked)">
-                        <span><i class="fa-solid fa-flag"></i> Ragu-ragu</span>
+                        <span><i data-lucide="flag"></i> Ragu-ragu</span>
                     </label>
 
                     <span id="questionTypeBadge" style="background: rgba(99, 102, 241, 0.15); color: var(--primary); padding: 0.25rem 0.6rem; border-radius: 0.35rem; font-size: 0.8rem; font-weight: 600;">Single Choice</span>
@@ -61,8 +61,8 @@
         </div>
 
         <div id="navigationBox" style="display: none; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
-            <button type="button" class="btn btn-secondary" id="prevBtn" onclick="navigateQuestion(-1)">← Previous</button>
-            <button type="button" class="btn btn-primary" id="nextBtn" onclick="navigateQuestion(1)">Next →</button>
+            <button type="button" class="btn btn-secondary" id="prevBtn" onclick="navigateQuestion(-1)"><i data-lucide="arrow-left"></i> Previous</button>
+            <button type="button" class="btn btn-primary" id="nextBtn" onclick="navigateQuestion(1)">Next <i data-lucide="arrow-right"></i></button>
         </div>
     </div>
 
@@ -145,7 +145,7 @@ async function fetchExamPayload() {
         }
     } catch (err) {
         console.error('Payload fetch error:', err);
-        document.getElementById('loadingBox').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Connection error loading questions. Please refresh the page.';
+        document.getElementById('loadingBox').innerHTML = '<i data-lucide="circle-alert"></i> Connection error loading questions. Please refresh the page.';
     }
 }
 
@@ -298,8 +298,8 @@ function renderQuestion(index) {
             row.innerHTML = `
                 <span><strong>${idx + 1}.</strong> ${escapeHtml(String(itemText ?? ''))}</span>
                 <div style="display: flex; gap: 0.4rem;">
-                    <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem;" onclick="moveSortItem('${q.id}', ${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲ Up</button>
-                    <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem;" onclick="moveSortItem('${q.id}', ${idx}, 1)" ${idx === items.length - 1 ? 'disabled' : ''}>▼ Down</button>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem;" onclick="moveSortItem('${q.id}', ${idx}, -1)" ${idx === 0 ? 'disabled' : ''}><i data-lucide="chevron-up"></i> Up</button>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem;" onclick="moveSortItem('${q.id}', ${idx}, 1)" ${idx === items.length - 1 ? 'disabled' : ''}><i data-lucide="chevron-down"></i> Down</button>
                 </div>
             `;
             sortingBox.appendChild(row);

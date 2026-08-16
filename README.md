@@ -66,7 +66,7 @@ The platform natively supports 7 comprehensive question formats:
   - Real-time countdown timer with automatic graceful submission upon timeout.
   - Question palette navigation with visual status indicators (*Answered*, *Unanswered*, *Flagged/Ragu-ragu*, and *Active*).
   - Built-in Dark Mode toggle with persistent local storage preferences.
-  - Built-in SVG Favicon featuring `fa-graduation-cap` (`public/favicon.svg`).
+  - Built-in SVG favicon featuring Lucide's graduation-cap mark (`public/favicon.svg`).
 - **Flexible Deployment Architecture**:
   - High Performance Mode: Laravel Octane + Redis.
   - Web Server Container Mode: OpenLiteSpeed (OLS).
@@ -347,7 +347,7 @@ To minimize storage space and save bandwidth:
 - **Cloudflare Turnstile CAPTCHA Integration**: Native server-side validation ([`TurnstileRule`](/app/Rules/TurnstileRule.php)) to block automated bot submissions on Login, School Registration, and Password Reset forms.
 - **HTML Email Delivery (Brevo SMTP Integration)**: Integrated HTML Mailables (`resources/views/emails/`) for email verification and password reset to ensure high inbox deliverability and prevent rSPAM classification by mail relays.
 - **HTTP Security Headers**: Global middleware [`SecurityHeaders`](/app/Http/Middleware/SecurityHeaders.php) automatically injects `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, and `X-XSS-Protection`.
-- **Zero External CDN Dependencies**: All CSS, JavaScript, icons (FontAwesome 6 Free), and layout utilities are served locally from `public/vendor/`. This prevents potential third-party script injection or CDN outage disruptions during exam sessions.
+- **Zero External Icon CDN Dependencies**: Lucide UI icons and Flag Icons country flags are installed with npm, bundled by Vite, and served from the application itself. This prevents third-party icon CDN injection or outage disruptions during exam sessions.
 - **Password Reset & Email Verification**: Reset tokens enforce expiration and revoke existing sessions; verification links require a valid temporary URL signature.
 
 ### SMTP Mail Setup (`.env`)

@@ -143,7 +143,7 @@
     <div class="arabic-text">{{ __('messages.bismillah') }}</div>
     <div class="arabic-text" style="font-size: 1.4rem; margin-bottom: 1.5rem;">{{ __('messages.shalawat') }}</div>
     
-    <div class="jargon-badge"><i class="fa-solid fa-hand-holding-heart"></i> {{ __('messages.jargon') }}</div>
+    <div class="jargon-badge"><i data-lucide="hand-heart"></i> {{ __('messages.jargon') }}</div>
     
     <h1 class="hero-title">{{ __('messages.hero_title') }}</h1>
     <p class="hero-subtitle">
@@ -151,48 +151,48 @@
     </p>
     
     <div class="hero-actions">
-        <a href="{{ route('login') }}" class="btn btn-primary"><i class="fa-solid fa-right-to-bracket" style="margin-right: 0.5rem;"></i> {{ __('messages.enter_portal') }}</a>
-        <a href="{{ route('register.school') }}" class="btn btn-secondary"><i class="fa-solid fa-school" style="margin-right: 0.5rem;"></i> {{ __('messages.register_school_btn') }}</a>
+        <a href="{{ route('login') }}" class="btn btn-primary"><i data-lucide="log-in" style="margin-right: 0.5rem;"></i> {{ __('messages.enter_portal') }}</a>
+        <a href="{{ route('register.school') }}" class="btn btn-secondary"><i data-lucide="school" style="margin-right: 0.5rem;"></i> {{ __('messages.register_school_btn') }}</a>
     </div>
 
-    <!-- Landing Quick Language Switcher with Font Awesome Flags -->
+    <!-- Landing Quick Language Switcher with locally bundled Flag Icons -->
     <div style="margin-top: 2rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
         <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
-            <i class="fa-solid fa-flag" style="color: var(--accent);"></i> {{ __('messages.select_language') }}:
+            <i data-lucide="languages" style="color: var(--accent);"></i> {{ __('messages.select_language') }}:
         </span>
         <a href="{{ route('set.locale', 'id') }}" class="badge-lang {{ app()->getLocale() === 'id' ? 'active' : '' }}" title="Bahasa Indonesia">
-            <i class="fa-solid fa-flag" style="color: #ef4444;"></i> 🇮🇩 ID
+            <span class="fi fi-id" aria-hidden="true"></span> ID
         </a>
         <a href="{{ route('set.locale', 'en') }}" class="badge-lang {{ app()->getLocale() === 'en' ? 'active' : '' }}" title="English (GB)">
-            <i class="fa-solid fa-flag" style="color: #3b82f6;"></i> 🇬🇧 EN
+            <span class="fi fi-gb" aria-hidden="true"></span> EN
         </a>
         <a href="{{ route('set.locale', 'ar') }}" class="badge-lang {{ app()->getLocale() === 'ar' ? 'active' : '' }}" title="العربية">
-            <i class="fa-solid fa-flag" style="color: #10b981;"></i> 🇸🇦 AR
+            <span class="fi fi-sa" aria-hidden="true"></span> AR
         </a>
         <a href="{{ route('set.locale', 'zh') }}" class="badge-lang {{ app()->getLocale() === 'zh' ? 'active' : '' }}" title="中文">
-            <i class="fa-solid fa-flag" style="color: #f59e0b;"></i> 🇨🇳 ZH
+            <span class="fi fi-cn" aria-hidden="true"></span> ZH
         </a>
     </div>
 </div>
 
 <div class="features-grid">
     <div class="feature-card">
-        <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
+        <div class="feature-icon"><i data-lucide="zap"></i></div>
         <h3 class="feature-title">{{ __('messages.feature_1_title') }}</h3>
         <p class="feature-desc">{{ __('messages.feature_1_desc') }}</p>
     </div>
     <div class="feature-card">
-        <div class="feature-icon"><i class="fa-solid fa-list-check"></i></div>
+        <div class="feature-icon"><i data-lucide="list-checks"></i></div>
         <h3 class="feature-title">{{ __('messages.feature_2_title') }}</h3>
         <p class="feature-desc">{{ __('messages.feature_2_desc') }}</p>
     </div>
     <div class="feature-card">
-        <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="feature-icon"><i data-lucide="shield-check"></i></div>
         <h3 class="feature-title">{{ __('messages.feature_3_title') }}</h3>
         <p class="feature-desc">{{ __('messages.feature_3_desc') }}</p>
     </div>
     <div class="feature-card">
-        <div class="feature-icon"><i class="fa-solid fa-users-gear"></i></div>
+        <div class="feature-icon"><i data-lucide="users-round"></i></div>
         <h3 class="feature-title">{{ __('messages.feature_4_title') }}</h3>
         <p class="feature-desc">{{ __('messages.feature_4_desc') }}</p>
     </div>

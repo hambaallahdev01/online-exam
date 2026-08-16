@@ -1,0 +1,61 @@
+.lucide {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    vertical-align: -0.125em;
+    stroke-width: 2;
+}
+
+.icon-spin {
+    animation: icon-spin 1s linear infinite;
+}
+
+.fib,
+.fi {
+    background-position: 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.fi {
+    position: relative;
+    display: inline-block;
+    width: 1.333333em;
+    line-height: 1em;
+    flex-shrink: 0;
+    border-radius: 0.125rem;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12);
+}
+
+.fi::before {
+    content: '\00a0';
+}
+
+.fi-id {
+    background-image: url('../../node_modules/flag-icons/flags/4x3/id.svg');
+}
+
+.fi-gb {
+    background-image: url('../../node_modules/flag-icons/flags/4x3/gb.svg');
+}
+
+.fi-sa {
+    background-image: url('../../node_modules/flag-icons/flags/4x3/sa.svg');
+}
+
+.fi-cn {
+    background-image: url('../../node_modules/flag-icons/flags/4x3/cn.svg');
+}
+
+@keyframes icon-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .icon-spin {
+        animation-duration: 2s;
+    }
+}
