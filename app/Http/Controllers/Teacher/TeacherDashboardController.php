@@ -141,77 +141,8 @@ class TeacherDashboardController extends Controller
     {
         $this->assertOwnedGroup($group);
 
-        $validated = $request->validate([
-            'question_type' => 'required|in:single_choice,multiple_choice,true_false,essay,fact_opinion,matching,sorting',
-            'content' => 'required|string',
-            'options' => 'nullable|array',
-            'options.*' => 'nullable|string',
-            'option_a' => 'nullable|string',
-            'option_b' => 'nullable|string',
-            'option_c' => 'nullable|string',
-            'option_d' => 'nullable|string',
-            'correct_answer' => 'nullable|string',
-            'explanation' => 'nullable|string',
-            'weight' => 'required|integer|min:1',
-        ]);
-
-        $options = null;
-        $correctAnswers = ! empty($validated['correct_answer']) ? [$validated['correct_answer']] : [];
-
-        if ($validated['question_type'] === 'single_choice' || $validated['question_type'] === 'multiple_choice') {
-            if (! empty($request->options) && is_array($request->options)) {
-                $options = [];
-                $labels = range('A', 'Z');
-                foreach (array_values($request->options) as $i => $text) {
-                    $letter = $labels[$i] ?? ('P'.($i + 1));
-                    $options[] = [
-                        'id' => $letter,
-                        'text' => $text,
-                    ];
-                }
-            } else {
-                $options = array_values(array_filter([
-                    ['id' => 'A', 'text' => $request->option_a],
-                    ['id' => 'B', 'text' => $request->option_b],
-                    ['id' => 'C', 'text' => $request->option_c],
-                    ['id' => 'D', 'text' => $request->option_d],
-                ], fn ($opt) => ! empty($opt['text'])));
-            }
-
-            if ($validated['question_type'] === 'multiple_choice') {
-                $correctAnswers = array_map('trim', explode(',', $validated['correct_answer'] ?? ''));
-            }
-        } elseif ($validated['question_type'] === 'true_false') {
-            $options = [
-                ['id' => 'true', 'text' => 'True / Benar'],
-                ['id' => 'false', 'text' => 'False / Salah'],
-            ];
-        } elseif ($validated['question_type'] === 'fact_opinion') {
-            $options = [
-                ['id' => 'fact', 'text' => 'Fakta'],
-                ['id' => 'opinion', 'text' => 'Opini'],
-            ];
-        } elseif ($validated['question_type'] === 'matching') {
-            // Options format: left_item => right_item
-            $pairs = json_decode($validated['correct_answer'] ?? '{}', true);
-            if (is_array($pairs)) {
-                $left = [];
-                $right = [];
-                foreach ($pairs as $k => $v) {
-                    $left[] = ['id' => (string) $k, 'text' => (string) $k];
-                    $right[] = ['id' => (string) $v, 'text' => (string) $v];
-                }
-                $options = ['left' => $left, 'right' => $right];
-                $correctAnswers = $pairs;
-            }
-        } elseif ($validated['question_type'] === 'sorting') {
-            // Options format: ordered array
-            $items = array_map('trim', explode(',', $validated['correct_answer'] ?? ''));
-            $options = $items;
-            $correctAnswers = $items;
-        }
-
-        $options = $this->sanitizeOptions($options, $validated['question_type']);
+        $validated = $this->validateQuestionRequest($request);
+        [$options, $correctAnswers] = $this->buildQuestionAnswerData($validated);
 
         Question::create([
             'school_id' => Auth::user()->school_id,
@@ -351,75 +282,8 @@ class TeacherDashboardController extends Controller
     {
         $this->assertOwnedQuestion($question);
 
-        $validated = $request->validate([
-            'question_type' => 'required|in:single_choice,multiple_choice,true_false,essay,fact_opinion,matching,sorting',
-            'content' => 'required|string',
-            'options' => 'nullable|array',
-            'options.*' => 'nullable|string',
-            'option_a' => 'nullable|string',
-            'option_b' => 'nullable|string',
-            'option_c' => 'nullable|string',
-            'option_d' => 'nullable|string',
-            'correct_answer' => 'nullable|string',
-            'explanation' => 'nullable|string',
-            'weight' => 'required|integer|min:1',
-        ]);
-
-        $options = null;
-        $correctAnswers = ! empty($validated['correct_answer']) ? [$validated['correct_answer']] : [];
-
-        if ($validated['question_type'] === 'single_choice' || $validated['question_type'] === 'multiple_choice') {
-            if (! empty($request->options) && is_array($request->options)) {
-                $options = [];
-                $labels = range('A', 'Z');
-                foreach (array_values($request->options) as $i => $text) {
-                    $letter = $labels[$i] ?? ('P'.($i + 1));
-                    $options[] = [
-                        'id' => $letter,
-                        'text' => $text,
-                    ];
-                }
-            } else {
-                $options = array_values(array_filter([
-                    ['id' => 'A', 'text' => $request->option_a],
-                    ['id' => 'B', 'text' => $request->option_b],
-                    ['id' => 'C', 'text' => $request->option_c],
-                    ['id' => 'D', 'text' => $request->option_d],
-                ], fn ($opt) => ! empty($opt['text'])));
-            }
-
-            if ($validated['question_type'] === 'multiple_choice') {
-                $correctAnswers = array_map('trim', explode(',', $validated['correct_answer'] ?? ''));
-            }
-        } elseif ($validated['question_type'] === 'true_false') {
-            $options = [
-                ['id' => 'true', 'text' => 'True / Benar'],
-                ['id' => 'false', 'text' => 'False / Salah'],
-            ];
-        } elseif ($validated['question_type'] === 'fact_opinion') {
-            $options = [
-                ['id' => 'fact', 'text' => 'Fakta'],
-                ['id' => 'opinion', 'text' => 'Opini'],
-            ];
-        } elseif ($validated['question_type'] === 'matching') {
-            $pairs = json_decode($validated['correct_answer'] ?? '{}', true);
-            if (is_array($pairs)) {
-                $left = [];
-                $right = [];
-                foreach ($pairs as $k => $v) {
-                    $left[] = ['id' => (string) $k, 'text' => (string) $k];
-                    $right[] = ['id' => (string) $v, 'text' => (string) $v];
-                }
-                $options = ['left' => $left, 'right' => $right];
-                $correctAnswers = $pairs;
-            }
-        } elseif ($validated['question_type'] === 'sorting') {
-            $items = array_map('trim', explode(',', $validated['correct_answer'] ?? ''));
-            $options = $items;
-            $correctAnswers = $items;
-        }
-
-        $options = $this->sanitizeOptions($options, $validated['question_type']);
+        $validated = $this->validateQuestionRequest($request);
+        [$options, $correctAnswers] = $this->buildQuestionAnswerData($validated);
 
         $oldUrls = $this->extractMediaUrlsFromQuestion($question);
 
@@ -444,6 +308,144 @@ class TeacherDashboardController extends Controller
         }
 
         return back()->with('success', 'Question updated successfully!');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateQuestionRequest(Request $request): array
+    {
+        $answerRequired = fn (): bool => in_array($request->input('question_type'), [
+            'single_choice',
+            'multiple_choice',
+            'true_false',
+            'fact_opinion',
+            'sorting',
+        ], true);
+
+        return $request->validate([
+            'question_type' => 'required|in:single_choice,multiple_choice,true_false,essay,fact_opinion,matching,sorting',
+            'content' => 'required|string',
+            'options' => 'nullable|array',
+            'options.*' => 'nullable|string',
+            'option_a' => 'nullable|string',
+            'option_b' => 'nullable|string',
+            'option_c' => 'nullable|string',
+            'option_d' => 'nullable|string',
+            'correct_answer' => [Rule::requiredIf($answerRequired), 'nullable', 'string'],
+            'matching_left' => 'required_if:question_type,matching|array|min:2|max:50',
+            'matching_left.*' => 'required|string|max:1000',
+            'matching_right' => 'required_if:question_type,matching|array|min:2|max:50',
+            'matching_right.*' => 'required|string|max:1000',
+            'explanation' => 'nullable|string',
+            'weight' => 'required|integer|min:1',
+        ], [
+            'matching_left.required_if' => 'Tambahkan minimal 2 pasangan untuk soal mencocokkan.',
+            'matching_left.min' => 'Soal mencocokkan harus memiliki minimal 2 pasangan.',
+            'matching_left.max' => 'Soal mencocokkan dibatasi maksimal 50 pasangan.',
+            'matching_left.*.required' => 'Semua item kiri harus diisi.',
+            'matching_right.required_if' => 'Tambahkan minimal 2 pasangan untuk soal mencocokkan.',
+            'matching_right.min' => 'Soal mencocokkan harus memiliki minimal 2 pasangan.',
+            'matching_right.max' => 'Soal mencocokkan dibatasi maksimal 50 pasangan.',
+            'matching_right.*.required' => 'Semua pasangan jawaban harus diisi.',
+        ]);
+    }
+
+    /**
+     * Build the persisted options and answer key without exposing their JSON shape
+     * to teachers in the question form.
+     *
+     * @param  array<string, mixed>  $validated
+     * @return array{0: ?array, 1: array}
+     */
+    private function buildQuestionAnswerData(array $validated): array
+    {
+        $questionType = $validated['question_type'];
+        $options = null;
+        $correctAnswers = ! empty($validated['correct_answer']) ? [$validated['correct_answer']] : [];
+
+        if (in_array($questionType, ['single_choice', 'multiple_choice'], true)) {
+            if (! empty($validated['options'])) {
+                $options = [];
+                $labels = range('A', 'Z');
+                foreach (array_values($validated['options']) as $index => $text) {
+                    $options[] = [
+                        'id' => $labels[$index] ?? ('P'.($index + 1)),
+                        'text' => $text,
+                    ];
+                }
+            } else {
+                $options = array_values(array_filter([
+                    ['id' => 'A', 'text' => $validated['option_a'] ?? null],
+                    ['id' => 'B', 'text' => $validated['option_b'] ?? null],
+                    ['id' => 'C', 'text' => $validated['option_c'] ?? null],
+                    ['id' => 'D', 'text' => $validated['option_d'] ?? null],
+                ], fn (array $option): bool => ! empty($option['text'])));
+            }
+
+            if ($questionType === 'multiple_choice') {
+                $correctAnswers = array_map('trim', explode(',', $validated['correct_answer']));
+            }
+        } elseif ($questionType === 'true_false') {
+            $options = [
+                ['id' => 'true', 'text' => 'True / Benar'],
+                ['id' => 'false', 'text' => 'False / Salah'],
+            ];
+        } elseif ($questionType === 'fact_opinion') {
+            $options = [
+                ['id' => 'fact', 'text' => 'Fakta'],
+                ['id' => 'opinion', 'text' => 'Opini'],
+            ];
+        } elseif ($questionType === 'matching') {
+            [$options, $correctAnswers] = $this->buildMatchingAnswerData(
+                array_values($validated['matching_left']),
+                array_values($validated['matching_right']),
+            );
+        } elseif ($questionType === 'sorting') {
+            $items = array_map('trim', explode(',', $validated['correct_answer']));
+            $options = $items;
+            $correctAnswers = $items;
+        }
+
+        return [$this->sanitizeOptions($options, $questionType), $correctAnswers];
+    }
+
+    /**
+     * Use stable internal IDs so duplicate labels never corrupt an associative JSON key.
+     *
+     * @param  array<int, string>  $leftItems
+     * @param  array<int, string>  $rightItems
+     * @return array{0: array{left: array, right: array}, 1: array<string, string>}
+     */
+    private function buildMatchingAnswerData(array $leftItems, array $rightItems): array
+    {
+        if (count($leftItems) !== count($rightItems)) {
+            throw ValidationException::withMessages([
+                'matching_right' => 'Setiap item kiri harus memiliki tepat satu pasangan jawaban.',
+            ]);
+        }
+
+        $options = ['left' => [], 'right' => []];
+        $correctAnswers = [];
+
+        foreach ($leftItems as $index => $leftText) {
+            $leftText = mb_substr(trim(strip_tags($leftText)), 0, 1000);
+            $rightText = mb_substr(trim(strip_tags($rightItems[$index])), 0, 1000);
+
+            if ($leftText === '' || $rightText === '') {
+                throw ValidationException::withMessages([
+                    $leftText === '' ? "matching_left.{$index}" : "matching_right.{$index}" => 'Teks pasangan tidak boleh kosong.',
+                ]);
+            }
+
+            $leftId = 'left_'.($index + 1);
+            $rightId = 'right_'.($index + 1);
+            $options['left'][] = ['id' => $leftId, 'text' => $leftText];
+            $options['right'][] = ['id' => $rightId, 'text' => $rightText];
+            $correctAnswers[$leftId] = $rightId;
+        }
+
+        return [$options, $correctAnswers];
     }
 
     private function extractMediaUrlsFromQuestion(Question $question): array

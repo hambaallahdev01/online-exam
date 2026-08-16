@@ -124,6 +124,50 @@
         height: 100%;
         border: 0;
     }
+    .matching-builder {
+        margin-top: 1.25rem;
+        padding: 1rem;
+        background: var(--bg-body);
+        border: 1px solid var(--border-color);
+        border-radius: 0.65rem;
+    }
+    .matching-pair-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+        gap: 0.7rem;
+        align-items: end;
+        padding: 0.8rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 0.55rem;
+    }
+    .matching-pair-arrow {
+        align-self: center;
+        color: var(--primary);
+        font-size: 1.1rem;
+        padding-top: 1.35rem;
+    }
+    .matching-summary-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 0.6rem;
+        align-items: center;
+        padding: 0.45rem 0.65rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .matching-summary-row:last-child {
+        border-bottom: none;
+    }
+    @media (max-width: 720px) {
+        .matching-pair-row {
+            grid-template-columns: 1fr;
+        }
+        .matching-pair-arrow {
+            padding: 0;
+            transform: rotate(90deg);
+            justify-self: center;
+        }
+    }
 </style>
 @endsection
 
@@ -231,11 +275,27 @@
                 </button>
             </div>
 
+            <div id="matchingBuilder" class="matching-builder" style="display: none;">
+                <div style="margin-bottom: 0.9rem;">
+                    <label style="font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;">Pasangan Soal dan Kunci Jawaban</label>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+                        Isi pasangan per baris. Struktur kunci jawaban dibuat otomatis oleh sistem—tidak perlu menulis JSON.
+                    </p>
+                </div>
+                <div id="matchingPairList" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+                <button type="button" class="btn btn-secondary" onclick="addMatchingPair()" style="margin-top: 0.85rem; width: 100%; border-style: dashed;">
+                    <i class="fa-solid fa-plus"></i> Tambah Pasangan
+                </button>
+                <small style="color: var(--text-muted); display: block; margin-top: 0.65rem;">
+                    Minimal 2 pasangan. Urutan pilihan jawaban di sisi kanan tidak menentukan kunci; sistem menghubungkannya melalui ID internal.
+                </small>
+            </div>
+
             <input type="file" id="mediaFileInput" style="display: none;" onchange="handleMediaUpload(this.files[0])">
 
-            <div class="form-group" style="margin-top: 1.25rem;">
+            <div class="form-group" id="correctAnswerGroup" style="margin-top: 1.25rem;">
                 <label for="correct_answer" id="correctAnswerLabel">Kunci Jawaban</label>
-                <input type="text" name="correct_answer" id="correct_answer" class="form-control" placeholder="Contoh: B (atau fact / opinion / A,C atau json pairs / ordered items)">
+                <input type="text" name="correct_answer" id="correct_answer" class="form-control" placeholder="Contoh: B (atau fact / opinion / A,C / item berurutan)">
                 <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;" id="correctAnswerHint">
                     Pilihan Ganda: A/B/C/D/E. Pilihan Banyak: A,B,C. Fakta/Opini: fact atau opinion. Mengurutkan: Item1,Item2,Item3.
                 </small>
@@ -284,8 +344,26 @@
 
                     @if($q->options_json)
                         @if($q->question_type === 'matching')
-                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-                                Pasangan: {{ json_encode($q->options_json) }}
+                            @php
+                                $matchingRights = collect($q->options_json['right'] ?? [])->keyBy(
+                                    fn ($item) => (string) ($item['id'] ?? '')
+                                );
+                            @endphp
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 700;">
+                                Pasangan dan kunci jawaban:
+                            </div>
+                            <div style="color: var(--text-main); font-size: 0.9rem; border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden;">
+                                @foreach($q->options_json['left'] ?? [] as $leftItem)
+                                    @php
+                                        $rightId = (string) ($q->correct_answers_json[$leftItem['id'] ?? ''] ?? '');
+                                        $rightItem = $matchingRights->get($rightId, []);
+                                    @endphp
+                                    <div class="matching-summary-row">
+                                        <span>{{ $leftItem['text'] ?? '' }}</span>
+                                        <i class="fa-solid fa-arrow-right" style="color: var(--primary);" aria-hidden="true"></i>
+                                        <span>{{ $rightItem['text'] ?? $rightId }}</span>
+                                    </div>
+                                @endforeach
                             </div>
                         @elseif(is_array($q->options_json))
                             <ul style="list-style: none; padding-left: 1rem; color: var(--text-muted); font-size: 0.9rem;">
@@ -300,9 +378,11 @@
                         @endif
                     @endif
 
-                    @if($q->correct_answers_json)
+                    @if($q->question_type === 'matching')
+                        {{-- The human-readable matching key is rendered with its pairs above. --}}
+                    @elseif($q->correct_answers_json)
                         <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--status-answered); font-weight: 600;">
-                            Kunci Jawaban: {{ is_array($q->correct_answers_json) ? implode(', ', $q->correct_answers_json) : (is_array($q->correct_answers_json) ? json_encode($q->correct_answers_json) : $q->correct_answers_json) }}
+                            Kunci Jawaban: {{ is_array($q->correct_answers_json) ? implode(', ', $q->correct_answers_json) : $q->correct_answers_json }}
                         </div>
                     @else
                         <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--warning); font-weight: 600;">
@@ -330,6 +410,7 @@ let currentUploadType = 'image';
 let currentUploadTargetId = 'editorContent';
 let selectedImg = null;
 let optionCount = 0;
+let matchingPairCount = 0;
 const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
 const QUESTIONS_BY_ID = {{ Illuminate\Support\Js::from($group->questions->keyBy('id')) }};
 
@@ -439,6 +520,91 @@ function updateOptionLabelsAndButtons() {
     });
 }
 
+function createMatchingPairHTML(index, leftValue = '', rightValue = '') {
+    return `
+        <div class="matching-pair-row" id="matchingPairRow_${index}">
+            <div>
+                <label class="matching-left-label" style="font-size: 0.85rem; font-weight: 600;">Item Kiri</label>
+                <input type="text" name="matching_left[]" class="form-control matching-pair-input" value="${escapeHtml(leftValue)}" maxlength="1000" required placeholder="Contoh: Indonesia">
+            </div>
+            <i class="fa-solid fa-arrow-right matching-pair-arrow" aria-hidden="true"></i>
+            <div>
+                <label class="matching-right-label" style="font-size: 0.85rem; font-weight: 600;">Pasangan Benar</label>
+                <input type="text" name="matching_right[]" class="form-control matching-pair-input" value="${escapeHtml(rightValue)}" maxlength="1000" required placeholder="Contoh: Jakarta">
+            </div>
+            <button type="button" class="btn btn-secondary btn-remove-matching" onclick="removeMatchingPair(${index})" style="padding: 0.55rem 0.7rem; color: var(--danger); border-color: var(--danger);" title="Hapus pasangan" aria-label="Hapus pasangan">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+        </div>
+    `;
+}
+
+function renderInitialMatchingPairs() {
+    const list = document.getElementById('matchingPairList');
+    list.innerHTML = '';
+    matchingPairCount = 0;
+    for (let i = 0; i < 3; i++) {
+        addMatchingPair();
+    }
+}
+
+function addMatchingPair(leftValue = '', rightValue = '') {
+    const list = document.getElementById('matchingPairList');
+    const index = matchingPairCount;
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = createMatchingPairHTML(index, leftValue, rightValue);
+    const row = wrapper.firstElementChild;
+    list.appendChild(row);
+    matchingPairCount++;
+
+    const isMatching = document.getElementById('question_type').value === 'matching';
+    row.querySelectorAll('.matching-pair-input').forEach(input => {
+        input.disabled = !isMatching;
+    });
+    updateMatchingPairRows();
+}
+
+function removeMatchingPair(index) {
+    const rows = document.querySelectorAll('.matching-pair-row');
+    if (rows.length <= 2) {
+        alert('Soal mencocokkan minimal harus memiliki 2 pasangan.');
+        return;
+    }
+
+    document.getElementById(`matchingPairRow_${index}`)?.remove();
+    updateMatchingPairRows();
+}
+
+function updateMatchingPairRows() {
+    const rows = document.querySelectorAll('.matching-pair-row');
+    rows.forEach((row, index) => {
+        const number = index + 1;
+        row.querySelector('.matching-left-label').textContent = `Item Kiri ${number}`;
+        row.querySelector('.matching-right-label').textContent = `Pasangan Benar ${number}`;
+        row.querySelector('.btn-remove-matching').style.visibility = rows.length <= 2 ? 'hidden' : 'visible';
+    });
+}
+
+function renderMatchingPairsFromQuestion(question) {
+    const list = document.getElementById('matchingPairList');
+    list.innerHTML = '';
+    matchingPairCount = 0;
+
+    const leftItems = question.options_json?.left || [];
+    const rightItems = question.options_json?.right || [];
+    const answers = question.correct_answers_json || {};
+
+    leftItems.forEach(leftItem => {
+        const rightId = answers[leftItem.id];
+        const rightItem = rightItems.find(item => String(item.id) === String(rightId));
+        addMatchingPair(String(leftItem.text ?? ''), String(rightItem?.text ?? rightId ?? ''));
+    });
+
+    while (document.querySelectorAll('.matching-pair-row').length < 2) {
+        addMatchingPair();
+    }
+}
+
 function editQuestionById(questionId) {
     const q = QUESTIONS_BY_ID[questionId];
     if (!q) return;
@@ -471,7 +637,7 @@ function editQuestionById(questionId) {
     list.innerHTML = '';
     optionCount = 0;
 
-    if (q.options_json && Array.isArray(q.options_json) && q.options_json.length > 0) {
+    if (['single_choice', 'multiple_choice'].includes(q.question_type) && q.options_json && Array.isArray(q.options_json) && q.options_json.length > 0) {
         q.options_json.forEach(opt => {
             const index = optionCount;
             const div = document.createElement('div');
@@ -489,10 +655,18 @@ function editQuestionById(questionId) {
         renderInitialOptions();
     }
 
+    if (q.question_type === 'matching') {
+        renderMatchingPairsFromQuestion(q);
+    } else {
+        renderInitialMatchingPairs();
+    }
+
     // Set correct answer & explanation & weight
     const correctAnswerInput = document.getElementById('correct_answer');
     if (correctAnswerInput) {
-        if (q.correct_answers_json) {
+        if (q.question_type === 'matching') {
+            correctAnswerInput.value = '';
+        } else if (q.correct_answers_json) {
             correctAnswerInput.value = Array.isArray(q.correct_answers_json) ? q.correct_answers_json.join(', ') : (typeof q.correct_answers_json === 'object' ? JSON.stringify(q.correct_answers_json) : q.correct_answers_json);
         } else {
             correctAnswerInput.value = '';
@@ -525,10 +699,14 @@ function cancelEdit() {
     form.reset();
     document.getElementById('editorContent').innerHTML = '';
     renderInitialOptions();
+    renderInitialMatchingPairs();
+    toggleOptionFields(document.getElementById('question_type').value);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
     renderInitialOptions();
+    renderInitialMatchingPairs();
+    toggleOptionFields(document.getElementById('question_type').value);
 
     const editor = document.getElementById('editorContent');
     const form = document.getElementById('createQuestionForm');
@@ -714,9 +892,18 @@ function insertYoutubeVideo(targetId = 'editorContent') {
 
 function toggleOptionFields(type) {
     const container = document.getElementById('optionsContainer');
+    const matchingBuilder = document.getElementById('matchingBuilder');
+    const correctAnswerGroup = document.getElementById('correctAnswerGroup');
     const label = document.getElementById('correctAnswerLabel');
     const hint = document.getElementById('correctAnswerHint');
     const input = document.getElementById('correct_answer');
+    const isMatching = type === 'matching';
+
+    matchingBuilder.style.display = isMatching ? 'block' : 'none';
+    correctAnswerGroup.style.display = isMatching ? 'none' : 'block';
+    document.querySelectorAll('.matching-pair-input').forEach(pairInput => {
+        pairInput.disabled = !isMatching;
+    });
     
     if (type === 'single_choice' || type === 'multiple_choice') {
         container.style.display = 'block';
@@ -725,7 +912,10 @@ function toggleOptionFields(type) {
         input.required = true;
     } else {
         container.style.display = 'none';
-        if (type === 'essay') {
+        if (isMatching) {
+            input.required = false;
+            input.value = '';
+        } else if (type === 'essay') {
             label.textContent = 'Kunci Jawaban / Rubrik Penilaian (Opsional)';
             hint.textContent = 'Kunci/Rubrik bersifat OPSIONAL untuk soal esai. Jawaban penalaran siswa dapat dinilai secara manual oleh guru.';
             input.required = false;
@@ -738,8 +928,6 @@ function toggleOptionFields(type) {
                 hint.textContent = 'Masukkan: "true" atau "false"';
             } else if (type === 'sorting') {
                 hint.textContent = 'Masukkan urutan yang benar dipisah koma, contoh: Langkah 1, Langkah 2, Langkah 3';
-            } else if (type === 'matching') {
-                hint.textContent = 'Masukkan pasangan JSON contoh: {"Indonesia":"Jakarta","Jepang":"Tokyo"}';
             } else {
                 hint.textContent = 'Masukkan teks kunci jawaban yang benar';
             }
